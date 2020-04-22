@@ -639,67 +639,6 @@ function evaluateBoard() {
 
 }
 
-  /*  const handleSuccess = function(stream) {
-    if (window.URL) {
-      player.srcObject = stream;
-    } else {
-      player.src = stream;
-    }
-  };*/
-
-  //navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-  //    .then(handleSuccess);
-  
-  //navigator.getUserMedia = navigator.getUserMedia ||
-  //                   navigator.webkitGetUserMedia ||
-  //                   navigator.mozGetUserMedia;
-
-  /*if (navigator.getUserMedia) {
-   navigator.getUserMedia({ audio: true, video: { width: 1280, height: 720 } },
-      function(stream) {
-         alert("Accessed the Microphone");
-      },
-      function(err) {
-         alert("The following error occured: " + err.name);
-      }
-    );
-  } else {
-   alert("getUserMedia not supported");
-  }*/
-
-  /*navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-.then(function(stream) {
-  audioContext = new AudioContext();
-  analyser = audioContext.createAnalyser();
-  microphone = audioContext.createMediaStreamSource(stream);
-  javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-
-  analyser.smoothingTimeConstant = 0.8;
-  analyser.fftSize = 1024;
-
-  microphone.connect(analyser);
-  analyser.connect(javascriptNode);
-  javascriptNode.connect(audioContext.destination);
-  javascriptNode.onaudioprocess = function() {
-      var array = new Uint8Array(analyser.frequencyBinCount);
-      analyser.getByteFrequencyData(array);
-      var values = 0;
-
-      var length = array.length;
-      for (var i = 0; i < length; i++) {
-        values += (array[i]);
-      }
-
-      var average = values / length;
-
-    console.log(Math.round(average));
-    // colorPids(average);
-  }
-  })
-  .catch(function(err) {
-    // handle the error 
-});*/
-  
   //alert("Your name is ");
 
 // Make sure that the engine is run every clockPeriod  
