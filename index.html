@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="scripts/fabric.min.js"></script>
+    <!--script src="beep.js"></script-->
+        <style>
+    {
+        box-sizing: border-box;
+    }
+    /* Set additional styling options for the columns*/
+    .column {
+    float: left;
+    /*width: 600;*/
+    }
+
+    .row:after {
+    content: "";
+    display: table;
+    clear: both;
+    }
+    </style>
+</head>
+  <body>
+    <div class="row">
+      <div class="column">
+        <h2>Online Systeembord</h2>
+        <div id="canvas1" style="position:relative;width:600px;height:450px;top:0px; left:0px">
+          <canvas id="c" width="600" height="450" style="border:1px solid #ccc">
+          Your browser does not support HTML5 Canvas.
+          </canvas>
+        </div>    
+      </div>
+        <div class="column">
+          <h3>Beknopte instructie:</h3>
+<ul> 
+  <li><b>Verbindingssnoeren maken:</b><br/>
+  Klik op een rode cirkel en sleep het naar een andere cirkel.</li>
+  <li><b>Verbindingssnoeren verwijderen:</b><br/>
+  Klik op een rode cirkel van een verbinding en sleep het terug.</li>
+  <li><b>Drukschakelaar:</b><br/>
+  Met een dubbelklik of klik-sleep kan de schakelaar worden vastgezet.</li>
+  <li><b>Zoemer:</b><br/>
+  Er zit een vertraging in de zoemer van een halve seconde.</br>
+  In iOS/Safari moet je vaak eerst de zoemer handmatig initialiseren, door hieronder op play te klikken.
+    <audio id="myAudio" controls preload="auto">
+      <source src="audio/beep440Hz.ogg" type="audio/ogg">
+      <source src="audio/beep440Hz.mp3" type="audio/mpeg">
+      <source src="audio/beep440Hz.wav" type="audio/wav">
+      Your browser does not support the audio element.
+    </audio>  
+  </li>
+  <li><b>Meer informatie:</b><br/>
+    Zie de handleinding van het <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li>  
+</ul>
+        </div>
+    </div>
+
+
+    
+    <!--audio id="player" controls preload="auto" src="audio/beep440Hz.mp3"></audio-->
+    
+    <script src="scripts/systemboard_engine.js"></script>
+    <script id="main">
+(function() {
+    
+  // Define the elements of the systemboard
+  elements = [new Switch(0,150),
+              new Switch(0,200),
+              new Switch(0,250),
+              new Pulse(0,300),
+              new VarVoltage(0,350),
+              new ADC(0,400),
+              new Comparator(150,0),
+              new Comparator(300,0),
+              new ANDPort(150,100),
+              new ANDPort(300,100),
+              new ORPort(300,200),
+              new Memory(150,200),
+              new NOTPort(150,300),
+              new NOTPort(300,300),
+              new Counter(150,350),
+              new LED(450,0), 
+              new LED(450,50), 
+              new LED(450,100), 
+              new LED(450,150),
+              new Sound(450,200),
+              // temporary (waiting for sensors and relais)
+              new VarVoltage(0,0),
+              new VarVoltage(0,50),
+              new Switch(0,100),
+              new LED(450,250),
+              new LED(450,300),
+             ];
+    /*elements = [
+                    new Switch(0,200),
+              new Switch(0,250),
+              new Pulse(0,300),
+              new ORPort(150,100),
+              new ORPort(300,100),
+              new ORPort(300,200),
+              new Memory(150,200),
+              new NOTPort(150,300),
+              new NOTPort(300,300),
+              new LED(450,0), 
+              new LED(450,50), 
+             ];
+*/
+
+})();
+</script>
+      
+  </body>
+</html>
