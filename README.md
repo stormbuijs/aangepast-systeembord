@@ -16,8 +16,8 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 - Verbindingssnoeren maken: Klik op een rode cirkel en sleep het naar een andere cirkel.
 - Verbindingssnoeren verwijderen: Klik op een rode cirkel van een verbinding en sleep het terug.
 - Drukschakelaar: Met een dubbelklik of klik-sleep kan de schakelaar worden vastgezet.
-- Zoemer: Er zit een vertraging in de zoemer van een halve seconde. In iOS/Safari moet je eerst de zoemer handmatig initialiseren door op de play button te drukken (zie deze [[https://stackoverflow.com/questions/12804028/safari-with-audio-tag-not-working][discussie]]).
-- Meer informatie: Zie de [[http://www.cma-science.nl/resources/nl/practicum/b0020.pdf][handleiding]] van het systeembord.
+- Zoemer: Er zit een vertraging in de zoemer van een halve seconde. In iOS/Safari moet je eerst de zoemer handmatig initialiseren door op de play button te drukken (zie deze [discussie](https://stackoverflow.com/questions/12804028/safari-with-audio-tag-not-working)).
+- Meer informatie: Zie de [handleiding](http://www.cma-science.nl/resources/nl/practicum/b0020.pdf) van het systeembord.
 
 ## Wish list
 
