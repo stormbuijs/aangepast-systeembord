@@ -24,8 +24,8 @@
     <div class="row">
       <div class="column">
         <h2>Online Systeembord</h2>
-        <div id="canvas1" style="position:relative;width:600px;height:450px;top:0px; left:0px">
-          <canvas id="c" width="600" height="450" style="border:1px solid #ccc">
+        <div id="canvas1" style="position:relative;width:900px;height:500px;top:0px; left:0px">
+          <canvas id="c" width="900" height="500" style="border:1px solid #ccc">
           Your browser does not support HTML5 Canvas.
           </canvas>
         </div>    
@@ -37,6 +37,9 @@
   Klik op een rode cirkel en sleep het naar een andere cirkel.</li>
   <li><b>Verbindingssnoeren verwijderen:</b><br/>
   Klik op een rode cirkel van een verbinding en sleep het terug.</li>
+  <li><b>Meerdere verbindingssnoeren:</b><br/>
+  Een uitgang kan met meerdere ingangen worden verbonden.</br>
+  De snoeren moeten dan wel van de ingang naar de uitgang worden getrokken.</li>
   <li><b>Drukschakelaar:</b><br/>
   Met een dubbelklik of klik-sleep kan de schakelaar worden vastgezet.</li>
   <li><b>Zoemer:</b><br/>
@@ -60,33 +63,35 @@
     <script id="main">
 (function() {
     
+  
   // Define the elements of the systemboard
-  elements = [new Switch(0,150),
-              new Switch(0,200),
-              new Switch(0,250),
-              new Pulse(0,300),
-              new VarVoltage(0,350),
-              new ADC(0,400),
-              new Comparator(150,0),
-              new Comparator(300,0),
-              new ANDPort(150,100),
-              new ANDPort(300,100),
-              new ORPort(300,200),
-              new Memory(150,200),
-              new NOTPort(150,300),
-              new NOTPort(300,300),
-              new Counter(150,350),
-              new LED(450,0), 
-              new LED(450,50), 
-              new LED(450,100), 
-              new LED(450,150),
-              new Sound(450,200),
+  elements = [new Switch(60,175),
+              new Switch(60,225),
+              new Switch(60,275),
+              new Pulse(60,325),
+              new VarVoltage(60,375),
+              new ADC(60,425),
+              new Comparator(220,25),
+              new Comparator(370,25),
+              new ANDPort(220,125),
+              new ANDPort(370,125),
+              new ORPort(370,225),
+              new Memory(220,225),
+              new NOTPort(220,325),
+              new NOTPort(370,325),
+              new Counter(220,375),
+              new LED(530,25), 
+              new LED(530,75), 
+              new LED(530,125), 
+              new LED(530,175),
+              new LED(530,225),
+              new LED(530,275),
+              new Sound(530,325),
+              new Relais(530,375),
               // temporary (waiting for sensors and relais)
-              new VarVoltage(0,0),
-              new VarVoltage(0,50),
-              new Switch(0,100),
-              new LED(450,250),
-              new LED(450,300),
+              new VarVoltage(60,25),
+              new VarVoltage(60,75),
+              new Switch(60,125),
              ];
     /*elements = [
                     new Switch(0,200),
@@ -103,6 +108,12 @@
              ];
 */
 
+    // Draw the main board as well
+  var x1=50, y1=0;
+  drawBoard(x1,y1);
+
+
+  
 })();
 </script>
       

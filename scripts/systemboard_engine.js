@@ -10,13 +10,38 @@ var clockPeriod = 50; // time between evaluate-calls (speed of the engine)
 var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
   
 // Create canvas
-var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, backgroundColor: 'lightgrey', });
+var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, 
+                                                     /*backgroundColor: 'lightgrey',*/ });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
+
+// Draw header
+function drawHeader(x1,y1,text) {
+    // Draw text in box
+    var textbox = new fabric.Textbox(text, { left: x1, top: y1, width: 150,
+                                             fontSize: 16, textAlign: 'center', fontFamily:'Arial',
+                                             selectable: false, evented: false });
+    canvas.add(textbox)
+    textbox.sendToBack();
+}
+
+// Draw the box plus text
+function drawBoard(x1,y1) {
+    // Draw the headers
+    drawHeader(x1+85, y1+16,"INVOER");
+    drawHeader(x1+320, y1+16,"VERWERKING");
+    drawHeader(x1+555, y1+16,"UITVOER");
   
-  
+    // Draw box
+    var r = new fabric.Rect({left: x1+320, top: y1+242, width: 640, height: 474, 
+                             fill: 'lightgrey', selectable: false, evented: false,
+                             stroke: 'black', strokeWidth: 2   });
+    canvas.add(r);
+    r.sendToBack();
+}
+
 // Make movable circle for wire
-function makeCircle(left, top, line1, node){
-    var c = new fabric.Circle({left: left, top: top, radius: 5, fill: 'red',});
+function makeCircle(left, top, line1, node, color){
+    var c = new fabric.Circle({left: left, top: top, radius: 5, fill: color});
     c.hasControls = c.hasBorders = false;
     c.name = "wire";
     c.line1 = line1;
@@ -26,19 +51,20 @@ function makeCircle(left, top, line1, node){
 }
 
 // Make line for wire
-function makeLine(coords) {
-    return new fabric.Line(coords, {stroke: '#dd0000', strokeWidth: 3, //stroke: 'black',
+function makeLine(coords, color) {
+    return new fabric.Line(coords, {stroke: color, strokeWidth: 3, //stroke: 'black',
                                     selectable: false, evented: false });
 }
 
 // Make wire (= movable circle + line + fixed circle)
-function makeWire(x1,y1,node) { 
-    var circ = new fabric.Circle({left: x1, top: y1, strokeWidth: 1, stroke: 'black' , radius: 6, 
-                                fill: 'red', selectable: false, evented: false});
-    canvas.add(circ);
-    var line = makeLine([ x1, y1, x1, y1 ]);
-    canvas.add( line );
-    canvas.add( makeCircle(x1, y1, line, node) );
+function makeWire(x1,y1,node,isHV=false) { 
+  var color = isHV ? 'black' : '#dd0000';
+  var circ = new fabric.Circle({left: x1, top: y1, strokeWidth: 1, stroke: 'black' , radius: 6, 
+                                fill: color, selectable: false, evented: false});
+  canvas.add(circ);
+  var line = makeLine([ x1, y1, x1, y1 ],color);
+  canvas.add( line );
+  canvas.add( makeCircle(x1, y1, line, node, color) );
 }
   
 // Set nice-looking gradients for buttons
@@ -65,6 +91,7 @@ function InputNode(x1,y1) {
     this.state = low; // only used by reset button of pulse counter
     this.eval = function() { return (this.child) ? this.child.eval() : false ; };
     this.isInput = true;
+    this.isHV = false;
     makeWire(x1,y1,this);
 }
 
@@ -75,6 +102,7 @@ function OutputNode(x1,y1) {
     this.state = low;
     this.eval = function() { return this.state; };      
     this.isInput = false;     
+    this.isHV = false;
     makeWire(x1,y1,this);
 }    
 
@@ -85,6 +113,7 @@ function ANDNode(x1,y1,input1,input2, color) {
     this.child1 = input1;
     this.child2 = input2;
     this.isInput = false;
+    this.isHV = false;
     this.state = low;
     this.isSet = false;
     this.eval = function() {
@@ -108,6 +137,7 @@ function ORNode(x1,y1,input1,input2) {
     this.child1 = input1;
     this.child2 = input2;
     this.isInput = false;
+    this.isHV = false;
     this.state = low;
     this.isSet = false;
     this.eval = function() {
@@ -131,6 +161,7 @@ function NOTNode(x1,y1,input1) {
     this.y1 = y1;
     this.child1 = input1;
     this.isInput = false;     
+    this.isHV = false;
     this.state = low;
     this.isSet = false;
     this.eval = function() {
@@ -154,6 +185,7 @@ function ComparatorNode(x1,y1,input1) {
     this.child1 = input1;
     this.compare = low;
     this.isInput = false;     
+    this.isHV = false;
     this.state = low;
     this.isSet = false;
     this.eval = function() {
@@ -177,6 +209,7 @@ function BinaryNode(x1,y1,input1,bin) {
     this.y1 = y1;
     this.child1 = input1;
     this.isInput = false;     
+    this.isHV = false;
     this.state = low;
     this.isSet = false;
     this.eval = function() {
@@ -201,6 +234,7 @@ function BinaryNodeS(x1,y1,bin) {
     this.x1 = x1;
     this.y1 = y1;
     this.isInput = false;     
+    this.isHV = false;
     this.counter = 0;
     this.eval = function() {
       var binary = this.counter ;
@@ -210,7 +244,18 @@ function BinaryNodeS(x1,y1,bin) {
 
     makeWire(x1,y1,this);
 }    
-    
+
+// Relais node 
+function RelaisNode(x1,y1,input) { 
+    this.x1 = x1;
+    this.y1 = y1;
+    this.child = input;
+    this.isHV = true;
+    this.eval = function() { return isHigh(this.child.eval()); };      
+    this.isInput = false;
+    makeWire(x1,y1,this,this.isHV);
+}
+
 // Draw the box plus text
 function drawElementBox(x1,y1,width,height,text) {
     // Draw text in box
@@ -222,7 +267,7 @@ function drawElementBox(x1,y1,width,height,text) {
     // Draw box
     var r = new fabric.Rect({left: x1+0.5*width, top: y1+0.5*height, height: height, width: width, 
                              fill: 'lightgrey', selectable: false, evented: false,
-                             stroke: 'black', strokeWidth: 2   });
+                             stroke: 'black', strokeWidth: 1   });
     canvas.add(r);
     r.sendToBack();
 }
@@ -417,7 +462,7 @@ function inputDOM(x1,y1,name,value,step,min,max){
     input.id = name; 
     input.name = name;
     input.value = value; input.step = step; input.min= min; input.max= max;
-    input.style = "position:absolute;width:30px";
+    input.style = "position:absolute;width:40px";
     input.style.left = (x1).toString()+"px";
     input.style.top = (y1).toString()+"px";
     input.className = "css-class-name"; // set the CSS class
@@ -430,7 +475,7 @@ function inputDOM(x1,y1,name,value,step,min,max){
 // Create a pulse generator
 function Pulse(x1,y1) {
   
-    drawText(x1+60,y1+30,"Hz",12);
+    drawText(x1+70,y1+30,"Hz",12);
     drawElementBox(x1,y1,boxWidth,boxHeightSmall,'pulsgenerator');
 
     // Create unique element ID
@@ -457,7 +502,7 @@ function Pulse(x1,y1) {
 // Variable voltage power
 function VarVoltage(x1,y1) {
   
-    drawText(x1+60,y1+30,"V",12);
+    drawText(x1+70,y1+30,"V",12);
     drawElementBox(x1,y1,boxWidth,boxHeightSmall,'variabele spanning');
  
     // Create unique element ID
@@ -480,6 +525,7 @@ function VarVoltage(x1,y1) {
 // Comparator
 function Comparator(x1,y1) {
   
+  drawText(x1+120,y1+80,"V",12);
   drawText(x1+57,y1+31,"+");
   drawText(x1+57,y1+53,"\u2212");
   var r = new fabric.Triangle({left: x1+0.5*boxWidth, top: y1+35, height: 40, width: 40, 
@@ -622,6 +668,43 @@ function Counter(x1,y1) {
     };
 }
 
+// Create relais with its nodes
+function Relais(x1,y1) {
+  // Draw symbols and wires
+  drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
+  var r = new fabric.Rect({left: x1+25, top: y1+0.5*boxHeight, width: 20, height: 10, 
+                             fill: 'lightgrey', selectable: false, evented: false,
+                             stroke: 'black', strokeWidth: 1   });   
+  canvas.add(r); r.sendToBack();
+  var textbox = new fabric.Textbox("~", { left: x1+boxWidth-50, top: y1+25, width: 20,
+                                          fontSize: 20, textAlign: 'center', fontFamily:'Arial',
+                                          selectable: false, evented: false });
+  canvas.add(textbox)
+  textbox.sendToBack();
+  var circ = new fabric.Circle({left: x1+boxWidth-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
+                                radius: 10, fill: 'lightgrey', selectable: false, evented: false});
+  canvas.add(circ);
+  circ.sendToBack();
+  drawConnection([x1+25, y1+25, x1+25, y1+boxHeight-25]);
+  drawConnection([x1+20, y1+boxHeight-25, x1+30, y1+boxHeight-25]);
+  drawConnection([x1+25, y1+0.5*boxHeight, x1+boxWidth-70, y1+0.5*boxHeight]);  
+  drawConnection([x1+boxWidth-25, y1+25, x1+boxWidth-25, y1+boxHeight-25]);
+  drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-75, y1+40]);
+  drawConnection([x1+boxWidth-65, y1+40, x1+boxWidth-75, y1+60]);
+  drawConnection([x1+boxWidth-75, y1+60, x1+boxWidth-75, y1+boxHeight-25]);
+  drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-25, y1+25]);
+
+  drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
+  this.output = function() {return true;};
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
+  let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
+  this.nodes = [ node1, node2, node3 ] ;
+}
+
+
+
+
 var elements = [];  
 
 // Main engine: evaluate all elements (elements evaluate the nodes)
@@ -675,21 +758,25 @@ canvas.on('mouse:up', function(e) {
     
 // Control behaviour when moving wire
 canvas.on('object:moving', function(e) {
-    var p = e.target;
-    if( p.name != "wire") return;
-    p.line1.set({ 'x2': p.left, 'y2': p.top });
-    // Snap to any node
-    for (i = 0; i < elements.length; i++) {
-      for (j = 0; j < elements[i].nodes.length; j++) {
-        var x1 = elements[i].nodes[j].x1;
-        var y1 = elements[i].nodes[j].y1;
+  var p = e.target;
+  if( p.name != "wire" ) return;
+  p.line1.set({ 'x2': p.left, 'y2': p.top });
+  // Snap to any node
+  for (i = 0; i < elements.length; i++) {
+    for (j = 0; j < elements[i].nodes.length; j++) {
+      var snapNode = elements[i].nodes[j];
+      // Check if wire and node are the same type 
+      if( (p.node.isHV && snapNode.isHV) || (!p.node.isHV && !snapNode.isHV) ) {
+        var x1 = snapNode.x1;
+        var y1 = snapNode.y1;
         if( Math.abs(p.left - x1 ) < 20 && Math.abs(p.top - y1 ) < 20 ) {
-            p.left = x1;
-            p.top = y1;
-            p.line1.set({ 'x2': x1, 'y2': y1 });
+          p.left = x1;
+          p.top = y1;
+          p.line1.set({ 'x2': x1, 'y2': y1 });
         }
       }
     }
+  }
 });
     
 // After moving wire: destroy create new links
@@ -715,7 +802,7 @@ canvas.on('object:moved', function(e) {
             p.bringToFront();
             snapped = true;
             // Create extra wire for output node
-            makeWire(node1.x1,node1.y1,node1);
+            makeWire(node1.x1,node1.y1,node1,node1.isHV);
           } 
                         
         }
