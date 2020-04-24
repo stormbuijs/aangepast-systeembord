@@ -641,9 +641,7 @@ function Counter(x1,y1) {
         // reset counter (check button or reset node)
         if( isHigh(node6.state) || isHigh(node6.eval()) ) { 
           this.counter = 0;
-          this.state = low;
           this.textbox.text = (this.counter).toString();
-          return true;
         } else {
           // inhibit counter
           if( node5.child && !isHigh(node5.eval()) ) {
