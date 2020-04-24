@@ -84,15 +84,15 @@ function makeButton(left, top, node){
 }    
   
 // Generic input node (has a child to follow)
-function InputNode(x1,y1) { 
+function InputNode(x1,y1, isHV=false) { 
     this.x1 = x1;
     this.y1 = y1;
     this.child = null;
     this.state = low; // only used by reset button of pulse counter
     this.eval = function() { return (this.child) ? this.child.eval() : false ; };
     this.isInput = true;
-    this.isHV = false;
-    makeWire(x1,y1,this);
+    this.isHV = isHV;
+    makeWire(x1,y1,this,isHV);
 }
 
 // Generic output node (has a state=voltage)
@@ -251,7 +251,7 @@ function RelaisNode(x1,y1,input) {
     this.y1 = y1;
     this.child = input;
     this.isHV = true;
-    this.eval = function() { return isHigh(this.child.eval()); };      
+    this.eval = function() { return this.child.eval(); };      
     this.isInput = false;
     makeWire(x1,y1,this,this.isHV);
 }
@@ -668,6 +668,118 @@ function Counter(x1,y1) {
     };
 }
 
+
+
+// Create light bulb 
+function Lightbulb(x1,y1) {
+
+  var imgElementOn = document.getElementById('lighton');
+  this.imgBulbOn = new fabric.Image(imgElementOn, {
+    left: x1, 
+    top: y1, selectable: false, evented: false,
+  });
+  this.imgBulbOn.scale(0.7);
+  
+  var imgElementOff = document.getElementById('lightoff');
+  this.imgBulbOff = new fabric.Image(imgElementOff, {
+    left: x1,
+    top: y1, selectable: false, evented: false,
+  });
+  this.imgBulbOff.scale(0.7);
+  canvas.add(this.imgBulbOff);  
+  this.imgBulbOff.sendToBack();
+            
+  //canvas.remove(this.imgBulbOff);
+  //canvas.add(this.imgBulbOn);
+  //this.imgBulbOn.sendToBack();
+
+  //var image;// = new Image();
+  //var myImg = [];//null;
+
+  /*var img = new fabric.Image(image, {left: x1, top: y1,});
+  image.src = 'img/pic_bulbon.gif';
+  canvas.add(img);
+  img.sendToBack;
+*/
+  
+  /*fabric.Image.fromURL('img/pic_bulboff.gif', function(img) {
+    img.scale(0.5).set({ left: x1, top: y1,});
+    //img.setSrc('img/pic_bulbon.gif');
+
+    img.getElement().id = "bla";
+    img.getElement().name = "bla";
+
+    //canvas.setActiveObject(img);
+    //myImg= canvas.getActiveObject();
+    //myImg.push( canvas.getActiveObject());
+    //image = new fabric.Image(img.getElement());
+    canvas.add(img);
+    img.sendToBack;
+  });
+
+  canvas.renderAll();
+
+
+  image = document.getElementById("bla");
+  //image = document.getElementsByTagName("IMG")[0];
+
+  image.src = 'img/pic_bulbon.gif';
+*/
+  
+  /*var imgObj = new Image();
+  imgObj.src = "img/pic_bulboff.gif";
+  imgObj.onload = function () 
+  {
+    var image = new fabric.Image(imgObj);
+    image.set({ left: x1, top: y1,
+    });
+  }*/
+  //canvas.add(imgObj);
+
+  //myImg[0].set = {left: 100};
+  /*var objs = canvas.getObjects();
+  if (objs.length) {
+       objs.forEach(function(e) {
+         if (e && e.type === 'image') {         
+           e._element.src = 'img/pic_bulbon.gif';
+           canvas.renderAll();
+         }
+       });
+  }*/
+  //this.changeSrc();
+  //image.src = 'img/pic_bulbon.gif';
+  //img.setSrc('img/pic_bulbon.gif');
+  //image.getElement().setSrc('img/pic_bulbon.gif');
+
+  this.state = false;
+  var isHV = true;
+  let node1 = new InputNode(x1-17, y1+35, isHV );
+  let node2 = new InputNode(x1, y1+65, isHV );
+  this.nodes = [ node1, node2 ] ;
+  
+  this.output = function() {
+    var newState = this.nodes[0].child && this.nodes[1].child && // nodes should be connected
+                   this.nodes[0].child.child == this.nodes[1].child.child && // from the same relais
+                   isHigh( this.nodes[1].eval() ) ;// check node2
+    if( (newState && !this.state) || (!newState && this.state) ) {
+      this.state = newState;
+      if( this.state ) { 
+        canvas.remove(this.imgBulbOff);
+	      canvas.add(this.imgBulbOn);
+        this.imgBulbOn.sendToBack();
+      } else {
+        canvas.remove(this.imgBulbOn);
+	      canvas.add(this.imgBulbOff);
+        this.imgBulbOff.sendToBack();
+      }
+    }
+    return;
+  };
+
+
+}
+
+
 // Create relais with its nodes
 function Relais(x1,y1) {
   // Draw symbols and wires
@@ -701,6 +813,7 @@ function Relais(x1,y1) {
   let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
   this.nodes = [ node1, node2, node3 ] ;
 }
+
 
 
 
