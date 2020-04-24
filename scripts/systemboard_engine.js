@@ -842,20 +842,16 @@ setInterval(evaluateBoard, clockPeriod);
 
 //evaluateBoard();
 
+
 // Change button color and state of OutputNode when pushed
-canvas.on({'mouse:dblclick': mouseClick,
-           'mouse:down':mouseClick});
+canvas.on({'mouse:down':mouseClick});
 function mouseClick(e) {
     var p = e.target;
     if( !p || p.name != "button") return;
     p.node.state = invert(p.node.state);
-    if( isHigh(p.node.state) ) {
-      p.set({ fill: '#333333', strokeWidth: 3, radius: 10});
-      p.setGradient('stroke', gradientButtonDw );
-    } else {
-      p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
-      p.setGradient('stroke', gradientButtonUp );
-    }
+    p.node.state = high;
+    p.set({ fill: '#333333', strokeWidth: 3, radius: 10});
+    p.setGradient('stroke', gradientButtonDw );
 }
     
 // Change button color and state of OutputNode to low when mouse is up
@@ -863,8 +859,7 @@ canvas.on('mouse:up', function(e) {
     var p = e.target;
     if( !p || p.name != "button") return;
     // a mouse-click can be too short for the engine to evaluate itself
-    setTimeout(function(){ p.node.state = low; }, clockPeriod+5); // add small delay
-    //p.node.state = low;
+    timeOutButton = setTimeout(function(){ p.node.state = low; }, clockPeriod+5); // add small delay
     p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
     p.setGradient('stroke', gradientButtonUp );
 });     
