@@ -14,30 +14,7 @@ var canvas = this.__canvas = new fabric.Canvas('c', { selection: false,
                                                      /*backgroundColor: 'lightgrey',*/ });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
-// Draw header
-function drawHeader(x1,y1,text) {
-    // Draw text in box
-    var textbox = new fabric.Textbox(text, { left: x1, top: y1, width: 150,
-                                             fontSize: 16, textAlign: 'center', fontFamily:'Arial',
-                                             selectable: false, evented: false });
-    canvas.add(textbox)
-    textbox.sendToBack();
-}
 
-// Draw the box plus text
-function drawBoard(x1,y1) {
-    // Draw the headers
-    drawHeader(x1+85, y1+16,"INVOER");
-    drawHeader(x1+320, y1+16,"VERWERKING");
-    drawHeader(x1+555, y1+16,"UITVOER");
-  
-    // Draw box
-    var r = new fabric.Rect({left: x1+320, top: y1+242, width: 640, height: 474, 
-                             fill: 'lightgrey', selectable: false, evented: false,
-                             stroke: 'black', strokeWidth: 2   });
-    canvas.add(r);
-    r.sendToBack();
-}
 
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
@@ -302,6 +279,32 @@ function drawConnection(coords){
   line.sendToBack();
 }
 
+// Draw the board plus text
+function Board(x1,y1) {
+  function drawHeader(x1,y1,text) {
+    // Draw text in box
+    var textbox = new fabric.Textbox(text, { left: x1, top: y1, width: 150,
+                                           fontSize: 16, textAlign: 'center', fontFamily:'Arial',
+                                           selectable: false, evented: false });
+    canvas.setBackgroundImage(textbox);
+  }
+
+  // Draw the headers
+  drawHeader(x1+85, y1+16,"INVOER");
+  drawHeader(x1+320, y1+16,"VERWERKING");
+  drawHeader(x1+555, y1+16,"UITVOER");
+  
+  // Draw box
+  var r = new fabric.Rect({left: x1+320, top: y1+242, width: 640, height: 474, 
+                           fill: 'lightgrey', selectable: false, evented: false,
+                           stroke: 'black', strokeWidth: 2   });
+  canvas.setBackgroundImage(r);
+  // Dummy functions
+  this.nodes = [];
+  this.output = function() { };
+  this.remove = function() { };
+}
+
 // Create AND port with its nodes
 function ANDPort(x1,y1) {
   // Draw symbols and wires
@@ -318,6 +321,7 @@ function ANDPort(x1,y1) {
   let node2 = new InputNode(x1+25, y1+boxHeight-25 );
   let node3 = new ANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
   this.nodes = [ node1, node2 , node3 ] ;
+  this.remove = function() { };
 }
 
 // Create OR port with its nodes
@@ -334,7 +338,8 @@ function ORPort(x1,y1) {
   let node2 = new InputNode(x1+25, y1+boxHeight-25 );
   let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
   this.output = function() { return true; };
-  this.nodes = [ node1, node2 , node3 ] ;     
+  this.nodes = [ node1, node2 , node3 ] ;
+  this.remove = function() { };
 }
 
 // Create NOT port with its nodes
@@ -349,6 +354,7 @@ function NOTPort(x1,y1) {
   let node1 = new InputNode(x1+25, y1+0.5*boxHeightSmall );
   let node2 = new NOTNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, node1);
   this.nodes = [ node1, node2 ] ;     
+  this.remove = function() { };
 }
 
 // Create memory cell with its nodes
@@ -372,31 +378,34 @@ function Memory(x1,y1) {
     if( isHigh(node1.eval()) ) this.nodes[2].state = high; // set always wins
     return true;
   }
+  this.remove = function() { };
 }
     
 // Create LED with node
 function LED(x1,y1) {
-    drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
     
-    // Draw LED
-    var c = new fabric.Circle({left: x1+boxWidth-25, top: y1+20, radius: 5, 
-                               fill: 'darkred', selectable: false, evented: false,
-                               stroke: 'black', strokeWidth: 2   });
-    c.setGradient('stroke', gradientButtonDw );
-    canvas.add(c);
+  // Draw LED
+  var c = new fabric.Circle({left: x1+boxWidth-25, top: y1+20, radius: 5, 
+                             fill: 'darkred', selectable: false, evented: false,
+                             stroke: 'black', strokeWidth: 2   });
+  c.setGradient('stroke', gradientButtonDw );
+  canvas.add(c);
 
-    this.nodes = [ new InputNode(x1+25, y1+20 ) ] ;    
+  this.nodes = [ new InputNode(x1+25, y1+20 ) ] ;    
 
-    // Control LED behaviour
-    this.output = function() {
-        var result = this.nodes[0].eval();
-        if( isHigh(result) ) {
-          c.set({fill : 'red'});
-        } else {
-          c.set({fill : 'darkred'});            
-        }
-        return result;
-    };
+  // Control LED behaviour
+  this.output = function() {
+    var result = this.nodes[0].eval();
+    if( isHigh(result) ) {
+      c.set({fill : 'red'});
+    } else {
+      c.set({fill : 'darkred'});            
+    }
+    return result;
+  };
+
+  this.remove = function() { };
 }
 
 // Create sound output
@@ -444,16 +453,20 @@ function Sound(x1,y1) {
       }
       return result;
   };
+
+  this.remove = function() { };
+
 }    
     
 // Create switch
 function Switch(x1,y1) {
-    drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
-    this.output = function() { return true;};
-    let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
-    this.nodes = [ node ] ;
-    // Draw the push button
-    canvas.add( makeButton(x1+25, y1+0.5*boxHeightSmall, node) );
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
+  this.output = function() { return true;};
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ;
+  // Draw the push button
+  canvas.add( makeButton(x1+25, y1+0.5*boxHeightSmall, node) );
+  this.remove = function() { };
 }
 
 // Create an number-input DOM element
@@ -488,15 +501,26 @@ function Pulse(x1,y1) {
     this.nodes = [ node ] ; 
     this.pulseStarted = false;
     this.output = function() { return true; };
-      
+         
     // Start the pulse generator
+    var timer;
     this.startPulse = function() {
         node.state = invert(node.state);
         var myElement = document.getElementById(elementName);
         var _this = this;
-        setTimeout(function() { _this.startPulse(); }, 500/(myElement.value));
+        timer = setTimeout(function() { _this.startPulse(); }, 500/(myElement.value));
     }
     this.startPulse();
+  
+    // Delete the dom element and stop the pulsing
+    this.remove = function() {
+      // Stop the pulse generator
+      clearTimeout(timer);
+      // Remove the DOM element
+      var myElement = document.getElementById(elementName);
+      myElement.remove();
+    }
+  
 }    
 
 // Variable voltage power
@@ -519,7 +543,15 @@ function VarVoltage(x1,y1) {
         this.nodes[0].state = input.value;
         return true;
     };
-    
+
+    // Delete the dom element
+    this.remove = function() {
+      // Remove the DOM element
+      var myElement = document.getElementById(elementName);
+      myElement.remove();
+    }
+
+
 }    
 
 // Comparator
@@ -557,6 +589,14 @@ function Comparator(x1,y1) {
       this.nodes[1].compare = input.value;
       return true;
   };
+  
+  // Delete the dom element
+  this.remove = function() {
+  // Remove the DOM element
+    var myElement = document.getElementById(elementName);
+    myElement.remove();
+  }
+  
 }
     
 // Create ADC
@@ -579,6 +619,8 @@ function ADC(x1,y1) {
     let node1 = new BinaryNode(x1+boxWidth-45, y1+17, node4, 1 );
     let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
     this.nodes = [ node4,node3,node2,node1,node0 ] ;
+
+    this.remove = function() {};
 }
 
 // Create Counter
@@ -664,6 +706,8 @@ function Counter(x1,y1) {
         this.nodes[6].counter = this.counter;
         return true;
     };
+  
+    this.remove = function() {};
 }
 
 
@@ -774,6 +818,7 @@ function Lightbulb(x1,y1) {
     return;
   };
 
+  this.remove = function() {};
 
 }
 
@@ -810,8 +855,17 @@ function Relais(x1,y1) {
   let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
   let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
   this.nodes = [ node1, node2, node3 ] ;
+
+  this.remove = function() {};
+
 }
 
+function removeElements() {
+  canvas.clear();
+  for (i = 0; i < elements.length; i++) { 
+    elements[i].remove();
+  } 
+}
 
 
 

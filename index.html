@@ -32,6 +32,8 @@
         </div>    
       </div>
         <div class="column">
+                    
+          <div id="demo"/>
           <h3>Beknopte instructie:</h3>
 <ul> 
   <li><b>Verbindingssnoeren maken:</b><br/>
@@ -70,7 +72,8 @@
     
   
   // Define the elements of the systemboard
-  elements = [new Switch(60,175),
+  elements =[ new Board(50,0),
+              new Switch(60,175),
               new Switch(60,225),
               new Switch(60,275),
               new Pulse(60,325),
@@ -100,8 +103,10 @@
               new VarVoltage(60,75),
               new Switch(60,125),
              ];
-    /*elements = [
-                    new Switch(0,200),
+  
+  /*removeElements();
+
+  elements =[ new Switch(0,200),
               new Switch(0,250),
               new Pulse(0,300),
               new ORPort(150,100),
@@ -112,14 +117,8 @@
               new NOTPort(300,300),
               new LED(450,0), 
               new LED(450,50), 
-             ];
+            ];
 */
-
-    // Draw the main board as well
-  var x1=50, y1=0;
-  drawBoard(x1,y1);
-
-
   
 })();
 </script>
