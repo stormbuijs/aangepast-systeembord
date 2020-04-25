@@ -975,3 +975,107 @@ canvas.on('object:moved', function(e) {
     }
 });
 
+// Add listener for uploading files
+var control = document.getElementById("fileinput");
+control.addEventListener("change", function(event) {
+  //document.getElementById("bla").innerHTML = control.value;  
+  let files = control.files;
+  //Use createObjectURL, this should address any CORS issues.
+  let filePath = URL.createObjectURL(files[0]);
+  readFile(filePath);
+});
+
+function readFile(url) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      //document.getElementById("bla").innerHTML = this.responseText;
+      parseFile(this);
+    }
+  };
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+function parseFile(xml) {
+  removeElements();
+  var i;
+  var xmlDoc = xml.responseXML;
+  var table = "";
+  var x = xmlDoc.getElementsByTagName("systeembord");
+  for (i = 0; i <x.length; i++) { 
+    //table += "Found element</br>";
+    var domElements = x[i].getElementsByTagName("element");
+
+    for (j = 0; j < domElements.length; j++) { 
+      //table += domElements[j].childNodes[0].nodeValue; 
+      var className = domElements[j].getAttribute('name');
+      /*table += className + ' ';
+      table += 'x=' + domElements[j].getAttribute('x') + ' ';
+      table += 'y=' + domElements[j].getAttribute('y') + ' </br>';*/
+     
+      var x = parseInt(domElements[j].getAttribute('x')); 
+      var y = parseInt( domElements[j].getAttribute('y'));
+      //var z= x + y;
+      //table += 'z=' + z + ' </br>';
+      addElement(className,x,y) 
+    }
+    
+
+  }
+  //document.getElementById("demo").innerHTML = table;
+}
+
+
+function addElement(className,x1,y1){
+  switch( className ) {
+    case "Board" :
+      elements.push(new Board(x1,y1));
+    break;
+    case "Switch" :
+      elements.push(new Switch(x1,y1));
+    break;
+    case "Pulse" :
+      elements.push(new Pulse(x1,y1));
+    break;
+    case "VarVoltage" :
+      elements.push(new VarVoltage(x1,y1));
+    break;
+    case "Comparator" :
+      elements.push(new Comparator(x1,y1));
+    break;
+    case "ANDPort" :
+      elements.push(new ANDPort(x1,y1));
+    break;
+    case "ORPort" :
+      elements.push(new ORPort(x1,y1));
+    break;
+    case "NOTPort" :
+      elements.push(new NOTPort(x1,y1));
+    break;
+    case "Memory" :
+      elements.push(new Memory(x1,y1));
+    break;
+    case "Counter" :
+      elements.push(new Counter(x1,y1));
+    break;
+    case "ADC" :
+      elements.push(new ADC(x1,y1));
+    break;
+    case "LED" :
+      elements.push(new LED(x1,y1));
+    break;
+    case "Sound" :
+      elements.push(new Sound(x1,y1));
+    break;
+    case "Relais" :
+      elements.push(new Relais(x1,y1));
+    break;
+    case "Lightbulb" :
+      elements.push(new Lightbulb(x1,y1));
+    break;
+  }    
+
+}
+
+

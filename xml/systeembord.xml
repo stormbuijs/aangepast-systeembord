@@ -1,1 +1,31 @@
-<tag>bla</tag>
+<systeembord>
+  <element name="Board" x="50" y="0"/>
+  <element name="Switch" x="60" y="175"/>
+  <element name="Switch" x="60" y="225"/>
+  <element name="Switch" x="60" y="275"/>
+  <element name="Pulse" x="60" y="325"/>
+  <element name="VarVoltage" x="60" y="375"/>
+  <element name="ADC" x="60" y="425"/>
+  <element name="Comparator" x="220" y="25"/>
+  <element name="Comparator" x="370" y="25"/>
+  <element name="ANDPort" x="220" y="125"/>
+  <element name="ANDPort" x="370" y="125"/>
+  <element name="ORPort" x="370" y="225"/>
+  <element name="Memory" x="220" y="225"/>
+  <element name="NOTPort" x="220" y="325"/>
+  <element name="NOTPort" x="370" y="325"/>
+  <element name="Counter" x="220" y="375"/>
+  <element name="LED" x="530" y="25"/> 
+  <element name="LED" x="530" y="75"/> 
+  <element name="LED" x="530" y="125"/> 
+  <element name="LED" x="530" y="175"/>
+  <element name="LED" x="530" y="225"/>
+  <element name="LED" x="530" y="275"/>
+  <element name="Sound" x="530" y="325"/>
+  <element name="Relais" x="530" y="375"/>
+  <element name="Lightbulb" x="750" y="375"/>
+
+  <element name="VarVoltage" x="60" y="25"/>
+  <element name="VarVoltage" x="60" y="75"/>
+  <element name="Switch" x="60" y="125"/>
+</systeembord>
