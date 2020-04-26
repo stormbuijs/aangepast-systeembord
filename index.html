@@ -70,6 +70,8 @@
 
 <img width=0 src="img/pic_bulboff.gif" id="lightoff">
 <img width=0 src="img/pic_bulbon.gif" id="lighton">
+<img width=0 src="img/ldr.png" id="ldr">
+
 
         </div>
     </div>
@@ -108,7 +110,7 @@
               new Lightbulb(750,375),
 
               // temporary (waiting for sensors and relais)
-              new VarVoltage(60,25),
+              new LightSensor(60,25),
               new VarVoltage(60,75),
               new Switch(60,125),
              ];

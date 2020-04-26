@@ -864,27 +864,75 @@ function Lightbulb(x1,y1) {
 
 }
 
+
+// Make movable circle for LDR
+function makeLDR(left, top, node){
+  
+  var domLDR = document.getElementById('ldr');
+  var imgLDR = new fabric.Image(domLDR, { left: left, top: top });
+  imgLDR.scale(0.15);
+  //canvas.add(imgLDR);  
+  imgLDR.sendToBack();
+  imgLDR.hasControls = c.hasBorders = false;
+  imgLDR.name = "LDR";
+  imgLDR.node = node;
+  return imgLDR;
+
+  /*var c = new fabric.Circle({left: left, top: top, strokeWidth: 1, stroke: 'black' ,
+                              radius: 10, fill: 'green' });
+  c.hasControls = c.hasBorders = false;
+  c.name = "LDR";
+  c.node = node;
+  return c;*/
+}
+
+// Make display for sensor
+function makeDisplay(x1, y1){
+
+  var l = new fabric.Line([x1+75,y1+30,x1+75,y1+12], {strokeWidth: 2, stroke: 'red' ,
+                           selectable: false, evented: false});
+  canvas.add(l); l.sendToBack();
+
+  var r = new fabric.Rect({left: x1+75, top: y1+20, height: 20, width: 40, 
+                           fill: 'white', selectable: false, evented: false,
+                           stroke: 'black', strokeWidth: 1   });   
+  canvas.add(r); r.sendToBack();
+
+  return l;
+}
+
 // Light sensor
 function LightSensor(x1,y1) {
   this.x = x1;
   this.y = y1;
   
-  //drawText(x1+70,y1+30,"V",12);
-  
-  var circ = new fabric.Circle({left: x1-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
-                                radius: 10, fill: 'green', selectable: false, evented: true});
-  canvas.add(circ);
-  circ.sendToBack();
+  /*this.textbox = new fabric.Textbox("0", {
+        left: x1+boxWidth-60, top: y1-20, width: 30, fontSize: 10, textAlign: 'right',
+        fill: 'red', fontFamily: 'Arial',
+        selectable: false, evented: false });
+  canvas.add(this.textbox);*/
+
+  drawText(x1+57,y1+19,"1",8);
+  drawText(x1+88,y1+19,"5",8);
+  this.display = makeDisplay(x1,y1);
   
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ; 
+  var ldr = makeLDR(x1-40, y1+25, this.nodes[0]);
+  canvas.add(ldr);
   
   drawConnectors(this.nodes, "yellow");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'lichtsensor');
  
   // Set voltage 
-  node.state = low;
-  this.output = function() { return true; };
+  this.output = function() { 
+    //this.textbox.text = this.nodes[0].state.toString();
+    var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    var x2 = x1+75 - 18*Math.cos(angle);
+    var y2 = y1+30 - 18*Math.sin(angle);
+    this.display.set({ 'x2': x2, 'y2': y2 });
+    return true; 
+  };
   this.remove = function() { };
 }    
 
@@ -950,7 +998,33 @@ canvas.on('mouse:up', function(e) {
 // Control behaviour when moving wire
 canvas.on('object:moving', function(e) {
   var p = e.target;
-  if( p.name != "wire" ) return;
+  if( p.name == "wire" ) moveWire(p);
+  if( p.name == "LDR" ) moveLDR(p);
+});
+
+function moveLDR(p){
+  
+  // Find the lightbulb
+  var lightbulb = null;
+  for (var i = 0; i < elements.length; i++) { 
+    if( elements[i].constructor.name == "Lightbulb" ) {
+	    lightbulb = elements[i];      
+      continue;
+    }
+  }
+  if( lightbulb && lightbulb.state ) {
+    var dist = Math.pow(p.left-lightbulb.x,2)+Math.pow(p.top-lightbulb.y,2);
+    var voltage = 5.0/(1.0+dist/20000.0);
+    //voltage = Math.sqrt(dist);
+    // Normalize distance (maximum is around 1000) to 5 V
+    p.node.state = voltage;
+    //p.element.state = voltage;
+  } else {
+    p.node.state = low;    
+  }
+}
+
+function moveWire(p){
   p.line1.set({ 'x2': p.left, 'y2': p.top });
   // Snap to any node
   for (i = 0; i < elements.length; i++) {
@@ -968,11 +1042,12 @@ canvas.on('object:moving', function(e) {
       }
     }
   }
-});
+}
     
 // After moving wire: destroy create new links
 canvas.on('object:moved', function(e) {
     var p = e.target;
+    if( p.name != "wire" ) return;
     var snapped = false;
     // reset connection wire
     if( p.connection ) p.connection.child = null;
