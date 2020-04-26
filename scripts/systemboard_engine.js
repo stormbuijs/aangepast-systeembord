@@ -36,7 +36,7 @@ function makeLine(coords, color) {
 // Make wire (= movable circle + line + fixed circle)
 function makeWire(x1,y1,node,isHV=false) { 
   var color = isHV ? 'black' : '#dd0000';
-  var circ = new fabric.Circle({left: x1, top: y1, strokeWidth: 1, stroke: 'black' , radius: 6, 
+  var circ = new fabric.Circle({left: x1, top: y1, strokeWidth: 0, stroke: 'black' , radius: 5, 
                                 fill: color, selectable: false, evented: false});
   canvas.add(circ);
   var line = makeLine([ x1, y1, x1, y1 ],color);
@@ -309,6 +309,16 @@ function Board(x1,y1) {
   this.remove = function() { };
 }
 
+function drawConnectors(nodes,color) {
+  for(var i=0; i<nodes.length; ++i) {
+    var circ = new fabric.Circle({left: nodes[i].x1, top: nodes[i].y1, strokeWidth: 4, stroke: color , radius: 6, 
+                                  fill: "transparent", selectable: false, evented: false});
+    canvas.add(circ);
+    circ.sendToBack();
+    //canvas.setBackgroundImage(circ);
+  }
+}
+
 // Create AND port with its nodes
 function ANDPort(x1,y1) {
   this.x = x1;
@@ -320,13 +330,15 @@ function ANDPort(x1,y1) {
   drawConnection([x1+25, y1+40, x1+0.5*boxWidth, y1+40]);
   drawConnection([x1+25, y1+boxHeight-25, x1+25, y1+boxHeight-40]);
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
-  drawElementBox(x1,y1,boxWidth,boxHeight,'EN-poort');
-    
-  this.output = function() {return true;};
   let node1 = new InputNode(x1+25, y1+25 );
   let node2 = new InputNode(x1+25, y1+boxHeight-25 );
   let node3 = new ANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
   this.nodes = [ node1, node2 , node3 ] ;
+  drawConnectors(this.nodes, "blue");
+
+  drawElementBox(x1,y1,boxWidth,boxHeight,'EN-poort');
+    
+  this.output = function() {return true;};
   this.remove = function() { };
 }
 
@@ -341,12 +353,13 @@ function ORPort(x1,y1) {
   drawConnection([x1+25, y1+40, x1+0.5*boxWidth, y1+40]);
   drawConnection([x1+25, y1+boxHeight-25, x1+25, y1+boxHeight-40]);
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
-  drawElementBox(x1,y1,boxWidth,boxHeight,'OF-poort');
   let node1 = new InputNode(x1+25, y1+25 );
   let node2 = new InputNode(x1+25, y1+boxHeight-25 );
   let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
   this.output = function() { return true; };
   this.nodes = [ node1, node2 , node3 ] ;
+  drawConnectors(this.nodes, "blue");
+  drawElementBox(x1,y1,boxWidth,boxHeight,'OF-poort');
   this.remove = function() { };
 }
 
@@ -359,11 +372,12 @@ function NOTPort(x1,y1) {
   drawConnection([x1+25, y1+0.5*boxHeightSmall, x1+boxWidth-25, y1+0.5*boxHeightSmall]);
   drawConnection([x1+15+0.5*boxWidth, y1-5+0.5*boxHeightSmall, 
                   x1+20+0.5*boxWidth, y1+0.5*boxHeightSmall]);
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'invertor');
-  this.output = function() { return true; };
   let node1 = new InputNode(x1+25, y1+0.5*boxHeightSmall );
   let node2 = new NOTNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, node1);
   this.nodes = [ node1, node2 ] ;     
+  drawConnectors(this.nodes, "blue");
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'invertor');
+  this.output = function() { return true; };
   this.remove = function() { };
 }
 
@@ -380,11 +394,12 @@ function Memory(x1,y1) {
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
   drawText(x1+35,y1+31,"set");
   drawText(x1+35,y1+boxHeight-19,"reset");
-  drawElementBox(x1,y1,boxWidth,boxHeight,'geheugencel');
   let node1 = new InputNode(x1+25, y1+25 );
   let node2 = new InputNode(x1+25, y1+boxHeight-25 );
   let node3 = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeight);
   this.nodes = [ node1, node2, node3 ] ;     
+  drawConnectors(this.nodes, "blue");
+  drawElementBox(x1,y1,boxWidth,boxHeight,'geheugencel');
   this.output = function() { 
     if( isHigh(node2.eval()) ) this.nodes[2].state = low;
     if( isHigh(node1.eval()) ) this.nodes[2].state = high; // set always wins
@@ -397,7 +412,6 @@ function Memory(x1,y1) {
 function LED(x1,y1) {
   this.x = x1;
   this.y = y1;
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
     
   // Draw LED
   var c = new fabric.Circle({left: x1+boxWidth-25, top: y1+20, radius: 5, 
@@ -407,6 +421,9 @@ function LED(x1,y1) {
   canvas.add(c);
 
   this.nodes = [ new InputNode(x1+25, y1+20 ) ] ;    
+  drawConnectors(this.nodes, "white");
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
+
 
   // Control LED behaviour
   this.output = function() {
@@ -451,9 +468,11 @@ function Sound(x1,y1) {
                            stroke: 'black', strokeWidth: 1 });
   canvas.add(t); t.sendToBack();     
   
+  this.nodes = [ new InputNode(x1+25, y1+0.5*boxHeightSmall) ] ;    
+
+  drawConnectors(this.nodes, "white");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
-  this.nodes = [ new InputNode(x1+25, y1+0.5*boxHeightSmall) ] ;    
   this.audio = document.getElementById("myAudio"); 
   // Control LED behaviour
   this.output = function() {  
@@ -478,10 +497,11 @@ function Sound(x1,y1) {
 function Switch(x1,y1) {
   this.x = x1;
   this.y = y1;
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
   this.output = function() { return true;};
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;
+  drawConnectors(this.nodes, "yellow");
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
   // Draw the push button
   canvas.add( makeButton(x1+25, y1+0.5*boxHeightSmall, node) );
   this.remove = function() { };
@@ -508,6 +528,11 @@ function Pulse(x1,y1) {
   this.x = x1;
   this.y = y1; 
   drawText(x1+70,y1+30,"Hz",12);
+  
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ; 
+
+  drawConnectors(this.nodes, "yellow");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'pulsgenerator');
 
   // Create unique element ID
@@ -516,8 +541,6 @@ function Pulse(x1,y1) {
   // Create an input DOM element
   var input = inputDOM(x1+20,y1+10,elementName,"1","0.1","0.5","10");
 
-  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
-  this.nodes = [ node ] ; 
   this.pulseStarted = false;
   this.output = function() { return true; };
          
@@ -548,6 +571,11 @@ function VarVoltage(x1,y1) {
   this.y = y1;
   
   drawText(x1+70,y1+30,"V",12);
+  
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ; 
+  
+  drawConnectors(this.nodes, "yellow");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'variabele spanning');
  
   // Create unique element ID
@@ -557,9 +585,7 @@ function VarVoltage(x1,y1) {
   var input = inputDOM(x1+20,y1+10,elementName,"5","0.1","0.1","5");
 
   // Create an ouput node and set voltage from the DOM element
-  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   node.state = input.value;
-  this.nodes = [ node ] ;     
   this.output = function() {
     this.nodes[0].state = input.value;
     return true;
@@ -594,6 +620,11 @@ function Comparator(x1,y1) {
   drawConnection([x1+40, y1+45, x1+40, y1+70]);
   drawConnection([x1+40, y1+70, x1+70, y1+70]);
 
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
+  this.nodes = [ node1, node2 ] ;     
+
+  drawConnectors(this.nodes, "blue");
   drawElementBox(x1,y1,boxWidth,boxHeight,'comparator');
     
   // Create unique element ID
@@ -603,10 +634,7 @@ function Comparator(x1,y1) {
   var input = inputDOM(x1+70,y1+60,elementName,"2.5","0.1","0.1","5");
     
   // Create the node
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
   node2.compare = input.value; // set compare value
-  this.nodes = [ node1, node2 ] ;     
   this.output = function() {
       this.nodes[1].compare = input.value;
       return true;
@@ -635,7 +663,6 @@ function ADC(x1,y1) {
   drawConnection([x1+boxWidth-92, y1+30, x1+boxWidth-62, y1+30]);
   drawConnection([x1+boxWidth-46, y1+30, x1+boxWidth-18, y1+30]);
 
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
   this.output = function() { return true;};
   let node4 = new InputNode( x1+25, y1+17 );
   let node3 = new BinaryNode(x1+boxWidth-85, y1+17, node4, 3 );
@@ -644,6 +671,10 @@ function ADC(x1,y1) {
   let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
   this.nodes = [ node4,node3,node2,node1,node0 ] ;
 
+  drawConnectors(this.nodes.slice(1,5), "yellow");
+  drawConnectors([this.nodes[0]], "white");
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
+  
   this.remove = function() {};
 }
 
@@ -680,8 +711,6 @@ function Counter(x1,y1) {
   drawConnection([x1+2*boxWidth-25, y1+39,x1+2*boxWidth-25, y1+20]);  
   drawConnection([x1+85, y1+50, x1+2*boxWidth-75, y1+50]);
 
-  drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
-
   this.counter = 0;
   this.state = low;
     
@@ -705,6 +734,9 @@ function Counter(x1,y1) {
   canvas.add(this.textbox);
 
   this.nodes = [ node6,node5,node4,node3,node2,node1,node0 ] ;
+  drawConnectors(this.nodes, "blue");
+  drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
+
   this.output = function() {
     // reset counter (check button or reset node)
     if( isHigh(node6.state) || isHigh(node6.eval()) ) { 
@@ -819,12 +851,13 @@ function Relais(x1,y1) {
   drawConnection([x1+boxWidth-75, y1+60, x1+boxWidth-75, y1+boxHeight-25]);
   drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-25, y1+25]);
 
-  drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
   this.output = function() {return true;};
   let node1 = new InputNode(x1+25, y1+25 );
   let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
   let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
   this.nodes = [ node1, node2, node3 ] ;
+  drawConnectors([this.nodes[0]], "white");
+  drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
 
   this.remove = function() {};
 
@@ -983,7 +1016,6 @@ function parseFile(xml) {
     var y = parseInt( domElements[i].getAttribute('y'));
     addElement(className,x,y); 
   }    
-  //}
   
   // Second loop to add the links
   for (i = 0; i < domElements.length; i++) { 
@@ -1139,7 +1171,7 @@ function findLink(thisNode) {
       if( thisNode == elements[i].nodes[j] ) return [i,j];
     }
   }
-  return [-1.-1];
+  return [-1,-1];
 }
 
 
