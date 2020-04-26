@@ -235,6 +235,21 @@ function RelaisNode(x1,y1,input) {
     this.wire = makeWire(x1,y1,this,this.isHV);
 }
 
+// Light sensor node
+function LightSensorNode(x1,y1,x2,y2) { 
+    this.x1 = x1;
+    this.y1 = y1;
+    this.xLDR = x2;
+    this.yLDR = y2;
+    this.state = low;
+    this.eval = function() { return this.state; };      
+    this.isInput = false;     
+    this.isHV = false;
+    this.wire = makeWire(x1,y1,this);
+}    
+
+
+
 // Draw the box plus text
 function drawElementBox(x1,y1,width,height,text) {
     // Draw text in box
@@ -856,6 +871,13 @@ function Lightbulb(x1,y1) {
 	      canvas.add(this.imgBulbOff);
         this.imgBulbOff.sendToBack();
       }
+      // also update all light sensors
+      for (var i = 0; i < elements.length; i++) { 
+        if( elements[i].constructor.name == "LightSensor" ) {
+          var lightsensor = elements[i];
+          updateLDR( lightsensor.nodes[0] );
+        }
+      }
     }
     return;
   };
@@ -865,9 +887,8 @@ function Lightbulb(x1,y1) {
 }
 
 
-// Make movable circle for LDR
+// Make movable image for LDR
 function makeLDR(left, top, node){
-  
   var domLDR = document.getElementById('ldr');
   var imgLDR = new fabric.Image(domLDR, { left: left, top: top });
   imgLDR.scale(0.15);
@@ -877,13 +898,6 @@ function makeLDR(left, top, node){
   imgLDR.name = "LDR";
   imgLDR.node = node;
   return imgLDR;
-
-  /*var c = new fabric.Circle({left: left, top: top, strokeWidth: 1, stroke: 'black' ,
-                              radius: 10, fill: 'green' });
-  c.hasControls = c.hasBorders = false;
-  c.name = "LDR";
-  c.node = node;
-  return c;*/
 }
 
 // Make display for sensor
@@ -905,20 +919,20 @@ function makeDisplay(x1, y1){
 function LightSensor(x1,y1) {
   this.x = x1;
   this.y = y1;
-  
+
   /*this.textbox = new fabric.Textbox("0", {
         left: x1+boxWidth-60, top: y1-20, width: 30, fontSize: 10, textAlign: 'right',
         fill: 'red', fontFamily: 'Arial',
         selectable: false, evented: false });
   canvas.add(this.textbox);*/
 
-  drawText(x1+57,y1+19,"1",8);
+  drawText(x1+57,y1+19,"0",8);
   drawText(x1+88,y1+19,"5",8);
   this.display = makeDisplay(x1,y1);
   
-  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  let node = new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1-40, y1+25 );
   this.nodes = [ node ] ; 
-  var ldr = makeLDR(x1-40, y1+25, this.nodes[0]);
+  var ldr = makeLDR(node.xLDR, node.yLDR, this.nodes[0]);
   canvas.add(ldr);
   
   drawConnectors(this.nodes, "yellow");
@@ -999,29 +1013,30 @@ canvas.on('mouse:up', function(e) {
 canvas.on('object:moving', function(e) {
   var p = e.target;
   if( p.name == "wire" ) moveWire(p);
-  if( p.name == "LDR" ) moveLDR(p);
+  if( p.name == "LDR" ) {
+    p.node.xLDR = p.left;
+    p.node.yLDR = p.top;
+    updateLDR(p.node);
+  }
 });
 
-function moveLDR(p){
+function updateLDR(node){
   
-  // Find the lightbulb
+  // Find all lightbulbs and calculate distance
+  node.state = low;    
   var lightbulb = null;
   for (var i = 0; i < elements.length; i++) { 
     if( elements[i].constructor.name == "Lightbulb" ) {
-	    lightbulb = elements[i];      
-      continue;
+	    lightbulb = elements[i];
+      if( lightbulb && lightbulb.state ) {
+        var dist = Math.pow(node.xLDR-lightbulb.x,2)+Math.pow(node.yLDR-lightbulb.y,2);
+        var voltage = 5.0/(1.0+dist/20000.0);
+        // Normalize distance (maximum is around 1000) to 5 V
+        node.state += voltage;
+      }
     }
   }
-  if( lightbulb && lightbulb.state ) {
-    var dist = Math.pow(p.left-lightbulb.x,2)+Math.pow(p.top-lightbulb.y,2);
-    var voltage = 5.0/(1.0+dist/20000.0);
-    //voltage = Math.sqrt(dist);
-    // Normalize distance (maximum is around 1000) to 5 V
-    p.node.state = voltage;
-    //p.element.state = voltage;
-  } else {
-    p.node.state = low;    
-  }
+  node.state = Math.min(node.state, 5); // Set maximum to 5 volt
 }
 
 function moveWire(p){
