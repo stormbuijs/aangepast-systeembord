@@ -3,6 +3,7 @@
 <head>
   <title>Online systeembord</title>
     <script src="scripts/fabric.min.js"></script>
+    <script src="scripts/jquery-3.5.0.min.js"></script>
     <!--script src="beep.js"></script-->
         <style>
     {
@@ -37,7 +38,7 @@
           <input id="fileinput" type="file" style="display: none;">
           <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
           <input id="download_xml" type="button" value="Sla op (download) als:">
-          <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
+          <input type="text" id="xml_filename" value="systeembord1.xml" size=20><br>
 
           <div id="demo"/>
 
@@ -77,9 +78,10 @@
     <script id="main">
 (function() {
     
-  
+  readFile("xml/systeembord.xml");
+
   // Define the elements of the systemboard
-  elements =[ new Board(50,0),
+  /*elements =[ new Board(50,0),
               new Switch(60,175),
               new Switch(60,225),
               new Switch(60,275),
@@ -110,22 +112,9 @@
               new VarVoltage(60,75),
               new Switch(60,125),
              ];
-  
-  /*removeElements();
+  */
+  //removeElements();
 
-  elements =[ new Switch(0,200),
-              new Switch(0,250),
-              new Pulse(0,300),
-              new ORPort(150,100),
-              new ORPort(300,100),
-              new ORPort(300,200),
-              new Memory(150,200),
-              new NOTPort(150,300),
-              new NOTPort(300,300),
-              new LED(450,0), 
-              new LED(450,50), 
-            ];
-*/
   
 })();
 </script>

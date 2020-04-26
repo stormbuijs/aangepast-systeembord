@@ -1,0 +1,21 @@
+<systeembord>
+  <element name="Switch" x="0" y="100"/>
+  <element name="Switch" x="0" y="250"/>
+  <element name="ORPort" x="150" y="50">
+    <link id="0" toElement="5" toNode="1"/>
+    <link id="1" toElement="0" toNode="0"/>
+  </element>
+  <element name="ORPort" x="350" y="200">
+    <link id="0" toElement="4" toNode="1"/>
+    <link id="1" toElement="1" toNode="0"/>
+  </element>
+  <element name="NOTPort" x="300" y="75">
+    <link id="0" toElement="2" toNode="2"/>
+  </element>
+  <element name="NOTPort" x="500" y="225">
+    <link id="0" toElement="3" toNode="2"/>
+  </element>
+  <element name="LED" x="650" y="225">
+    <link id="0" toElement="5" toNode="1"/>
+  </element>
+</systeembord>

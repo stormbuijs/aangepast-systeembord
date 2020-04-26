@@ -1,0 +1,9 @@
+<systeembord>
+  <element name="Switch" x="0" y="100"/>
+  <element name="Switch" x="0" y="250"/>
+  <element name="ORPort" x="150" y="50"/>
+  <element name="ORPort" x="350" y="200"/>
+  <element name="NOTPort" x="300" y="75"/>
+  <element name="NOTPort" x="500" y="225"/>
+  <element name="LED" x="650" y="225"/>
+</systeembord>

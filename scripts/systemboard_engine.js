@@ -41,7 +41,9 @@ function makeWire(x1,y1,node,isHV=false) {
   canvas.add(circ);
   var line = makeLine([ x1, y1, x1, y1 ],color);
   canvas.add( line );
-  canvas.add( makeCircle(x1, y1, line, node, color) );
+  let endCircle = makeCircle(x1, y1, line, node, color);
+  canvas.add( endCircle );
+  return endCircle;
 }
   
 // Set nice-looking gradients for buttons
@@ -69,7 +71,7 @@ function InputNode(x1,y1, isHV=false) {
     this.eval = function() { return (this.child) ? this.child.eval() : false ; };
     this.isInput = true;
     this.isHV = isHV;
-    makeWire(x1,y1,this,isHV);
+    this.wire = makeWire(x1,y1,this,isHV);
 }
 
 // Generic output node (has a state=voltage)
@@ -80,7 +82,7 @@ function OutputNode(x1,y1) {
     this.eval = function() { return this.state; };      
     this.isInput = false;     
     this.isHV = false;
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }    
 
 // AND node
@@ -104,7 +106,7 @@ function ANDNode(x1,y1,input1,input2, color) {
           return this.state;
 	}
     };      
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }
 
 // OR node
@@ -129,7 +131,7 @@ function ORNode(x1,y1,input1,input2) {
       }
     };      
     
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }
 
 // NOT node
@@ -152,7 +154,7 @@ function NOTNode(x1,y1,input1) {
         return this.state;
       }
     };
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }    
   
 // Comparator node
@@ -177,7 +179,7 @@ function ComparatorNode(x1,y1,input1) {
       }
     };
 
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }  
     
 // Binary node
@@ -203,7 +205,7 @@ function BinaryNode(x1,y1,input1,bin) {
       }
     };
 
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }    
 
 // Binary node with stored counter
@@ -219,7 +221,7 @@ function BinaryNodeS(x1,y1,bin) {
       return ( bit == 1 ) ? high : low ;
     }
 
-    makeWire(x1,y1,this);
+    this.wire = makeWire(x1,y1,this);
 }    
 
 // Relais node 
@@ -230,7 +232,7 @@ function RelaisNode(x1,y1,input) {
     this.isHV = true;
     this.eval = function() { return this.child.eval(); };      
     this.isInput = false;
-    makeWire(x1,y1,this,this.isHV);
+    this.wire = makeWire(x1,y1,this,this.isHV);
 }
 
 // Draw the box plus text
@@ -281,6 +283,8 @@ function drawConnection(coords){
 
 // Draw the board plus text
 function Board(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   function drawHeader(x1,y1,text) {
     // Draw text in box
     var textbox = new fabric.Textbox(text, { left: x1, top: y1, width: 150,
@@ -307,6 +311,8 @@ function Board(x1,y1) {
 
 // Create AND port with its nodes
 function ANDPort(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "&");
   drawConnection([x1+0.5*boxWidth, y1+0.5*boxHeight, x1+boxWidth-25, y1+0.5*boxHeight]);
@@ -326,6 +332,8 @@ function ANDPort(x1,y1) {
 
 // Create OR port with its nodes
 function ORPort(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "\u22651");
   drawConnection([x1+0.5*boxWidth, y1+0.5*boxHeight, x1+boxWidth-25, y1+0.5*boxHeight]);
@@ -344,6 +352,8 @@ function ORPort(x1,y1) {
 
 // Create NOT port with its nodes
 function NOTPort(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1-7+0.5*boxHeightSmall, "1");
   drawConnection([x1+25, y1+0.5*boxHeightSmall, x1+boxWidth-25, y1+0.5*boxHeightSmall]);
@@ -359,6 +369,8 @@ function NOTPort(x1,y1) {
 
 // Create memory cell with its nodes
 function Memory(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "M");
   drawConnection([x1+0.5*boxWidth, y1+0.5*boxHeight, x1+boxWidth-25, y1+0.5*boxHeight]);
@@ -383,6 +395,8 @@ function Memory(x1,y1) {
     
 // Create LED with node
 function LED(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
     
   // Draw LED
@@ -410,6 +424,8 @@ function LED(x1,y1) {
 
 // Create sound output
 function Sound(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   
   // Draw speaker
   var c1 = new fabric.Path('M '+(x1+130).toString()+' '+(y1+15).toString()+' Q '+
@@ -460,6 +476,8 @@ function Sound(x1,y1) {
     
 // Create switch
 function Switch(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
   this.output = function() { return true;};
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
@@ -487,64 +505,67 @@ function inputDOM(x1,y1,name,value,step,min,max){
     
 // Create a pulse generator
 function Pulse(x1,y1) {
-  
-    drawText(x1+70,y1+30,"Hz",12);
-    drawElementBox(x1,y1,boxWidth,boxHeightSmall,'pulsgenerator');
+  this.x = x1;
+  this.y = y1; 
+  drawText(x1+70,y1+30,"Hz",12);
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'pulsgenerator');
 
-    // Create unique element ID
-    var elementName = "frequency"+x1.toString()+y1.toString();
+  // Create unique element ID
+  var elementName = "frequency"+x1.toString()+y1.toString();
     
-    // Create an input DOM element
-    var input = inputDOM(x1+20,y1+10,elementName,"1","0.1","0.5","10");
+  // Create an input DOM element
+  var input = inputDOM(x1+20,y1+10,elementName,"1","0.1","0.5","10");
 
-    let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
-    this.nodes = [ node ] ; 
-    this.pulseStarted = false;
-    this.output = function() { return true; };
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ; 
+  this.pulseStarted = false;
+  this.output = function() { return true; };
          
-    // Start the pulse generator
-    var timer;
-    this.startPulse = function() {
-        node.state = invert(node.state);
-        var myElement = document.getElementById(elementName);
-        var _this = this;
-        timer = setTimeout(function() { _this.startPulse(); }, 500/(myElement.value));
-    }
-    this.startPulse();
+  // Start the pulse generator
+  var timer;
+  this.startPulse = function() {
+    node.state = invert(node.state);
+    var myElement = document.getElementById(elementName);
+    var _this = this;
+    timer = setTimeout(function() { _this.startPulse(); }, 500/(myElement.value));
+  }
+  this.startPulse();
   
-    // Delete the dom element and stop the pulsing
-    this.remove = function() {
-      // Stop the pulse generator
-      clearTimeout(timer);
-      // Remove the DOM element
-      var myElement = document.getElementById(elementName);
-      myElement.remove();
-    }
+  // Delete the dom element and stop the pulsing
+  this.remove = function() {
+    // Stop the pulse generator
+    clearTimeout(timer);
+    // Remove the DOM element
+    var myElement = document.getElementById(elementName);
+    myElement.remove();
+  }
   
 }    
 
 // Variable voltage power
 function VarVoltage(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   
-    drawText(x1+70,y1+30,"V",12);
-    drawElementBox(x1,y1,boxWidth,boxHeightSmall,'variabele spanning');
+  drawText(x1+70,y1+30,"V",12);
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'variabele spanning');
  
-    // Create unique element ID
-    var elementName = "voltage"+x1.toString()+y1.toString();
+  // Create unique element ID
+  var elementName = "voltage"+x1.toString()+y1.toString();
 
-    // Create an input DOM element
-    var input = inputDOM(x1+20,y1+10,elementName,"5","0.1","0.1","5");
+  // Create an input DOM element
+  var input = inputDOM(x1+20,y1+10,elementName,"5","0.1","0.1","5");
 
-    // Create an ouput node and set voltage from the DOM element
-    let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
-    node.state = input.value;
-    this.nodes = [ node ] ;     
-    this.output = function() {
-        this.nodes[0].state = input.value;
-        return true;
-    };
+  // Create an ouput node and set voltage from the DOM element
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  node.state = input.value;
+  this.nodes = [ node ] ;     
+  this.output = function() {
+    this.nodes[0].state = input.value;
+    return true;
+  };
 
-    // Delete the dom element
+  // Delete the dom element
     this.remove = function() {
       // Remove the DOM element
       var myElement = document.getElementById(elementName);
@@ -556,7 +577,8 @@ function VarVoltage(x1,y1) {
 
 // Comparator
 function Comparator(x1,y1) {
-  
+  this.x = x1;
+  this.y = y1;
   drawText(x1+120,y1+80,"V",12);
   drawText(x1+57,y1+31,"+");
   drawText(x1+57,y1+53,"\u2212");
@@ -593,7 +615,7 @@ function Comparator(x1,y1) {
   // Delete the dom element
   this.remove = function() {
   // Remove the DOM element
-    var myElement = document.getElementById(elementName);
+  var myElement = document.getElementById(elementName);
     myElement.remove();
   }
   
@@ -601,119 +623,125 @@ function Comparator(x1,y1) {
     
 // Create ADC
 function ADC(x1,y1) {
+  this.x = x1;
+  this.y = y1;
 
-    drawText(x1+22,y1+36,"in");
-    drawText(x1+boxWidth-60,y1+36,"uit");
-    drawText(x1+boxWidth-88,y1+12,"8");
-    drawText(x1+boxWidth-68,y1+12,"4");
-    drawText(x1+boxWidth-48,y1+12,"2");
-    drawText(x1+boxWidth-28,y1+12,"1");
-    drawConnection([x1+boxWidth-92, y1+30, x1+boxWidth-62, y1+30]);
-    drawConnection([x1+boxWidth-46, y1+30, x1+boxWidth-18, y1+30]);
+  drawText(x1+22,y1+36,"in");
+  drawText(x1+boxWidth-60,y1+36,"uit");
+  drawText(x1+boxWidth-88,y1+12,"8");
+  drawText(x1+boxWidth-68,y1+12,"4");
+  drawText(x1+boxWidth-48,y1+12,"2");
+  drawText(x1+boxWidth-28,y1+12,"1");
+  drawConnection([x1+boxWidth-92, y1+30, x1+boxWidth-62, y1+30]);
+  drawConnection([x1+boxWidth-46, y1+30, x1+boxWidth-18, y1+30]);
 
-    drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
-    this.output = function() { return true;};
-    let node4 = new InputNode( x1+25, y1+17 );
-    let node3 = new BinaryNode(x1+boxWidth-85, y1+17, node4, 3 );
-    let node2 = new BinaryNode(x1+boxWidth-65, y1+17, node4, 2 );
-    let node1 = new BinaryNode(x1+boxWidth-45, y1+17, node4, 1 );
-    let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
-    this.nodes = [ node4,node3,node2,node1,node0 ] ;
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
+  this.output = function() { return true;};
+  let node4 = new InputNode( x1+25, y1+17 );
+  let node3 = new BinaryNode(x1+boxWidth-85, y1+17, node4, 3 );
+  let node2 = new BinaryNode(x1+boxWidth-65, y1+17, node4, 2 );
+  let node1 = new BinaryNode(x1+boxWidth-45, y1+17, node4, 1 );
+  let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
+  this.nodes = [ node4,node3,node2,node1,node0 ] ;
 
-    this.remove = function() {};
+  this.remove = function() {};
 }
 
 // Create Counter
 function Counter(x1,y1) {
+  this.x = x1;
+  this.y = y1;
   
-    var r = new fabric.Rect({left: x1+120, top: y1+35, height: 50, width: 50, 
+  var r = new fabric.Rect({left: x1+120, top: y1+35, height: 50, width: 50, 
                            fill: 'lightgrey', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 1 });
-    canvas.add(r); r.sendToBack();  
+  canvas.add(r); r.sendToBack();  
 
-    drawText(x1+10,y1+14,"tel pulsen");
-    drawText(x1+10,y1+44,"tellen aan/uit");
-    drawText(x1+10,y1+74,"reset");
-    drawText(x1+2*boxWidth-103,y1+14,"8");
-    drawText(x1+2*boxWidth-78,y1+14,"4");
-    drawText(x1+2*boxWidth-53,y1+14,"2");
-    drawText(x1+2*boxWidth-28,y1+14,"1");
+  drawText(x1+10,y1+14,"tel pulsen");
+  drawText(x1+10,y1+44,"tellen aan/uit");
+  drawText(x1+10,y1+74,"reset");
+  drawText(x1+2*boxWidth-103,y1+14,"8");
+  drawText(x1+2*boxWidth-78,y1+14,"4");
+  drawText(x1+2*boxWidth-53,y1+14,"2");
+  drawText(x1+2*boxWidth-28,y1+14,"1");
 
-    drawConnection([x1+25, y1+20, x1+120, y1+20]);
-    drawConnection([x1+25, y1+50, x1+120, y1+50]);
-    drawConnection([x1+25, y1+80, x1+100, y1+80]);
-    drawConnection([x1+100, y1+80, x1+100, y1+50]);
+  drawConnection([x1+25, y1+20, x1+120, y1+20]);
+  drawConnection([x1+25, y1+50, x1+120, y1+50]);
+  drawConnection([x1+25, y1+80, x1+100, y1+80]);
+  drawConnection([x1+100, y1+80, x1+100, y1+50]);
 
-    drawConnection([x1+120, y1+30, x1+2*boxWidth-100, y1+30]);
-    drawConnection([x1+120, y1+33, x1+2*boxWidth-75, y1+33]);
-    drawConnection([x1+120, y1+36, x1+2*boxWidth-50, y1+36]);
-    drawConnection([x1+120, y1+39, x1+2*boxWidth-25, y1+39]);
-    drawConnection([x1+2*boxWidth-100, y1+30,x1+2*boxWidth-100, y1+20]);
-    drawConnection([x1+2*boxWidth-75, y1+33,x1+2*boxWidth-75, y1+20]);
-    drawConnection([x1+2*boxWidth-50, y1+36,x1+2*boxWidth-50, y1+20]);
-    drawConnection([x1+2*boxWidth-25, y1+39,x1+2*boxWidth-25, y1+20]);  
-    drawConnection([x1+85, y1+50, x1+2*boxWidth-75, y1+50]);
+  drawConnection([x1+120, y1+30, x1+2*boxWidth-100, y1+30]);
+  drawConnection([x1+120, y1+33, x1+2*boxWidth-75, y1+33]);
+  drawConnection([x1+120, y1+36, x1+2*boxWidth-50, y1+36]);
+  drawConnection([x1+120, y1+39, x1+2*boxWidth-25, y1+39]);
+  drawConnection([x1+2*boxWidth-100, y1+30,x1+2*boxWidth-100, y1+20]);
+  drawConnection([x1+2*boxWidth-75, y1+33,x1+2*boxWidth-75, y1+20]);
+  drawConnection([x1+2*boxWidth-50, y1+36,x1+2*boxWidth-50, y1+20]);
+  drawConnection([x1+2*boxWidth-25, y1+39,x1+2*boxWidth-25, y1+20]);  
+  drawConnection([x1+85, y1+50, x1+2*boxWidth-75, y1+50]);
 
-    drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
+  drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
 
-    this.counter = 0;
-    this.state = low;
+  this.counter = 0;
+  this.state = low;
     
-    let node4 = new InputNode( x1+25, y1+20 ); // count pulses
-    let node5 = new InputNode( x1+25, y1+50 ); // inhibit 
-    let node6 = new InputNode( x1+25, y1+80 ); // reset
+  let node4 = new InputNode( x1+25, y1+20 ); // count pulses
+  let node5 = new InputNode( x1+25, y1+50 ); // inhibit 
+  let node6 = new InputNode( x1+25, y1+80 ); // reset
 
-    // Create the binary output nodes
-    let node3 = new BinaryNodeS(x1+2*boxWidth-100, y1+20, 3 );
-    let node2 = new BinaryNodeS(x1+2*boxWidth-75, y1+20, 2 );
-    let node1 = new BinaryNodeS(x1+2*boxWidth-50, y1+20, 1 );
-    let node0 = new BinaryNodeS(x1+2*boxWidth-25, y1+20, 0 );
+  // Create the binary output nodes
+  let node3 = new BinaryNodeS(x1+2*boxWidth-100, y1+20, 3 );
+  let node2 = new BinaryNodeS(x1+2*boxWidth-75, y1+20, 2 );
+  let node1 = new BinaryNodeS(x1+2*boxWidth-50, y1+20, 1 );
+  let node0 = new BinaryNodeS(x1+2*boxWidth-25, y1+20, 0 );
 
-    // Draw the push button
-    canvas.add( makeButton(x1+100, y1+boxHeight-20, node6) );
+  // Draw the push button
+  canvas.add( makeButton(x1+100, y1+boxHeight-20, node6) );
     
-    this.textbox = new fabric.Textbox((this.counter).toString(), {
+  this.textbox = new fabric.Textbox((this.counter).toString(), {
         left: x1+2*boxWidth-50, top: y1+70, width: 60, fontSize: 44, textAlign: 'right',
         fill: 'red', backgroundColor: '#330000', fontFamily: 'Courier New',
         selectable: false, evented: false });
-    canvas.add(this.textbox);
+  canvas.add(this.textbox);
 
-    this.nodes = [ node6,node5,node4,node3,node2,node1,node0 ] ;
-    this.output = function() {
-        // reset counter (check button or reset node)
-        if( isHigh(node6.state) || isHigh(node6.eval()) ) { 
-          this.counter = 0;
-          this.textbox.text = (this.counter).toString();
-        } else {
-          // inhibit counter
-          if( node5.child && !isHigh(node5.eval()) ) {
-            this.state = low;
-            return true; 
-          }
-          var currentState = node4.eval();
-          if( isHigh(currentState) && isLow(this.state) ) {
-            this.state = high;
-            ++this.counter; // only count rising edge
-            if( this.counter == 16) this.counter = 0; // reset counter
-            this.textbox.text = (this.counter).toString();
-          }
-          if( isLow(currentState) && isHigh(this.state) ) { this.state = low;}
-        }
-        // update counters
-        this.nodes[3].counter = this.counter;
-        this.nodes[4].counter = this.counter;
-        this.nodes[5].counter = this.counter;
-        this.nodes[6].counter = this.counter;
-        return true;
-    };
+  this.nodes = [ node6,node5,node4,node3,node2,node1,node0 ] ;
+  this.output = function() {
+    // reset counter (check button or reset node)
+    if( isHigh(node6.state) || isHigh(node6.eval()) ) { 
+      this.counter = 0;
+      this.textbox.text = (this.counter).toString();
+    } else {
+      // inhibit counter
+      if( node5.child && !isHigh(node5.eval()) ) {
+        this.state = low;
+        return true; 
+      }
+      var currentState = node4.eval();
+      if( isHigh(currentState) && isLow(this.state) ) {
+        this.state = high;
+        ++this.counter; // only count rising edge
+        if( this.counter == 16) this.counter = 0; // reset counter
+        this.textbox.text = (this.counter).toString();
+      }
+      if( isLow(currentState) && isHigh(this.state) ) { this.state = low;}
+    }
+    // update counters
+    this.nodes[3].counter = this.counter;
+    this.nodes[4].counter = this.counter;
+    this.nodes[5].counter = this.counter;
+    this.nodes[6].counter = this.counter;
+    return true;
+  };
   
-    this.remove = function() {};
+  this.remove = function() {};
 }
 
 
 
 // Create light bulb 
 function Lightbulb(x1,y1) {
+  this.x = x1;
+  this.y = y1;
 
   var imgElementOn = document.getElementById('lighton');
   this.imgBulbOn = new fabric.Image(imgElementOn, {
@@ -731,67 +759,6 @@ function Lightbulb(x1,y1) {
   canvas.add(this.imgBulbOff);  
   this.imgBulbOff.sendToBack();
             
-  //canvas.remove(this.imgBulbOff);
-  //canvas.add(this.imgBulbOn);
-  //this.imgBulbOn.sendToBack();
-
-  //var image;// = new Image();
-  //var myImg = [];//null;
-
-  /*var img = new fabric.Image(image, {left: x1, top: y1,});
-  image.src = 'img/pic_bulbon.gif';
-  canvas.add(img);
-  img.sendToBack;
-*/
-  
-  /*fabric.Image.fromURL('img/pic_bulboff.gif', function(img) {
-    img.scale(0.5).set({ left: x1, top: y1,});
-    //img.setSrc('img/pic_bulbon.gif');
-
-    img.getElement().id = "bla";
-    img.getElement().name = "bla";
-
-    //canvas.setActiveObject(img);
-    //myImg= canvas.getActiveObject();
-    //myImg.push( canvas.getActiveObject());
-    //image = new fabric.Image(img.getElement());
-    canvas.add(img);
-    img.sendToBack;
-  });
-
-  canvas.renderAll();
-
-
-  image = document.getElementById("bla");
-  //image = document.getElementsByTagName("IMG")[0];
-
-  image.src = 'img/pic_bulbon.gif';
-*/
-  
-  /*var imgObj = new Image();
-  imgObj.src = "img/pic_bulboff.gif";
-  imgObj.onload = function () 
-  {
-    var image = new fabric.Image(imgObj);
-    image.set({ left: x1, top: y1,
-    });
-  }*/
-  //canvas.add(imgObj);
-
-  //myImg[0].set = {left: 100};
-  /*var objs = canvas.getObjects();
-  if (objs.length) {
-       objs.forEach(function(e) {
-         if (e && e.type === 'image') {         
-           e._element.src = 'img/pic_bulbon.gif';
-           canvas.renderAll();
-         }
-       });
-  }*/
-  //this.changeSrc();
-  //image.src = 'img/pic_bulbon.gif';
-  //img.setSrc('img/pic_bulbon.gif');
-  //image.getElement().setSrc('img/pic_bulbon.gif');
 
   this.state = false;
   var isHV = true;
@@ -825,6 +792,9 @@ function Lightbulb(x1,y1) {
 
 // Create relais with its nodes
 function Relais(x1,y1) {
+  this.x = x1;
+  this.y = y1;
+
   // Draw symbols and wires
   drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
   var r = new fabric.Rect({left: x1+25, top: y1+0.5*boxHeight, width: 20, height: 10, 
@@ -864,7 +834,8 @@ function removeElements() {
   canvas.clear();
   for (i = 0; i < elements.length; i++) { 
     elements[i].remove();
-  } 
+  }
+  elements = [];
 }
 
 
@@ -978,11 +949,12 @@ canvas.on('object:moved', function(e) {
 // Add listener for uploading files
 var control = document.getElementById("fileinput");
 control.addEventListener("change", function(event) {
-  //document.getElementById("bla").innerHTML = control.value;  
   let files = control.files;
   //Use createObjectURL, this should address any CORS issues.
   let filePath = URL.createObjectURL(files[0]);
   readFile(filePath);
+  // Reset the file input such that it triggers next change
+  control.value = '';
 });
 
 function readFile(url) {
@@ -999,31 +971,46 @@ function readFile(url) {
 
 function parseFile(xml) {
   removeElements();
-  var i;
+  var i,j;
   var xmlDoc = xml.responseXML;
-  var table = "";
   var x = xmlDoc.getElementsByTagName("systeembord");
-  for (i = 0; i <x.length; i++) { 
-    //table += "Found element</br>";
-    var domElements = x[i].getElementsByTagName("element");
+  var domElements = x[0].getElementsByTagName("element");
 
-    for (j = 0; j < domElements.length; j++) { 
-      //table += domElements[j].childNodes[0].nodeValue; 
-      var className = domElements[j].getAttribute('name');
-      /*table += className + ' ';
-      table += 'x=' + domElements[j].getAttribute('x') + ' ';
-      table += 'y=' + domElements[j].getAttribute('y') + ' </br>';*/
+  for (i = 0; i < domElements.length; i++) { 
+    var className = domElements[i].getAttribute('name');
      
-      var x = parseInt(domElements[j].getAttribute('x')); 
-      var y = parseInt( domElements[j].getAttribute('y'));
-      //var z= x + y;
-      //table += 'z=' + z + ' </br>';
-      addElement(className,x,y) 
-    }
-    
+    var x = parseInt( domElements[i].getAttribute('x')); 
+    var y = parseInt( domElements[i].getAttribute('y'));
+    addElement(className,x,y); 
+  }    
+  //}
+  
+  // Second loop to add the links
+  for (i = 0; i < domElements.length; i++) { 
+    var domLinks = domElements[i].getElementsByTagName("link");
+    for (j = 0; j < domLinks.length; j++) { 
+      var iNode = parseInt( domLinks[j].getAttribute('id')); 
+      var iToElement = parseInt( domLinks[j].getAttribute('toElement')); 
+      var iToNode = parseInt( domLinks[j].getAttribute('toNode')); 
+      
+      // Update drawing of wire
+      var node = elements[i].nodes[iNode];
+      var toNode = elements[iToElement].nodes[iToNode];
+      var wire = toNode.wire; 
+      wire.connection = node;
+      wire.bringToFront();
+      wire.set({ 'left': node.x1, 'top' : node.y1 } );
+      wire.setCoords();
+      wire.line1.set({ 'x2': node.x1, 'y2': node.y1 });
 
+      // Create extra wire for output node
+      toNode.wire = makeWire(toNode.x1,toNode.y1,toNode,toNode.isHV);
+
+      // Set the link in the right element
+      node.child = toNode;
+    }
   }
-  //document.getElementById("demo").innerHTML = table;
+  
 }
 
 
@@ -1074,8 +1061,118 @@ function addElement(className,x1,y1){
     case "Lightbulb" :
       elements.push(new Lightbulb(x1,y1));
     break;
-  }    
-
+  } 
 }
+
+// Add listener for download button
+document.getElementById("download_xml").addEventListener("click", function(){
+   download( document.getElementById("xml_filename").value, createXmlFile());
+}, false);
+
+// Create an invisible download element
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+}
+
+// Write the xml file
+function createXmlFile(){
+  var xmlDoc = document.implementation.createDocument(null,"systeembord");
+  x = xmlDoc.getElementsByTagName("systeembord")[0];
+  for (var i = 0; i < elements.length; i++) { 
+    var newElement = xmlDoc.createElement("element");
+
+    var attName = xmlDoc.createAttribute("name");
+    attName.nodeValue = elements[i].constructor.name;
+    newElement.setAttributeNode(attName);
+
+    var attPosX = xmlDoc.createAttribute("x");
+    attPosX.nodeValue = elements[i].x.toString();
+    newElement.setAttributeNode(attPosX);
+
+    var attPosY = xmlDoc.createAttribute("y");
+    attPosY.nodeValue = elements[i].y.toString();
+    newElement.setAttributeNode(attPosY);
+
+    x.appendChild(newElement);
+    for (var j = 0; j < elements[i].nodes.length; j++) {
+
+      var thisNode = elements[i].nodes[j];
+      if( thisNode.isInput && thisNode.child ) {
+        var newLink = xmlDoc.createElement("link");
+
+        var attLinkID = xmlDoc.createAttribute("id");
+        attLinkID.nodeValue = j.toString();
+        newLink.setAttributeNode(attLinkID);
+
+        // find to which link this node points
+        var toElementNode = findLink( thisNode.child );
+        
+        var attToElement = xmlDoc.createAttribute("toElement");
+        attToElement.nodeValue = toElementNode[0].toString();
+        newLink.setAttributeNode(attToElement);
+
+        var attToElement = xmlDoc.createAttribute("toNode");
+        attToElement.nodeValue = toElementNode[1].toString();
+        newLink.setAttributeNode(attToElement);
+
+        newElement.appendChild(newLink);
+      }
+    }
+    
+  } 
+
+  var serializer = new XMLSerializer();
+  var xmlString = serializer.serializeToString(xmlDoc);
+  return formatXml( xmlString );
+
+}  
+
+function findLink(thisNode) {
+  for (var i = 0; i < elements.length; i++) { 
+    for (var j = 0; j < elements[i].nodes.length; j++) {
+      if( thisNode == elements[i].nodes[j] ) return [i,j];
+    }
+  }
+  return [-1.-1];
+}
+
+
+function formatXml(xml) {
+    var formatted = '';
+    var reg = /(>)(<)(\/*)/g;
+    xml = xml.replace(reg, '$1\r\n$2$3');
+    var pad = 0;
+    jQuery.each(xml.split('\r\n'), function(index, node) {
+        var indent = 0;
+        if (node.match( /.+<\/\w[^>]*>$/ )) {
+            indent = 0;
+        } else if (node.match( /^<\/\w/ )) {
+            if (pad != 0) {
+                pad -= 1;
+            }
+        } else if (node.match( /^<\w[^>]*[^\/]>.*$/ )) {
+            indent = 1;
+        } else {
+            indent = 0;
+        }
+
+        var padding = '';
+        for (var i = 0; i < pad; i++) {
+            padding += '  ';
+        }
+
+        formatted += padding + node + '\r\n';
+        pad += indent;
+    });
+
+    return formatted;
+}
+
 
 
