@@ -22,13 +22,11 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 
 ## Wish list
 
-- Toevoegen van relais.
 - Toevoegen van combinatie: virtuele lichtsensor met lamp (lamp via relais).
 - Toevoegen van combinatie: virtuele temperatuursensor met heater (heater via relais). 
 - Toevoegen van geluidssensor via de ingebouwde microfoon.
 - Toevoegen van echte sensoren via USB.
-- Zelf configureren van de componenten.
-- Opslaan van schakelingen.
+- Zelf configureren van de componenten door te slepen.
 
 ## License and credits
 
