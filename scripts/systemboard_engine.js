@@ -281,28 +281,30 @@ function drawConnection(coords){
   line.sendToBack();
 }
 
-// Draw the board plus text
-function Board(x1,y1) {
-  this.x = x1;
-  this.y = y1;
   function drawHeader(x1,y1,text) {
     // Draw text in box
     var textbox = new fabric.Textbox(text, { left: x1, top: y1, width: 150,
                                            fontSize: 16, textAlign: 'center', fontFamily:'Arial',
                                            selectable: false, evented: false });
-    canvas.setBackgroundImage(textbox);
+    //canvas.setBackgroundImage(textbox);
+    return textbox;
   }
 
-  // Draw the headers
-  drawHeader(x1+85, y1+16,"INVOER");
-  drawHeader(x1+320, y1+16,"VERWERKING");
-  drawHeader(x1+555, y1+16,"UITVOER");
-  
-  // Draw box
-  var r = new fabric.Rect({left: x1+320, top: y1+242, width: 640, height: 474, 
+// Draw the board plus text
+function Board(x1,y1) {
+  this.x = x1;
+  this.y = y1;
+
+  var r = new fabric.Rect({left: 0, top: 0, width: 640, height: 474, 
+                           originX: 'left', originY: 'top',
                            fill: 'lightgrey', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 2   });
-  canvas.setBackgroundImage(r);
+  var group = new fabric.Group([ r, drawHeader(80, 11,"INVOER"),
+                                 drawHeader(316, 11,"VERWERKING"),
+                                 drawHeader(550, 11, "UITVOER") ], 
+                               {left: x1, top: y1+5, originX: 'left', originY: 'top'});
+  canvas.setBackgroundImage(group);
+  
   // Dummy functions
   this.nodes = [];
   this.output = function() { };
@@ -769,6 +771,47 @@ function Counter(x1,y1) {
 }
 
 
+// Create relais with its nodes
+function Relais(x1,y1) {
+  this.x = x1;
+  this.y = y1;
+
+  // Draw symbols and wires
+  drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
+  var r = new fabric.Rect({left: x1+25, top: y1+0.5*boxHeight, width: 20, height: 10, 
+                             fill: 'lightgrey', selectable: false, evented: false,
+                             stroke: 'black', strokeWidth: 1   });   
+  canvas.add(r); r.sendToBack();
+  var textbox = new fabric.Textbox("~", { left: x1+boxWidth-50, top: y1+25, width: 20,
+                                          fontSize: 20, textAlign: 'center', fontFamily:'Arial',
+                                          selectable: false, evented: false });
+  canvas.add(textbox)
+  textbox.sendToBack();
+  var circ = new fabric.Circle({left: x1+boxWidth-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
+                                radius: 10, fill: 'lightgrey', selectable: false, evented: false});
+  canvas.add(circ);
+  circ.sendToBack();
+  drawConnection([x1+25, y1+25, x1+25, y1+boxHeight-25]);
+  drawConnection([x1+20, y1+boxHeight-25, x1+30, y1+boxHeight-25]);
+  drawConnection([x1+25, y1+0.5*boxHeight, x1+boxWidth-70, y1+0.5*boxHeight]);  
+  drawConnection([x1+boxWidth-25, y1+25, x1+boxWidth-25, y1+boxHeight-25]);
+  drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-75, y1+40]);
+  drawConnection([x1+boxWidth-65, y1+40, x1+boxWidth-75, y1+60]);
+  drawConnection([x1+boxWidth-75, y1+60, x1+boxWidth-75, y1+boxHeight-25]);
+  drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-25, y1+25]);
+
+  this.output = function() {return true;};
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
+  let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
+  this.nodes = [ node1, node2, node3 ] ;
+  drawConnectors([this.nodes[0]], "white");
+  drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
+
+  this.remove = function() {};
+
+}
+
 
 // Create light bulb 
 function Lightbulb(x1,y1) {
@@ -821,47 +864,31 @@ function Lightbulb(x1,y1) {
 
 }
 
-
-// Create relais with its nodes
-function Relais(x1,y1) {
+// Light sensor
+function LightSensor(x1,y1) {
   this.x = x1;
   this.y = y1;
-
-  // Draw symbols and wires
-  drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
-  var r = new fabric.Rect({left: x1+25, top: y1+0.5*boxHeight, width: 20, height: 10, 
-                             fill: 'lightgrey', selectable: false, evented: false,
-                             stroke: 'black', strokeWidth: 1   });   
-  canvas.add(r); r.sendToBack();
-  var textbox = new fabric.Textbox("~", { left: x1+boxWidth-50, top: y1+25, width: 20,
-                                          fontSize: 20, textAlign: 'center', fontFamily:'Arial',
-                                          selectable: false, evented: false });
-  canvas.add(textbox)
-  textbox.sendToBack();
-  var circ = new fabric.Circle({left: x1+boxWidth-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
-                                radius: 10, fill: 'lightgrey', selectable: false, evented: false});
+  
+  //drawText(x1+70,y1+30,"V",12);
+  
+  var circ = new fabric.Circle({left: x1-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
+                                radius: 10, fill: 'green', selectable: false, evented: true});
   canvas.add(circ);
   circ.sendToBack();
-  drawConnection([x1+25, y1+25, x1+25, y1+boxHeight-25]);
-  drawConnection([x1+20, y1+boxHeight-25, x1+30, y1+boxHeight-25]);
-  drawConnection([x1+25, y1+0.5*boxHeight, x1+boxWidth-70, y1+0.5*boxHeight]);  
-  drawConnection([x1+boxWidth-25, y1+25, x1+boxWidth-25, y1+boxHeight-25]);
-  drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-75, y1+40]);
-  drawConnection([x1+boxWidth-65, y1+40, x1+boxWidth-75, y1+60]);
-  drawConnection([x1+boxWidth-75, y1+60, x1+boxWidth-75, y1+boxHeight-25]);
-  drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-25, y1+25]);
+  
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ; 
+  
+  drawConnectors(this.nodes, "yellow");
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'lichtsensor');
+ 
+  // Set voltage 
+  node.state = low;
+  this.output = function() { return true; };
+  this.remove = function() { };
+}    
 
-  this.output = function() {return true;};
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
-  let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
-  this.nodes = [ node1, node2, node3 ] ;
-  drawConnectors([this.nodes[0]], "white");
-  drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
 
-  this.remove = function() {};
-
-}
 
 function removeElements() {
   canvas.clear();
