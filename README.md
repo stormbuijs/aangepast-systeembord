@@ -13,10 +13,12 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 
 ## Beknopte instructie
 
-- Verbindingssnoeren maken: Klik op een rode cirkel en sleep het naar een andere cirkel.
-- Verbindingssnoeren verwijderen: Klik op een rode cirkel van een verbinding en sleep het terug.
-- Meerdere verbindingssnoeren: Een uitgang kan met meerdere ingangen worden verbonden. De snoeren moeten dan wel van de ingang naar de uitgang worden getrokken.
+- Verbindingssnoeren maken: De snoeren moeten van een uitgang naar ingang worden getrokken. Klik op een uitgang (rode cirkel) en sleep het snoer naar een (grijze) ingang.
+- Meerdere verbindingssnoeren: Een uitgang kan met meerdere ingangen worden verbonden.
+- Verbindingssnoeren verwijderen: Sleep het snoer weg van de ingang.
 - Drukschakelaar: Met een klik-sleep kan de schakelaar worden vastgezet.
+- Relais: De relais is al aangesloten op een wisselspanningbron. De zwarte uitgangen kunnen worden verbonden met de lamp.
+- Sensor: De LDR kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat.
 - Zoemer: Er zit een vertraging in de zoemer van een halve seconde. In iOS/Safari moet je eerst de zoemer handmatig initialiseren door op de play button te drukken (zie deze [discussie](https://stackoverflow.com/questions/12804028/safari-with-audio-tag-not-working)).
 - Meer informatie: Zie de [handleiding](http://www.cma-science.nl/resources/nl/practicum/b0020.pdf) van het systeembord.
 
