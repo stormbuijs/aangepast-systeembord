@@ -30,33 +30,37 @@
           <canvas id="c" width="900" height="500" style="border:1px solid #ccc">
           Your browser does not support HTML5 Canvas.
           </canvas>
-        </div>    
-      </div>
-        <div class="column">
-                    
-
+        </div>
+        <div>
+          <br/>
           <input id="fileinput" type="file" style="display: none;">
           <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
           <input id="download_xml" type="button" value="Sla op (download) als:">
           <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
-
-          <div id="demo"/>
-
+        </div>
+      </div>
+      <div class="column">
           <h3>Beknopte instructie:</h3>
 <ul> 
   <li><b>Verbindingssnoeren maken:</b><br/>
-  Klik op een rode cirkel en sleep het naar een andere cirkel.</li>
-  <li><b>Verbindingssnoeren verwijderen:</b><br/>
-  Klik op een rode cirkel van een verbinding en sleep het terug.</li>
+    De snoeren moeten van een uitgang naar ingang worden getrokken. </br>
+    Klik op een uitgang (rode cirkel) en sleep het snoer naar </br>een (grijze) ingang.</li>
   <li><b>Meerdere verbindingssnoeren:</b><br/>
-  Een uitgang kan met meerdere ingangen worden verbonden.</br>
-  De snoeren moeten dan wel van de ingang naar de uitgang worden getrokken.</li>
+    Een uitgang kan met meerdere ingangen worden verbonden.</li>
+  <li><b>Verbindingssnoeren verwijderen:</b><br/>
+    Sleep het snoer weg van de ingang.</li>
   <li><b>Drukschakelaar:</b><br/>
-  Met een klik-sleep kan de schakelaar worden vastgezet.</li>
+    Met een klik-sleep kan de schakelaar worden vastgezet.</li>
+  <li><b>Relais:</b><br/>
+    De relais is al aangesloten op een wisselspanningbron.</br>
+    De zwarte uitgangen kunnen worden verbonden met de lamp.</li>
+  <li><b>Sensor:</b><br/>
+    De LDR kan worden gesleept. De spanning is afhankelijk van </br>
+    de afstand tot de lamp, wanneer die aan staat.</li>
   <li><b>Zoemer:</b><br/>
-  Er zit een vertraging in de zoemer van een halve seconde.</br>
-  In iOS/Safari moet je vaak eerst de zoemer handmatig initialiseren,</br>
-  door hieronder op play te klikken.</br>
+    Er zit een vertraging in de zoemer van een halve seconde.</br>
+    In iOS/Safari moet je vaak eerst de zoemer handmatig initialiseren,</br>
+    door hieronder op play te klikken.</br>
     <audio id="myAudio" controls preload="auto" style="width: 200px">
       <source src="audio/beep440Hz.ogg" type="audio/ogg">
       <source src="audio/beep440Hz.mp3" type="audio/mpeg">

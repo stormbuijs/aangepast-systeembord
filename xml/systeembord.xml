@@ -15,17 +15,16 @@
   <element name="NOTPort" x="220" y="325"/>
   <element name="NOTPort" x="370" y="325"/>
   <element name="Counter" x="220" y="375"/>
-  <element name="LED" x="530" y="25"/> 
-  <element name="LED" x="530" y="75"/> 
-  <element name="LED" x="530" y="125"/> 
+  <element name="LED" x="530" y="25"/>
+  <element name="LED" x="530" y="75"/>
+  <element name="LED" x="530" y="125"/>
   <element name="LED" x="530" y="175"/>
   <element name="LED" x="530" y="225"/>
   <element name="LED" x="530" y="275"/>
   <element name="Sound" x="530" y="325"/>
   <element name="Relais" x="530" y="375"/>
   <element name="Lightbulb" x="750" y="375"/>
-
-  <element name="VarVoltage" x="60" y="25"/>
+  <element name="LightSensor" x="60" y="25"/>
   <element name="VarVoltage" x="60" y="75"/>
   <element name="Switch" x="60" y="125"/>
 </systeembord>

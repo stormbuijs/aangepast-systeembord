@@ -6,19 +6,19 @@ function invert(x) {return isHigh(x) ? low : high; };
 
 var clockPeriod = 50; // time between evaluate-calls (speed of the engine)
 
+var snapTolerance = 12;
+
 // Sizes of the elements
 var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
   
 // Create canvas
-var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, 
-                                                     /*backgroundColor: 'lightgrey',*/ });
+var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
-
 
 
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
-    var c = new fabric.Circle({left: left, top: top, radius: 5, fill: color});
+    var c = new fabric.Circle({left: left, top: top, radius: 3, fill: color, padding: 7});
     c.hasControls = c.hasBorders = false;
     c.name = "wire";
     c.line1 = line1;
@@ -35,9 +35,9 @@ function makeLine(coords, color) {
 
 // Make wire (= movable circle + line + fixed circle)
 function makeWire(x1,y1,node,isHV=false) { 
-  var color = isHV ? 'black' : '#dd0000';
-  var circ = new fabric.Circle({left: x1, top: y1, strokeWidth: 0, stroke: 'black' , radius: 5, 
-                                fill: color, selectable: false, evented: false});
+  var color = isHV ? '#444444' : '#dd0000';
+  var circ = new fabric.Circle({left: x1, top: y1, radius: 3, fill: color, 
+                                selectable: false, evented: false});
   canvas.add(circ);
   var line = makeLine([ x1, y1, x1, y1 ],color);
   canvas.add( line );
@@ -45,21 +45,33 @@ function makeWire(x1,y1,node,isHV=false) {
   canvas.add( endCircle );
   return endCircle;
 }
-  
+
+function drawConnectors(nodes,color) {
+  for(var i=0; i<nodes.length; ++i) {
+    var circ = new fabric.Circle({left: nodes[i].x1, top: nodes[i].y1, strokeWidth: 4, 
+                                  stroke: color , radius: 5, 
+                                  fill: "darkgrey", selectable: false, evented: false});
+    canvas.add(circ);
+    circ.sendToBack();
+  }
+}
+
 // Set nice-looking gradients for buttons
 var gradientButtonUp = { x1: -10, y1: -10, x2: 20, y2: 20,
                          colorStops: { 0: 'white', 1: '#333333' }};
 var gradientButtonDw = { x1: -10, y1: -10, x2: 22, y2: 22,
                          colorStops: { 0: '#333333', 1: 'white' }};
 
-// Make a push button
-function makeButton(left, top, node){
-    var c = new fabric.Circle({left: left, top: top, strokeWidth: 3, stroke: 'grey', radius: 10,
-                               fill: '#222222', selectable: false });
-    c.setGradient('stroke', gradientButtonUp );
-    c.name = "button";
-    c.node = node;
-    return c;
+// Draw a push button
+function drawButton(left, top, node){
+  var c = new fabric.Circle({left: left, top: top, strokeWidth: 3, stroke: 'grey', radius: 10,
+                             fill: '#222222', selectable: false });
+  c.setGradient('stroke', gradientButtonUp );
+  c.name = "button";
+  c.node = node;
+  canvas.add(c);
+  c.sendToBack();
+  //  return c;
 }    
   
 // Generic input node (has a child to follow)
@@ -71,7 +83,7 @@ function InputNode(x1,y1, isHV=false) {
     this.eval = function() { return (this.child) ? this.child.eval() : false ; };
     this.isInput = true;
     this.isHV = isHV;
-    this.wire = makeWire(x1,y1,this,isHV);
+    //this.wire = makeWire(x1,y1,this,isHV);
 }
 
 // Generic output node (has a state=voltage)
@@ -326,20 +338,16 @@ function Board(x1,y1) {
   this.remove = function() { };
 }
 
-function drawConnectors(nodes,color) {
-  for(var i=0; i<nodes.length; ++i) {
-    var circ = new fabric.Circle({left: nodes[i].x1, top: nodes[i].y1, strokeWidth: 4, stroke: color , radius: 6, 
-                                  fill: "transparent", selectable: false, evented: false});
-    canvas.add(circ);
-    circ.sendToBack();
-    //canvas.setBackgroundImage(circ);
-  }
-}
-
 // Create AND port with its nodes
 function ANDPort(x1,y1) {
   this.x = x1;
   this.y = y1;
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+  let node3 = new ANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
+  this.nodes = [ node1, node2 , node3 ] ;
+  drawConnectors(this.nodes, "blue");
+
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "&");
   drawConnection([x1+0.5*boxWidth, y1+0.5*boxHeight, x1+boxWidth-25, y1+0.5*boxHeight]);
@@ -347,11 +355,6 @@ function ANDPort(x1,y1) {
   drawConnection([x1+25, y1+40, x1+0.5*boxWidth, y1+40]);
   drawConnection([x1+25, y1+boxHeight-25, x1+25, y1+boxHeight-40]);
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new InputNode(x1+25, y1+boxHeight-25 );
-  let node3 = new ANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
-  this.nodes = [ node1, node2 , node3 ] ;
-  drawConnectors(this.nodes, "blue");
 
   drawElementBox(x1,y1,boxWidth,boxHeight,'EN-poort');
     
@@ -363,6 +366,13 @@ function ANDPort(x1,y1) {
 function ORPort(x1,y1) {
   this.x = x1;
   this.y = y1;
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+  let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
+  this.output = function() { return true; };
+  this.nodes = [ node1, node2 , node3 ] ;
+  drawConnectors(this.nodes, "blue");
+
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "\u22651");
   drawConnection([x1+0.5*boxWidth, y1+0.5*boxHeight, x1+boxWidth-25, y1+0.5*boxHeight]);
@@ -370,12 +380,6 @@ function ORPort(x1,y1) {
   drawConnection([x1+25, y1+40, x1+0.5*boxWidth, y1+40]);
   drawConnection([x1+25, y1+boxHeight-25, x1+25, y1+boxHeight-40]);
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new InputNode(x1+25, y1+boxHeight-25 );
-  let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
-  this.output = function() { return true; };
-  this.nodes = [ node1, node2 , node3 ] ;
-  drawConnectors(this.nodes, "blue");
   drawElementBox(x1,y1,boxWidth,boxHeight,'OF-poort');
   this.remove = function() { };
 }
@@ -384,15 +388,16 @@ function ORPort(x1,y1) {
 function NOTPort(x1,y1) {
   this.x = x1;
   this.y = y1;
+  let node1 = new InputNode(x1+25, y1+0.5*boxHeightSmall );
+  let node2 = new NOTNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, node1);
+  this.nodes = [ node1, node2 ] ;     
+  drawConnectors(this.nodes, "blue");
+
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1-7+0.5*boxHeightSmall, "1");
   drawConnection([x1+25, y1+0.5*boxHeightSmall, x1+boxWidth-25, y1+0.5*boxHeightSmall]);
   drawConnection([x1+15+0.5*boxWidth, y1-5+0.5*boxHeightSmall, 
                   x1+20+0.5*boxWidth, y1+0.5*boxHeightSmall]);
-  let node1 = new InputNode(x1+25, y1+0.5*boxHeightSmall );
-  let node2 = new NOTNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, node1);
-  this.nodes = [ node1, node2 ] ;     
-  drawConnectors(this.nodes, "blue");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'invertor');
   this.output = function() { return true; };
   this.remove = function() { };
@@ -402,6 +407,12 @@ function NOTPort(x1,y1) {
 function Memory(x1,y1) {
   this.x = x1;
   this.y = y1;
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+  let node3 = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeight);
+  this.nodes = [ node1, node2, node3 ] ;     
+  drawConnectors(this.nodes, "blue");
+
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "M");
   drawConnection([x1+0.5*boxWidth, y1+0.5*boxHeight, x1+boxWidth-25, y1+0.5*boxHeight]);
@@ -411,11 +422,6 @@ function Memory(x1,y1) {
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
   drawText(x1+35,y1+31,"set");
   drawText(x1+35,y1+boxHeight-19,"reset");
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new InputNode(x1+25, y1+boxHeight-25 );
-  let node3 = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeight);
-  this.nodes = [ node1, node2, node3 ] ;     
-  drawConnectors(this.nodes, "blue");
   drawElementBox(x1,y1,boxWidth,boxHeight,'geheugencel');
   this.output = function() { 
     if( isHigh(node2.eval()) ) this.nodes[2].state = low;
@@ -430,17 +436,18 @@ function LED(x1,y1) {
   this.x = x1;
   this.y = y1;
     
+  this.nodes = [ new InputNode(x1+25, y1+20 ) ] ;    
+  drawConnectors(this.nodes, "white");
+
   // Draw LED
   var c = new fabric.Circle({left: x1+boxWidth-25, top: y1+20, radius: 5, 
                              fill: 'darkred', selectable: false, evented: false,
                              stroke: 'black', strokeWidth: 2   });
   c.setGradient('stroke', gradientButtonDw );
   canvas.add(c);
+  c.sendToBack();
 
-  this.nodes = [ new InputNode(x1+25, y1+20 ) ] ;    
-  drawConnectors(this.nodes, "white");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
-
 
   // Control LED behaviour
   this.output = function() {
@@ -460,7 +467,10 @@ function LED(x1,y1) {
 function Sound(x1,y1) {
   this.x = x1;
   this.y = y1;
-  
+  this.nodes = [ new InputNode(x1+25, y1+0.5*boxHeightSmall) ] ;    
+
+  drawConnectors(this.nodes, "white");
+
   // Draw speaker
   var c1 = new fabric.Path('M '+(x1+130).toString()+' '+(y1+15).toString()+' Q '+
                            (x1+135).toString()+', '+(y1+25).toString()+', '+
@@ -485,9 +495,6 @@ function Sound(x1,y1) {
                            stroke: 'black', strokeWidth: 1 });
   canvas.add(t); t.sendToBack();     
   
-  this.nodes = [ new InputNode(x1+25, y1+0.5*boxHeightSmall) ] ;    
-
-  drawConnectors(this.nodes, "white");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
   this.audio = document.getElementById("myAudio"); 
@@ -518,9 +525,9 @@ function Switch(x1,y1) {
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;
   drawConnectors(this.nodes, "yellow");
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
   // Draw the push button
-  canvas.add( makeButton(x1+25, y1+0.5*boxHeightSmall, node) );
+  drawButton(x1+25, y1+0.5*boxHeightSmall, node);
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
   this.remove = function() { };
 }
 
@@ -631,17 +638,18 @@ function Comparator(x1,y1) {
   canvas.add(r);
   r.sendToBack();  
   
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
+  this.nodes = [ node1, node2 ] ;     
+
+  drawConnectors(this.nodes, "blue");
+
   drawConnection([x1+25, y1+25, x1+60, y1+25]);
   drawConnection([x1+60, y1+35, x1+boxWidth-25, y1+35]);
   drawConnection([x1+40, y1+45, x1+60, y1+45]);
   drawConnection([x1+40, y1+45, x1+40, y1+70]);
   drawConnection([x1+40, y1+70, x1+70, y1+70]);
 
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
-  this.nodes = [ node1, node2 ] ;     
-
-  drawConnectors(this.nodes, "blue");
   drawElementBox(x1,y1,boxWidth,boxHeight,'comparator');
     
   // Create unique element ID
@@ -671,6 +679,16 @@ function ADC(x1,y1) {
   this.x = x1;
   this.y = y1;
 
+  this.output = function() { return true;};
+  let node4 = new InputNode( x1+25, y1+17 );
+  let node3 = new BinaryNode(x1+boxWidth-85, y1+17, node4, 3 );
+  let node2 = new BinaryNode(x1+boxWidth-65, y1+17, node4, 2 );
+  let node1 = new BinaryNode(x1+boxWidth-45, y1+17, node4, 1 );
+  let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
+  this.nodes = [ node4,node3,node2,node1,node0 ] ;
+  drawConnectors(this.nodes.slice(1,5), "yellow");
+  drawConnectors([this.nodes[0]], "white");
+
   drawText(x1+22,y1+36,"in");
   drawText(x1+boxWidth-60,y1+36,"uit");
   drawText(x1+boxWidth-88,y1+12,"8");
@@ -680,16 +698,6 @@ function ADC(x1,y1) {
   drawConnection([x1+boxWidth-92, y1+30, x1+boxWidth-62, y1+30]);
   drawConnection([x1+boxWidth-46, y1+30, x1+boxWidth-18, y1+30]);
 
-  this.output = function() { return true;};
-  let node4 = new InputNode( x1+25, y1+17 );
-  let node3 = new BinaryNode(x1+boxWidth-85, y1+17, node4, 3 );
-  let node2 = new BinaryNode(x1+boxWidth-65, y1+17, node4, 2 );
-  let node1 = new BinaryNode(x1+boxWidth-45, y1+17, node4, 1 );
-  let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
-  this.nodes = [ node4,node3,node2,node1,node0 ] ;
-
-  drawConnectors(this.nodes.slice(1,5), "yellow");
-  drawConnectors([this.nodes[0]], "white");
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
   
   this.remove = function() {};
@@ -700,6 +708,21 @@ function Counter(x1,y1) {
   this.x = x1;
   this.y = y1;
   
+  let node4 = new InputNode( x1+25, y1+20 ); // count pulses
+  let node5 = new InputNode( x1+25, y1+50 ); // inhibit 
+  let node6 = new InputNode( x1+25, y1+80 ); // reset
+
+  // Create the binary output nodes
+  let node3 = new BinaryNodeS(x1+2*boxWidth-100, y1+20, 3 );
+  let node2 = new BinaryNodeS(x1+2*boxWidth-75, y1+20, 2 );
+  let node1 = new BinaryNodeS(x1+2*boxWidth-50, y1+20, 1 );
+  let node0 = new BinaryNodeS(x1+2*boxWidth-25, y1+20, 0 );
+  this.nodes = [ node6,node5,node4,node3,node2,node1,node0 ] ;
+  // Draw the push button
+  drawButton(x1+100, y1+boxHeight-20, node6) ;
+ 
+  drawConnectors(this.nodes, "blue");
+
   var r = new fabric.Rect({left: x1+120, top: y1+35, height: 50, width: 50, 
                            fill: 'lightgrey', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 1 });
@@ -730,28 +753,14 @@ function Counter(x1,y1) {
 
   this.counter = 0;
   this.state = low;
-    
-  let node4 = new InputNode( x1+25, y1+20 ); // count pulses
-  let node5 = new InputNode( x1+25, y1+50 ); // inhibit 
-  let node6 = new InputNode( x1+25, y1+80 ); // reset
-
-  // Create the binary output nodes
-  let node3 = new BinaryNodeS(x1+2*boxWidth-100, y1+20, 3 );
-  let node2 = new BinaryNodeS(x1+2*boxWidth-75, y1+20, 2 );
-  let node1 = new BinaryNodeS(x1+2*boxWidth-50, y1+20, 1 );
-  let node0 = new BinaryNodeS(x1+2*boxWidth-25, y1+20, 0 );
-
-  // Draw the push button
-  canvas.add( makeButton(x1+100, y1+boxHeight-20, node6) );
-    
+  
   this.textbox = new fabric.Textbox((this.counter).toString(), {
         left: x1+2*boxWidth-50, top: y1+70, width: 60, fontSize: 44, textAlign: 'right',
         fill: 'red', backgroundColor: '#330000', fontFamily: 'Courier New',
         selectable: false, evented: false });
   canvas.add(this.textbox);
+  this.textbox.sendToBack();
 
-  this.nodes = [ node6,node5,node4,node3,node2,node1,node0 ] ;
-  drawConnectors(this.nodes, "blue");
   drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
 
   this.output = function() {
@@ -791,6 +800,15 @@ function Relais(x1,y1) {
   this.x = x1;
   this.y = y1;
 
+  this.output = function() {return true;};
+  let node1 = new InputNode(x1+25, y1+25 );
+  let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
+  let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
+  this.nodes = [ node1, node2, node3 ] ;
+  drawConnectors([this.nodes[0]], "white");
+
+  drawConnectors(this.nodes.slice(1,3), "black");
+
   // Draw symbols and wires
   drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
   var r = new fabric.Rect({left: x1+25, top: y1+0.5*boxHeight, width: 20, height: 10, 
@@ -800,7 +818,7 @@ function Relais(x1,y1) {
   var textbox = new fabric.Textbox("~", { left: x1+boxWidth-50, top: y1+25, width: 20,
                                           fontSize: 20, textAlign: 'center', fontFamily:'Arial',
                                           selectable: false, evented: false });
-  canvas.add(textbox)
+  canvas.add(textbox);
   textbox.sendToBack();
   var circ = new fabric.Circle({left: x1+boxWidth-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
                                 radius: 10, fill: 'lightgrey', selectable: false, evented: false});
@@ -815,12 +833,6 @@ function Relais(x1,y1) {
   drawConnection([x1+boxWidth-75, y1+60, x1+boxWidth-75, y1+boxHeight-25]);
   drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-25, y1+25]);
 
-  this.output = function() {return true;};
-  let node1 = new InputNode(x1+25, y1+25 );
-  let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
-  let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
-  this.nodes = [ node1, node2, node3 ] ;
-  drawConnectors([this.nodes[0]], "white");
   drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
 
   this.remove = function() {};
@@ -832,6 +844,13 @@ function Relais(x1,y1) {
 function Lightbulb(x1,y1) {
   this.x = x1;
   this.y = y1;
+
+  this.state = false;
+  var isHV = true;
+  let node1 = new InputNode(x1-17, y1+35, isHV );
+  let node2 = new InputNode(x1, y1+65, isHV );
+  this.nodes = [ node1, node2 ] ;
+  drawConnectors(this.nodes, "black");
 
   var imgElementOn = document.getElementById('lighton');
   this.imgBulbOn = new fabric.Image(imgElementOn, {
@@ -848,13 +867,6 @@ function Lightbulb(x1,y1) {
   this.imgBulbOff.scale(0.7);
   canvas.add(this.imgBulbOff);  
   this.imgBulbOff.sendToBack();
-            
-
-  this.state = false;
-  var isHV = true;
-  let node1 = new InputNode(x1-17, y1+35, isHV );
-  let node2 = new InputNode(x1, y1+65, isHV );
-  this.nodes = [ node1, node2 ] ;
   
   this.output = function() {
     var newState = this.nodes[0].child && this.nodes[1].child && // nodes should be connected
@@ -1049,7 +1061,7 @@ function moveWire(p){
       if( (p.node.isHV && snapNode.isHV) || (!p.node.isHV && !snapNode.isHV) ) {
         var x1 = snapNode.x1;
         var y1 = snapNode.y1;
-        if( Math.abs(p.left - x1 ) < 20 && Math.abs(p.top - y1 ) < 20 ) {
+        if( Math.abs(p.left - x1 ) < snapTolerance && Math.abs(p.top - y1 ) < snapTolerance ) {
           p.left = x1;
           p.top = y1;
           p.line1.set({ 'x2': x1, 'y2': y1 });
@@ -1210,6 +1222,10 @@ function addElement(className,x1,y1){
     case "Lightbulb" :
       elements.push(new Lightbulb(x1,y1));
     break;
+    case "LightSensor" :
+      elements.push(new LightSensor(x1,y1));
+    break;
+
   } 
 }
 
