@@ -1,6 +1,6 @@
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
-function isHigh(x) {return x > hiThreshold; };
+function isHigh(x) {return x >= hiThreshold; };
 function isLow(x) {return x < loThreshold; }; 
 function invert(x) {return isHigh(x) ? low : high; };
 
@@ -186,7 +186,7 @@ function ComparatorNode(x1,y1,input1) {
         return this.state;
       } else {
         this.isSet = true;
-        this.state = (this.child1.eval() > this.compare) ? high : low ;
+        this.state = (this.child1.eval() < this.compare) ? low : high ;
         return this.state;
       }
     };
@@ -606,7 +606,7 @@ function VarVoltage(x1,y1) {
   var elementName = "voltage"+x1.toString()+y1.toString();
 
   // Create an input DOM element
-  var input = inputDOM(x1+20,y1+10,elementName,"5","0.1","0.1","5");
+  var input = inputDOM(x1+20,y1+10,elementName,"0","0.1","0.1","5");
 
   // Create an ouput node and set voltage from the DOM element
   node.state = input.value;
