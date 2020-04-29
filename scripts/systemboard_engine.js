@@ -10,7 +10,15 @@ var snapTolerance = 12;
 
 // Sizes of the elements
 var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
-  
+
+// Globals for the temperature and heater
+var heatTransfer = 100; // Means that Tmax=40
+var heatCapacity = 5000; // Determines speed of heating
+var temperatureInside = 15.0; // Celcius
+var temperatureOutside = 15.0; // Celcius
+var powerHeater = 2500; // Watt
+
+
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
@@ -932,7 +940,7 @@ function LightSensor(x1,y1) {
   this.x = x1;
   this.y = y1;
 
-  /*this.textbox = new fabric.Textbox("0", {
+  /*this.textbox = new fabric.Textbox("0.00", {
         left: x1+boxWidth-60, top: y1-20, width: 30, fontSize: 10, textAlign: 'right',
         fill: 'red', fontFamily: 'Arial',
         selectable: false, evented: false });
@@ -952,7 +960,7 @@ function LightSensor(x1,y1) {
  
   // Set voltage 
   this.output = function() { 
-    //this.textbox.text = this.nodes[0].state.toString();
+    //this.textbox.text = this.nodes[0].state.toFixed(2);
     var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
     var x2 = x1+75 - 18*Math.cos(angle);
     var y2 = y1+30 - 18*Math.sin(angle);
@@ -961,6 +969,82 @@ function LightSensor(x1,y1) {
   };
   this.remove = function() { };
 }    
+
+
+
+// Create heater 
+function Heater(x1,y1) {
+  this.x = x1;
+  this.y = y1;
+
+  this.state = false;
+  var isHV = true;
+  let node1 = new InputNode(x1-48, y1+25, isHV );
+  let node2 = new InputNode(x1-48, y1+50, isHV );
+  this.nodes = [ node1, node2 ] ;
+  drawConnectors(this.nodes, "black");
+
+  this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
+        left: x1+25, top: y1-55, width: 50, fontSize: 12, textAlign: 'right',
+        fill: 'red', backgroundColor: '#330000', fontFamily: 'Arial',
+        selectable: false, evented: false });
+  canvas.add(this.textbox);
+
+  var imgElement = document.getElementById('radiator');
+  this.imgRadiator = new fabric.Image(imgElement, {
+    left: x1, top: y1, selectable: false, evented: false, });
+  this.imgRadiator.scale(0.35);  
+  canvas.add(this.imgRadiator);  
+  this.imgRadiator.sendToBack();
+  
+  this.output = function() {
+    var heatLoss = heatTransfer * (temperatureInside - temperatureOutside);
+    temperatureInside += -heatLoss * clockPeriod*0.001 / heatCapacity;
+
+    if( this.nodes[0].child && this.nodes[1].child && // nodes should be connected
+        this.nodes[0].child.child == this.nodes[1].child.child && // from the same relais
+        isHigh( this.nodes[1].eval() ) ) { // check node2
+      temperatureInside += powerHeater * clockPeriod*0.001 / heatCapacity;
+    }
+    
+    this.textbox.text = temperatureInside.toFixed(1)+" \u2103";
+
+
+    return;
+  }
+
+  this.remove = function() {};
+
+}
+
+// Temperature sensor
+function TemperatureSensor(x1,y1) {
+  this.x = x1;
+  this.y = y1;
+
+  drawText(x1+57,y1+19,"0",8);
+  drawText(x1+88,y1+19,"5",8);
+  this.display = makeDisplay(x1,y1);
+  
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ;   
+  drawConnectors(this.nodes, "yellow");
+  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'temperatuursensor');
+ 
+  // Set voltage 
+  this.output = function() { 
+    var voltage = (temperatureInside - 15.0) * 0.2;
+    voltage = Math.min(Math.max(0.0,voltage),5.0); // Range between 0.0 and 5.0 V
+    this.nodes[0].state = voltage;
+    var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    var x2 = x1+75 - 18*Math.cos(angle);
+    var y2 = y1+30 - 18*Math.sin(angle);
+    this.display.set({ 'x2': x2, 'y2': y2 });
+    return true; 
+  };
+  this.remove = function() { };
+}    
+
 
 
 
@@ -1225,6 +1309,13 @@ function addElement(className,x1,y1){
     case "LightSensor" :
       elements.push(new LightSensor(x1,y1));
     break;
+    case "Heater" :
+      elements.push(new Heater(x1,y1));
+    break;
+    case "TemperatureSensor" :
+      elements.push(new TemperatureSensor(x1,y1));
+    break;
+
 
   } 
 }

@@ -53,10 +53,13 @@
     Met een klik-sleep kan de schakelaar worden vastgezet.</li>
   <li><b>Relais:</b><br/>
     De relais is al aangesloten op een wisselspanningbron.</br>
-    De zwarte uitgangen kunnen worden verbonden met de lamp.</li>
-  <li><b>Sensor:</b><br/>
+    De zwarte uitgangen kunnen worden verbonden met de lamp of </br> 
+    de elektrische verwarming.</li>
+  <li><b>Sensoren:</b><br/>
     De LDR kan worden gesleept. De spanning is afhankelijk van </br>
     de afstand tot de lamp, wanneer die aan staat.</li>
+    De temperatuursensor is (draadloos) verbonden met de thermometer</br>
+    bij de verwarming.</li>
   <li><b>Zoemer:</b><br/>
     Er zit een vertraging in de zoemer van een halve seconde.</br>
     In iOS/Safari moet je vaak eerst de zoemer handmatig initialiseren,</br>
@@ -75,6 +78,8 @@
 <img width=0 src="img/pic_bulboff.gif" id="lightoff">
 <img width=0 src="img/pic_bulbon.gif" id="lighton">
 <img width=0 src="img/ldr.png" id="ldr">
+<img width=0 src="img/radiator.jpg" id="radiator">
+
 
 
         </div>
@@ -88,18 +93,20 @@
 
   // Define the elements of the systemboard
   elements =[ new Board(50,0),
+              new LightSensor(60,25),
+              new TemperatureSensor(60,75),
               new Switch(60,175),
               new Switch(60,225),
-              new Switch(60,275),
-              new Pulse(60,325),
-              new VarVoltage(60,375),
+              new VarVoltage(60,275),
+              new VarVoltage(60,325),
+              new Pulse(60,375),
               new ADC(60,425),
               new Comparator(220,25),
               new Comparator(370,25),
               new ANDPort(220,125),
               new ANDPort(370,125),
-              new ORPort(370,225),
               new Memory(220,225),
+              new ORPort(370,225),
               new NOTPort(220,325),
               new NOTPort(370,325),
               new Counter(220,375),
@@ -111,12 +118,9 @@
               new LED(530,275),
               new Sound(530,325),
               new Relais(530,375),
-              new Lightbulb(750,375),          
-              //new Lightbulb(750,75),
-
-              // temporary (waiting for sensors and relais)
-              new LightSensor(60,25),
-              new VarVoltage(60,75),
+              new Lightbulb(770,75),
+              new Heater(790,420),          
+              // temporary (waiting for sound sensor)
               new Switch(60,125),
              ];
   
