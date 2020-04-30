@@ -19,13 +19,13 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 - Drukschakelaar: Met een klik-sleep kan de schakelaar worden vastgezet.
 - Relais: De relais is al aangesloten op een wisselspanningbron. De zwarte uitgangen kunnen worden verbonden met de lamp of 
 de elektrische verwarming. 
-- Sensoren: De LDR kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
+- Sensoren: De geluidsensor is aangesloten op de ingebouwde microfoon van de computer (werkt niet in iOS/Safari of IE).
+De LDR van de lichtsensor kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
 - Zoemer: Er zit een vertraging in de zoemer van een halve seconde. In iOS/Safari moet je eerst de zoemer handmatig initialiseren door op de play button te drukken (zie deze [discussie](https://stackoverflow.com/questions/12804028/safari-with-audio-tag-not-working)).
 - Meer informatie: Zie de [handleiding](http://www.cma-science.nl/resources/nl/practicum/b0020.pdf) van het systeembord.
 
 ## Wish list
 
-- Toevoegen van geluidssensor via de ingebouwde microfoon.
 - Toevoegen van echte sensoren via USB.
 - Zelf configureren van de componenten door te slepen.
 
