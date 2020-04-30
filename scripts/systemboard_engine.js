@@ -284,6 +284,8 @@ function drawElementBox(x1,y1,width,height,text) {
                              stroke: 'black', strokeWidth: 1   });
     canvas.add(r);
     r.sendToBack();
+
+    return textbox;
 }
 
 
@@ -472,7 +474,7 @@ function LED(x1,y1) {
 }
 
 // Create sound output
-function Sound(x1,y1) {
+function Buzzer(x1,y1) {
   this.x = x1;
   this.y = y1;
   this.nodes = [ new InputNode(x1+25, y1+0.5*boxHeightSmall) ] ;    
@@ -1045,7 +1047,72 @@ function TemperatureSensor(x1,y1) {
   this.remove = function() { };
 }    
 
+// Sound sensor
+function SoundSensor(x1,y1) {
+  this.x = x1;
+  this.y = y1;
 
+  /*this.tbox = new fabric.Textbox("0", {
+        left: x1+boxWidth-60, top: y1+5, width: 30, fontSize: 10, textAlign: 'right',
+        fill: 'red', fontFamily: 'Arial',
+        selectable: false, evented: false });
+  canvas.add(this.tbox);*/
+  
+  var circ = new fabric.Circle({left: x1+25, top: y1+0.5*boxHeightSmall, radius: 2, 
+                                  fill: "black", selectable: false, evented: false});
+  canvas.add(circ);
+  circ.sendToBack();
+  
+  drawText(x1+57,y1+19,"0",8);
+  drawText(x1+88,y1+19,"5",8);
+  this.display = makeDisplay(x1,y1);
+  
+  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+  this.nodes = [ node ] ;   
+  drawConnectors(this.nodes, "yellow");
+  this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor');
+ 
+  // Set voltage 
+  this.soundLevel = 0.0;
+  this.output = function() { 
+    this.nodes[0].state = Math.min(0.05 * this.soundLevel, 5.0) ;
+    var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    var x2 = x1+75 - 18*Math.cos(angle);
+    var y2 = y1+30 - 18*Math.sin(angle);
+    this.display.set({ 'x2': x2, 'y2': y2 });
+    return true; 
+  };
+  this.remove = function() { };
+
+  // Start the audio stream
+  var _this = this;
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+  .then(function(stream) {
+      audioContext = new AudioContext();
+      analyser = audioContext.createAnalyser();
+      microphone = audioContext.createMediaStreamSource(stream);
+      javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+      microphone.connect(analyser);
+      analyser.connect(javascriptNode);
+      javascriptNode.connect(audioContext.destination);
+      javascriptNode.onaudioprocess = function() {
+        var array = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(array);
+        var values = 0;
+        var length = array.length;
+        for (var i = 0; i < length; i++) { values += array[i]; };
+        var average = values / length;
+        _this.soundLevel = average;
+        //_this.tbox.text = average.toFixed(0);
+      }
+  })
+  .catch(function(err) {
+      _this.textbox.setColor('darkgrey');
+      canvas.remove(_this.nodes[0].wire);
+      console.log("The following error occured: " + err.name);
+  });
+
+}    
 
 
 function removeElements() {
@@ -1055,8 +1122,6 @@ function removeElements() {
   }
   elements = [];
 }
-
-
 
 
 var elements = [];  
@@ -1297,8 +1362,8 @@ function addElement(className,x1,y1){
     case "LED" :
       elements.push(new LED(x1,y1));
     break;
-    case "Sound" :
-      elements.push(new Sound(x1,y1));
+    case "Buzzer" :
+      elements.push(new Buzzer(x1,y1));
     break;
     case "Relais" :
       elements.push(new Relais(x1,y1));
@@ -1315,6 +1380,10 @@ function addElement(className,x1,y1){
     case "TemperatureSensor" :
       elements.push(new TemperatureSensor(x1,y1));
     break;
+    case "SoundSensor" :
+      elements.push(new SoundSensor(x1,y1));
+    break;
+
 
 
   } 

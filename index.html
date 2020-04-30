@@ -56,8 +56,10 @@
     De zwarte uitgangen kunnen worden verbonden met de lamp of </br> 
     de elektrische verwarming.</li>
   <li><b>Sensoren:</b><br/>
-    De LDR kan worden gesleept. De spanning is afhankelijk van </br>
-    de afstand tot de lamp, wanneer die aan staat.</li>
+    De geluidsensor is aangesloten op de ingebouwde microfoon van</br>
+    de computer (werkt niet in iOS/Safari of IE).</br>
+    De LDR van de lichtsensor kan worden gesleept. De spanning is </br>
+    afhankelijk van de afstand tot de lamp, wanneer die aan staat.</br>
     De temperatuursensor is (draadloos) verbonden met de thermometer</br>
     bij de verwarming.</li>
   <li><b>Zoemer:</b><br/>
@@ -95,6 +97,7 @@
   elements =[ new Board(50,0),
               new LightSensor(60,25),
               new TemperatureSensor(60,75),
+              new SoundSensor(60,125),
               new Switch(60,175),
               new Switch(60,225),
               new VarVoltage(60,275),
@@ -116,12 +119,10 @@
               new LED(530,175),
               new LED(530,225),
               new LED(530,275),
-              new Sound(530,325),
+              new Buzzer(530,325),
               new Relais(530,375),
               new Lightbulb(770,75),
               new Heater(790,420),          
-              // temporary (waiting for sound sensor)
-              new Switch(60,125),
              ];
   
   //removeElements();

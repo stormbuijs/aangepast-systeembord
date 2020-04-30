@@ -2,6 +2,7 @@
   <element name="Board" x="50" y="0"/>
   <element name="LightSensor" x="60" y="25"/>
   <element name="TemperatureSensor" x="60" y="75"/>
+  <element name="SoundSensor" x="60" y="125"/>
   <element name="Switch" x="60" y="175"/>
   <element name="Switch" x="60" y="225"/>
   <element name="VarVoltage" x="60" y="275"/>
@@ -23,9 +24,8 @@
   <element name="LED" x="530" y="175"/>
   <element name="LED" x="530" y="225"/>
   <element name="LED" x="530" y="275"/>
-  <element name="Sound" x="530" y="325"/>
+  <element name="Buzzer" x="530" y="325"/>
   <element name="Relais" x="530" y="375"/>
   <element name="Lightbulb" x="770" y="75"/>
   <element name="Heater" x="790" y="420"/>
-  <element name="Switch" x="60" y="125"/>
 </systeembord>
