@@ -21,6 +21,7 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 de elektrische verwarming. 
 - Sensoren: De geluidsensor is aangesloten op de ingebouwde microfoon van de computer (werkt niet in iOS/Safari of IE).
 De LDR van de lichtsensor kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
+- Voltmeter: Met de voltmeter kan de spanning op een uitgang worden gemeten. De andere ingang van de voltmeter is al verbonden met de aarde.
 - Zoemer: Er zit een vertraging in de zoemer van een halve seconde. In iOS/Safari moet je eerst de zoemer handmatig initialiseren door op de play button te drukken (zie deze [discussie](https://stackoverflow.com/questions/12804028/safari-with-audio-tag-not-working)).
 - Meer informatie: Zie de [handleiding](http://www.cma-science.nl/resources/nl/practicum/b0020.pdf) van het systeembord.
 
