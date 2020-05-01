@@ -28,4 +28,5 @@
   <element name="Relais" x="530" y="375"/>
   <element name="Lightbulb" x="770" y="75"/>
   <element name="Heater" x="790" y="420"/>
+  <element name="Voltmeter" x="2" y="100"/>
 </systeembord>

@@ -616,7 +616,7 @@ function VarVoltage(x1,y1) {
   var elementName = "voltage"+x1.toString()+y1.toString();
 
   // Create an input DOM element
-  var input = inputDOM(x1+20,y1+10,elementName,"0","0.1","0.1","5");
+  var input = inputDOM(x1+20,y1+10,elementName,"0","0.1","0","5");
 
   // Create an ouput node and set voltage from the DOM element
   node.state = input.value;
@@ -948,11 +948,11 @@ function LightSensor(x1,y1) {
         selectable: false, evented: false });
   canvas.add(this.textbox);*/
 
-  drawText(x1+57,y1+19,"0",8);
-  drawText(x1+88,y1+19,"5",8);
-  this.display = makeDisplay(x1,y1);
+  //drawText(x1+57,y1+19,"0",8);
+  //drawText(x1+88,y1+19,"5",8);
+  //this.display = makeDisplay(x1,y1);
   
-  let node = new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1-40, y1+25 );
+  let node = new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1+25, y1+25 );
   this.nodes = [ node ] ; 
   var ldr = makeLDR(node.xLDR, node.yLDR, this.nodes[0]);
   canvas.add(ldr);
@@ -963,10 +963,10 @@ function LightSensor(x1,y1) {
   // Set voltage 
   this.output = function() { 
     //this.textbox.text = this.nodes[0].state.toFixed(2);
-    var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
     var x2 = x1+75 - 18*Math.cos(angle);
     var y2 = y1+30 - 18*Math.sin(angle);
-    this.display.set({ 'x2': x2, 'y2': y2 });
+    this.display.set({ 'x2': x2, 'y2': y2 });*/
     return true; 
   };
   this.remove = function() { };
@@ -1024,9 +1024,9 @@ function TemperatureSensor(x1,y1) {
   this.x = x1;
   this.y = y1;
 
-  drawText(x1+57,y1+19,"0",8);
-  drawText(x1+88,y1+19,"5",8);
-  this.display = makeDisplay(x1,y1);
+  //drawText(x1+57,y1+19,"0",8);
+  //drawText(x1+88,y1+19,"5",8);
+  //this.display = makeDisplay(x1,y1);
   
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;   
@@ -1038,10 +1038,10 @@ function TemperatureSensor(x1,y1) {
     var voltage = (temperatureInside - 15.0) * 0.2;
     voltage = Math.min(Math.max(0.0,voltage),5.0); // Range between 0.0 and 5.0 V
     this.nodes[0].state = voltage;
-    var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
     var x2 = x1+75 - 18*Math.cos(angle);
     var y2 = y1+30 - 18*Math.sin(angle);
-    this.display.set({ 'x2': x2, 'y2': y2 });
+    this.display.set({ 'x2': x2, 'y2': y2 });*/
     return true; 
   };
   this.remove = function() { };
@@ -1063,9 +1063,9 @@ function SoundSensor(x1,y1) {
   canvas.add(circ);
   circ.sendToBack();
   
-  drawText(x1+57,y1+19,"0",8);
-  drawText(x1+88,y1+19,"5",8);
-  this.display = makeDisplay(x1,y1);
+  //drawText(x1+57,y1+19,"0",8);
+  //drawText(x1+88,y1+19,"5",8);
+  //this.display = makeDisplay(x1,y1);
   
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;   
@@ -1076,10 +1076,10 @@ function SoundSensor(x1,y1) {
   this.soundLevel = 0.0;
   this.output = function() { 
     this.nodes[0].state = Math.min(0.05 * this.soundLevel, 5.0) ;
-    var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
     var x2 = x1+75 - 18*Math.cos(angle);
     var y2 = y1+30 - 18*Math.sin(angle);
-    this.display.set({ 'x2': x2, 'y2': y2 });
+    this.display.set({ 'x2': x2, 'y2': y2 });*/
     return true; 
   };
   this.remove = function() { };
@@ -1113,6 +1113,45 @@ function SoundSensor(x1,y1) {
   });
 
 }    
+
+// Voltmeter
+function Voltmeter(x1,y1) {
+  this.x = x1;
+  this.y = y1;
+
+  drawText(x1+4,y1+11,"0",8);
+  drawText(x1+35,y1+11,"5",8);
+  
+  this.display = new fabric.Line([x1+22,y1+22,x1+22,y1+4], {strokeWidth: 2, stroke: 'red' ,
+                           selectable: false, evented: false});
+  canvas.add(this.display); this.display.sendToBack();
+
+  var r = new fabric.Rect({left: x1+22, top: y1+12, height: 20, width: 40, 
+                           fill: 'white', selectable: false, evented: false,
+                           stroke: 'black', strokeWidth: 1   });   
+  canvas.add(r); r.sendToBack();
+
+  //this.display = makeDisplay(x1-50,y1);
+  
+  let node = new InputNode(x1+35, y1+35 );
+  this.nodes = [ node ] ;   
+  drawConnectors(this.nodes, "white");
+
+  drawText(x1+1,y1+45,"volt-",12);
+  drawElementBox(x1,y1,44,boxHeightSmall+10,'meter');
+ 
+  // Set voltage 
+  this.output = function() { 
+    var angle = Math.PI*(0.25+0.5*(this.nodes[0].eval()/5.0));
+    var x2 = x1+22 - 18*Math.cos(angle);
+    var y2 = y1+22 - 18*Math.sin(angle);
+    this.display.set({ 'x2': x2, 'y2': y2 });
+    return true; 
+  };
+  this.remove = function() { };
+}    
+
+
 
 
 function removeElements() {
@@ -1383,8 +1422,9 @@ function addElement(className,x1,y1){
     case "SoundSensor" :
       elements.push(new SoundSensor(x1,y1));
     break;
-
-
+    case "Voltmeter" :
+      elements.push(new Voltmeter(x1,y1));
+    break;
 
   } 
 }
