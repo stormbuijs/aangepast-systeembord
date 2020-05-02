@@ -1047,6 +1047,7 @@ function TemperatureSensor(x1,y1) {
   this.remove = function() { };
 }    
 
+
 // Sound sensor
 function SoundSensor(x1,y1) {
   this.x = x1;
@@ -1058,6 +1059,7 @@ function SoundSensor(x1,y1) {
         selectable: false, evented: false });
   canvas.add(this.tbox);*/
   
+  // Draw circle for input hole microphone
   var circ = new fabric.Circle({left: x1+25, top: y1+0.5*boxHeightSmall, radius: 2, 
                                   fill: "black", selectable: false, evented: false});
   canvas.add(circ);
@@ -1073,9 +1075,7 @@ function SoundSensor(x1,y1) {
   this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor');
  
   // Set voltage 
-  this.soundLevel = 0.0;
   this.output = function() { 
-    this.nodes[0].state = Math.min(0.05 * this.soundLevel, 5.0) ;
     /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
     var x2 = x1+75 - 18*Math.cos(angle);
     var y2 = y1+30 - 18*Math.sin(angle);
@@ -1084,11 +1084,20 @@ function SoundSensor(x1,y1) {
   };
   this.remove = function() { };
 
+  
+  // Initialize the audio context
+  try {
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    window.audioContext = new AudioContext();
+  } catch (e) {
+    alert('Web Audio API not supported.');
+  }
   // Start the audio stream
   var _this = this;
   navigator.mediaDevices.getUserMedia({ audio: true, video: false })
   .then(function(stream) {
-      audioContext = new AudioContext();
+      window.localStream = stream;
+      audioContext = window.audioContext;//new AudioContext();
       analyser = audioContext.createAnalyser();
       microphone = audioContext.createMediaStreamSource(stream);
       javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
@@ -1101,9 +1110,9 @@ function SoundSensor(x1,y1) {
         var values = 0;
         var length = array.length;
         for (var i = 0; i < length; i++) { values += array[i]; };
-        var average = values / length;
-        _this.soundLevel = average;
-        //_this.tbox.text = average.toFixed(0);
+        var soundLevel = values / length;
+        _this.nodes[0].state = Math.min(0.05 * soundLevel, 5.0) ;
+        ///_this.tbox.text = soundLevel.toFixed(0);
       }
   })
   .catch(function(err) {
@@ -1111,7 +1120,7 @@ function SoundSensor(x1,y1) {
       canvas.remove(_this.nodes[0].wire);
       console.log("The following error occured: " + err.name);
   });
-
+   
 }    
 
 // Voltmeter
@@ -1196,7 +1205,7 @@ function mouseClick(e) {
     p.node.state = invert(p.node.state);
     p.node.state = high;
     p.set({ fill: '#333333', strokeWidth: 3, radius: 10});
-    p.setGradient('stroke', gradientButtonDw );
+    p.setGradient('stroke', gradientButtonDw );  
 }
     
 // Change button color and state of OutputNode to low when mouse is up
