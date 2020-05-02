@@ -494,13 +494,13 @@ function Buzzer(x1,y1) {
                            (x1+135).toString()+', '+(y1+25).toString()+', '+
                            (x1+130).toString()+', '+(y1+35).toString(), 
                              { fill: '', stroke: 'black',
-                               selectable: false, evented: false, strokeWidth: 1 });
+                               selectable: false, evented: false, strokeWidth: 0 });
   canvas.add(c1); c1.sendToBack();    
   var c2 = new fabric.Path('M '+(x1+135).toString()+' '+(y1+10).toString()+' Q '+
                            (x1+145).toString()+', '+(y1+25).toString()+', '+
                            (x1+135).toString()+', '+(y1+40).toString(), 
                              { fill: '', stroke: 'black',
-                               selectable: false, evented: false, strokeWidth: 1 });
+                               selectable: false, evented: false, strokeWidth: 0 });
   canvas.add(c2); c2.sendToBack();    
 
   var r = new fabric.Rect({left: x1+117, top: y1+25, height: 20, width: 10, 
@@ -1119,7 +1119,8 @@ function SoundSensor(x1,y1) {
   navigator.mediaDevices.getUserMedia({ audio: true, video: false })
   .then(function(stream) {
       //window.localStream = stream;
-      audioContext = audioCtx;//window.audioContext;//new AudioContext();
+      //audioContext = audioCtx;//window.audioContext;//new AudioContext();
+      audioContext = new (window.AudioContext || window.webkitAudioContext );
       analyser = audioContext.createAnalyser();
       microphone = audioContext.createMediaStreamSource(stream);
       javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
@@ -1203,24 +1204,16 @@ var elements = [];
 // Main engine: evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
     //var t0 = performance.now()
-
     for (i = 0; i < elements.length; i++) { 
        elements[i].output();
     } 
     canvas.renderAll();
-  
-  //evaluateBoard();
     //var t1 = performance.now()
     //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
-
 }
-
-  //alert("Your name is ");
 
 // Make sure that the engine is run every clockPeriod  
 setInterval(evaluateBoard, clockPeriod);
-
-//evaluateBoard();
 
 
 // Change button color and state of OutputNode when pushed
