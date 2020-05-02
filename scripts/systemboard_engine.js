@@ -18,6 +18,14 @@ var temperatureInside = 15.0; // Celcius
 var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500; // Watt
 
+// Create the AudioContext (for the soundsensor and buzzer)
+var audioCtx = null;
+try {
+   audioCtx = new (window.AudioContext || window.webkitAudioContext );
+ } catch (e) {
+   alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+         'the latest version or downloading Google Chrome or Mozilla Firefox');
+}
 
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
@@ -507,16 +515,29 @@ function Buzzer(x1,y1) {
   
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
-  this.audio = document.getElementById("myAudio"); 
-  // Control LED behaviour
+  // Create the oscillator node for the buzzer sound
+  var oscillator = gainNode = null;
+  if( audioCtx ) {
+    var gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+  }
+  this.state = false;
+  
+  // Control buzzer behaviour
   this.output = function() {  
     var result = this.nodes[0].eval();
-      if( isHigh(result) ) {    
-        this.audio.play();
+      if( isHigh(result) && !this.state) {    
+        this.state = true;
+        if( audioCtx ) {
+          oscillator = audioCtx.createOscillator();      
+          oscillator.connect(gainNode);
+          oscillator.start();
+        }
         c1.set({strokeWidth: 1});
         c2.set({strokeWidth: 1});        
-      } else {
-        this.audio.pause(); 	
+      } else if(!isHigh(result) && this.state) {
+        this.state = false;
+        if( audioCtx ) oscillator.stop();
         c1.set({strokeWidth: 0});
         c2.set({strokeWidth: 0});        
       }
@@ -1086,18 +1107,19 @@ function SoundSensor(x1,y1) {
 
   
   // Initialize the audio context
-  try {
+  /*try {
     window.AudioContext = window.AudioContext || window.webkitAudioContext;
     window.audioContext = new AudioContext();
   } catch (e) {
     alert('Web Audio API not supported.');
-  }
+  }*/
   // Start the audio stream
   var _this = this;
+  if( audioCtx ) {
   navigator.mediaDevices.getUserMedia({ audio: true, video: false })
   .then(function(stream) {
-      window.localStream = stream;
-      audioContext = window.audioContext;//new AudioContext();
+      //window.localStream = stream;
+      audioContext = audioCtx;//window.audioContext;//new AudioContext();
       analyser = audioContext.createAnalyser();
       microphone = audioContext.createMediaStreamSource(stream);
       javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
@@ -1120,6 +1142,10 @@ function SoundSensor(x1,y1) {
       canvas.remove(_this.nodes[0].wire);
       console.log("The following error occured: " + err.name);
   });
+  } else {
+      _this.textbox.setColor('darkgrey');
+      canvas.remove(_this.nodes[0].wire);    
+  }
    
 }    
 
