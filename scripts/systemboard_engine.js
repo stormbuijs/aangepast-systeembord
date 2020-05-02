@@ -18,19 +18,9 @@ var temperatureInside = 15.0; // Celcius
 var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500; // Watt
 
-// Create the AudioContext (for the soundsensor and buzzer)
-var audioCtx = null;
-try {
-   audioCtx = new (window.AudioContext || window.webkitAudioContext );
- } catch (e) {
-   alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-         'the latest version or downloading Google Chrome or Mozilla Firefox');
-}
-
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
-
 
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
@@ -514,6 +504,15 @@ function Buzzer(x1,y1) {
   canvas.add(t); t.sendToBack();     
   
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
+
+  // Create the AudioContext
+  var audioCtx = null;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext );
+  } catch (e) {
+    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+         'the latest version or downloading Google Chrome or Mozilla Firefox');
+  }
 
   // Create the oscillator node for the buzzer sound
   var oscillator = gainNode = null;
@@ -1107,20 +1106,19 @@ function SoundSensor(x1,y1) {
 
   
   // Initialize the audio context
-  /*try {
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    window.audioContext = new AudioContext();
+  var audioContext = null;
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext );
   } catch (e) {
-    alert('Web Audio API not supported.');
-  }*/
+    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+         'the latest version or downloading Google Chrome or Mozilla Firefox');
+  }
+
   // Start the audio stream
   var _this = this;
-  if( audioCtx ) {
+  if( audioContext ) {
   navigator.mediaDevices.getUserMedia({ audio: true, video: false })
   .then(function(stream) {
-      //window.localStream = stream;
-      //audioContext = audioCtx;//window.audioContext;//new AudioContext();
-      audioContext = new (window.AudioContext || window.webkitAudioContext );
       analyser = audioContext.createAnalyser();
       microphone = audioContext.createMediaStreamSource(stream);
       javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
