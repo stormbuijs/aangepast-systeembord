@@ -3,7 +3,7 @@ Style sheet for Online Systeembord
 */
 
 /* Main body */
-body {color:#303030; font:76% Verdana,Tahoma,Arial,sans-serif;}
+/*body {color:#303030; font:76% Verdana,Tahoma,Arial,sans-serif;}*/
 
 /* Basic tags */
 a {background-color:inherit; color:#286ea0; font-weight:700; text-decoration:none;}
@@ -14,7 +14,7 @@ li {text-indent: -1em; }
 /* Create two columns: one fixed, one flexible */
 * { box-sizing: border-box; }
 .column { }
-.left {float: left; width:900px;padding-bottom: 2em}
+.left {float: left;padding-bottom: 2em}
 .right {padding-top:35px;}
 .row:after {content: ""; display: table; clear: both; }
 /* Responsive layout - makes the two columns stack on top of each other instead of next to each other */
