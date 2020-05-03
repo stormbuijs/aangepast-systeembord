@@ -19,11 +19,8 @@ var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500; // Watt
 
 // Create canvas
-var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, 
-                                                     allowTouchScrolling: true, });
+var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
-
-$('.canvas-container').on('touchmove', function(evt){ evt.preventDefault(); });
 
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
