@@ -23,6 +23,8 @@ var canvas = this.__canvas = new fabric.Canvas('c', { selection: false,
                                                      allowTouchScrolling: true, });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
+$('.canvas-container').on('touchmove', function(evt){ evt.preventDefault(); });
+
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
     var c = new fabric.Circle({left: left, top: top, radius: 3, fill: color, padding: 7});
