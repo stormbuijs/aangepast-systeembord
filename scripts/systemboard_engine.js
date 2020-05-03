@@ -19,7 +19,8 @@ var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500; // Watt
 
 // Create canvas
-var canvas = this.__canvas = new fabric.Canvas('c', { selection: false });
+var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, 
+                                                     allowTouchScrolling: true, });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 
 // Make movable circle for wire
