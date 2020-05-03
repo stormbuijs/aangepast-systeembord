@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Online systeembord</title>
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen,projection" />
+</head>
+  <body>
+    <div class="row">
+      <div class="column left">
+        <h2>Online Systeembord</h2>
+        <div id="canvas1" style="position:relative;">
+          <canvas id="c" width="900" height="500" style="border:1px solid #ccc">
+          Your browser does not support HTML5 Canvas.
+          </canvas>
+        </div>
+        <div>
+          <br/>
+          <input id="fileinput" type="file" style="display: none;">
+          <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
+          <input id="download_xml" type="button" value="Sla op (download) als:">
+          <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
+        </div>
+      </div>
+      <div class="column right">
+          <h3>Beknopte instructie:</h3>
+        <ul> 
+          <li><b>Verbindingssnoeren maken:</b><br/>
+            De snoeren moeten van een uitgang naar ingang worden getrokken. Klik op een
+            uitgang (rode cirkel) en sleep het snoer naar een (grijze) ingang.</li>
+          <li><b>Meerdere verbindingssnoeren:</b><br/>
+            Een uitgang kan met meerdere ingangen worden verbonden.</li>
+          <li><b>Verbindingssnoeren verwijderen:</b><br/>
+            Sleep het snoer weg van de ingang.</li>
+          <li><b>Drukschakelaar:</b><br/>
+            Met een klik-sleep kan de schakelaar worden vastgezet.</li>
+          <li><b>Relais:</b><br/>
+            De relais is al aangesloten op een wisselspanningbron.
+            De zwarte uitgangen kunnen worden verbonden met de lamp of 
+            de elektrische verwarming.</li>
+          <li><b>Sensoren:</b><br/>
+            De geluidsensor is aangesloten op de ingebouwde microfoon van
+            de computer (je moet hiervoor wel toestemming geven).
+            De LDR van de lichtsensor kan worden gesleept. De spanning is 
+            afhankelijk van de afstand tot de lamp, wanneer die aan staat.
+            De temperatuursensor is (draadloos) verbonden met de thermometer
+            bij de verwarming.</li>
+          <li><b>Voltmeter:</b><br/>
+            Met de voltmeter kan de spanning op een uitgang worden gemeten.
+            De andere ingang van de voltmeter is al verbonden met de aarde.</li>
+          <li><b>Meer informatie:</b><br/>
+            Zie de handleiding van het <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li>  
+        </ul>
+        <img width=0 src="img/pic_bulboff.gif" id="lightoff">
+        <img width=0 src="img/pic_bulbon.gif" id="lighton">
+        <img width=0 src="img/ldr.png" id="ldr">
+        <img width=0 src="img/radiator.jpg" id="radiator">
+      </div>
+    </div>
+
+    <script src="scripts/fabric.min.js"></script>
+    <script src="scripts/jquery-3.5.0.min.js"></script>
+    <!--script src="http://webrtc.github.io/adapter/adapter-latest.js"></script-->
+    <script src="scripts/systemboard_engine.js"></script>
+    <script id="main">
+(function() {
+
+  
+// load all code after the document
+$("document").ready(function(){
+  //readFile("xml/systeembord.xml");
+
+  // Define the elements of the systemboard
+  elements =[ new Board(60,0),
+              new LightSensor(70,25),
+              new TemperatureSensor(70,75),
+              new SoundSensor(70,125),
+              new Switch(70,175),
+              new Switch(70,225),
+              new VarVoltage(70,275),
+              new VarVoltage(70,325),
+              new Pulse(70,375),
+              new ADC(70,425),
+              new Comparator(230,25),
+              new Comparator(380,25),
+              new ANDPort(230,125),
+              new ANDPort(380,125),
+              new Memory(230,225),
+              new ORPort(380,225),
+              new NOTPort(230,325),
+              new NOTPort(380,325),
+              new Counter(230,375),
+              new LED(540,25), 
+              new LED(540,75), 
+              new LED(540,125), 
+              new LED(540,175),
+              new LED(540,225),
+              new LED(540,275),
+              new Buzzer(540,325),
+              new Relais(540,375),
+              new Lightbulb(780,75),
+              new Heater(800,420),          
+              new Voltmeter(5,100),          
+             ];  
+});
+  
+})();
+</script>
+
+</body>
+</html>
