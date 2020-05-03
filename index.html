@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Online Systeembord">
+  <meta name="keywords" content="natuurkunde, technische automatisering, systeembord">
+  <meta name="author" content="Jeroen van Tilburg">
+  <meta name="viewport" content="width=930">
   <title>Online systeembord</title>
     <link rel="stylesheet" type="text/css" href="style.css" media="screen,projection" />
 </head>
@@ -67,8 +72,10 @@
 
 // load all code after the document
 $("document").ready(function(){
+  var xmlFile = window.location.hash.substr(1);
+  if( xmlFile == "") xmlFile = "systeembord.xml";
   // Read the default file
-  readFile("xml/systeembord.xml");
+  readFile("xml/"+xmlFile);
 });
   
 })();
