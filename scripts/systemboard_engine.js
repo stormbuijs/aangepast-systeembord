@@ -1093,18 +1093,8 @@ function SoundSensor(x1,y1) {
   this.nodes = [ node ] ;   
   drawConnectors(this.nodes, "yellow");
   this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor');
- 
-  // Set voltage 
-  this.output = function() { 
-    /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
-    var x2 = x1+75 - 18*Math.cos(angle);
-    var y2 = y1+30 - 18*Math.sin(angle);
-    this.display.set({ 'x2': x2, 'y2': y2 });*/
-    return true; 
-  };
-  this.remove = function() { };
 
-  
+    
   // Initialize the audio context
   var audioContext = null;
   try {
@@ -1113,6 +1103,19 @@ function SoundSensor(x1,y1) {
     alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
          'the latest version or downloading Google Chrome or Mozilla Firefox');
   }
+
+  // Set voltage 
+  this.output = function() {
+    // AudioContext may still be in suspended state. Resume to get mic working.
+    if( audioContext ) audioContext.resume();
+    /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
+    var x2 = x1+75 - 18*Math.cos(angle);
+    var y2 = y1+30 - 18*Math.sin(angle);
+    this.display.set({ 'x2': x2, 'y2': y2 });*/
+    return true; 
+  };
+  this.remove = function() { };
+
 
   // Start the audio stream
   var _this = this;
