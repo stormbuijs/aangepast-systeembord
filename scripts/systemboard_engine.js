@@ -266,6 +266,60 @@ function LightSensorNode(x1,y1,x2,y2) {
     this.wire = makeWire(x1,y1,this);
 }    
 
+// output node for sound sensor
+function SoundSensorNode(x1,y1,element) { 
+  this.x1 = x1;
+  this.y1 = y1;
+  this.state = low;
+  this.isInput = false;     
+  this.isHV = false;
+  this.wire = makeWire(x1,y1,this);
+  this.element = element
+
+  var audioContext = null;
+
+  this.eval = function() { 
+    if( !audioContext ) {
+      // Initialize the audio context
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext );
+      } catch (e) {
+        alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+             'the latest version or downloading Google Chrome or Mozilla Firefox');
+      }
+      
+      // Start the audio stream
+      var _this = this;
+      if( audioContext ) {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(function(stream) {
+          analyser = audioContext.createAnalyser();
+          microphone = audioContext.createMediaStreamSource(stream);
+          javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+          microphone.connect(analyser);
+          analyser.connect(javascriptNode);
+          javascriptNode.connect(audioContext.destination);
+          javascriptNode.onaudioprocess = function() {
+            var array = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(array);
+            var values = 0;
+            var length = array.length;
+            for (var i = 0; i < length; i++) { values += array[i]; };
+            var soundLevel = values / length;
+            _this.state = Math.min(0.05 * soundLevel, 5.0) ;
+          }
+      })
+      .catch(function(err) {
+          element.textbox.setColor('darkgrey');
+          console.log("The following error occured: " + err.name);
+      });
+      } else {
+          element.textbox.setColor('darkgrey');
+      }
+    }
+    return this.state; 
+  };
+}    
 
 
 // Draw the box plus text
@@ -1072,82 +1126,21 @@ function TemperatureSensor(x1,y1) {
 function SoundSensor(x1,y1) {
   this.x = x1;
   this.y = y1;
-
-  /*this.tbox = new fabric.Textbox("0", {
-        left: x1+boxWidth-60, top: y1+5, width: 30, fontSize: 10, textAlign: 'right',
-        fill: 'red', fontFamily: 'Arial',
-        selectable: false, evented: false });
-  canvas.add(this.tbox);*/
   
   // Draw circle for input hole microphone
   var circ = new fabric.Circle({left: x1+25, top: y1+0.5*boxHeightSmall, radius: 2, 
                                   fill: "black", selectable: false, evented: false});
   canvas.add(circ);
   circ.sendToBack();
-  
-  //drawText(x1+57,y1+19,"0",8);
-  //drawText(x1+88,y1+19,"5",8);
-  //this.display = makeDisplay(x1,y1);
-  
-  let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
+    
+  let node = new SoundSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, this );
   this.nodes = [ node ] ;   
   drawConnectors(this.nodes, "yellow");
   this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor');
 
-    
-  // Initialize the audio context
-  var audioContext = null;
-  try {
-    audioContext = new (window.AudioContext || window.webkitAudioContext );
-  } catch (e) {
-    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-         'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }
-
-  // Set voltage 
-  this.output = function() {
-    // AudioContext may still be in suspended state. Resume to get mic working.
-    if( audioContext ) audioContext.resume();
-    /*var angle = Math.PI*(0.25+0.5*(this.nodes[0].state/5.0));
-    var x2 = x1+75 - 18*Math.cos(angle);
-    var y2 = y1+30 - 18*Math.sin(angle);
-    this.display.set({ 'x2': x2, 'y2': y2 });*/
-    return true; 
-  };
+  // Default functions
+  this.output = function() { return true; };
   this.remove = function() { };
-
-
-  // Start the audio stream
-  var _this = this;
-  if( audioContext ) {
-  navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-  .then(function(stream) {
-      analyser = audioContext.createAnalyser();
-      microphone = audioContext.createMediaStreamSource(stream);
-      javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-      microphone.connect(analyser);
-      analyser.connect(javascriptNode);
-      javascriptNode.connect(audioContext.destination);
-      javascriptNode.onaudioprocess = function() {
-        var array = new Uint8Array(analyser.frequencyBinCount);
-        analyser.getByteFrequencyData(array);
-        var values = 0;
-        var length = array.length;
-        for (var i = 0; i < length; i++) { values += array[i]; };
-        var soundLevel = values / length;
-        _this.nodes[0].state = Math.min(0.05 * soundLevel, 5.0) ;
-        ///_this.tbox.text = soundLevel.toFixed(0);
-      }
-  })
-  .catch(function(err) {
-      _this.textbox.setColor('darkgrey');
-      canvas.remove(_this.nodes[0].wire);
-      console.log("The following error occured: " + err.name);
-  });
-  } else {
-      _this.textbox.setColor('darkgrey');
-      canvas.remove(_this.nodes[0].wire);    
-  }
    
 }    
 
