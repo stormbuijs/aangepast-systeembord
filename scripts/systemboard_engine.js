@@ -569,11 +569,11 @@ function Buzzer(x1,y1) {
     var result = this.nodes[0].eval();
       if( isHigh(result) && !this.state) {    
         this.state = true;
-        if( audioCtx ) {
+        //if( audioCtx ) {
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
           oscillator.start();
-        }
+        //}
         c1.set({strokeWidth: 1});
         c2.set({strokeWidth: 1});        
       } else if(!isHigh(result) && this.state) {
