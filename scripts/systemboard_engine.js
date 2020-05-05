@@ -18,6 +18,9 @@ var temperatureInside = 15.0; // Celcius
 var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500; // Watt
 
+// Global event counter for loop protection
+var eventCounter = 0;
+
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
@@ -105,125 +108,113 @@ function OutputNode(x1,y1) {
 
 // AND node
 function ANDNode(x1,y1,input1,input2, color) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child1 = input1;
-    this.child2 = input2;
-    this.isInput = false;
-    this.isHV = false;
-    this.state = low;
-    this.isSet = false;
-    this.eval = function() {
+  this.x1 = x1;
+  this.y1 = y1;
+  this.child1 = input1;
+  this.child2 = input2;
+  this.isInput = false;
+  this.isHV = false;
+  this.state = low;
+  var lastEvent = 0;
+  this.eval = function() {
     // loop protection
-      if( this.isSet ) {
-          this.isSet = false;
-          return this.state;
-	} else {
-          this.isSet = true;
-          this.state = (isHigh(this.child1.eval()) && isHigh(this.child2.eval()) ) ? high : low ;
-          return this.state;
-	}
-    };      
-    this.wire = makeWire(x1,y1,this);
+    if( lastEvent != eventCounter ) {
+      lastEvent = eventCounter;
+      this.state = (isHigh(this.child1.eval()) && isHigh(this.child2.eval()) ) ? high : low;
+    }
+    //lastEvent = eventCounter;
+    return this.state;
+  };      
+  this.wire = makeWire(x1,y1,this);
 }
 
 // OR node
 function ORNode(x1,y1,input1,input2) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child1 = input1;
-    this.child2 = input2;
-    this.isInput = false;
-    this.isHV = false;
-    this.state = low;
-    this.isSet = false;
-    this.eval = function() {
-      // loop protection
-      if( this.isSet ) {
-        this.isSet = false;
-        return this.state;
-      } else {
-        this.isSet = true;
-        this.state = (isHigh(this.child1.eval()) || isHigh(this.child2.eval()) ) ? high : low ;
-        return this.state;
-      }
-    };      
-    
-    this.wire = makeWire(x1,y1,this);
+  this.x1 = x1;
+  this.y1 = y1;
+  this.child1 = input1;
+  this.child2 = input2;
+  this.isInput = false;
+  this.isHV = false;
+  this.state = low;
+  var lastEvent = 0;
+  this.eval = function() {
+    // loop protection
+    if( lastEvent != eventCounter ) {
+      lastEvent = eventCounter;
+      this.state = (isHigh(this.child1.eval()) || isHigh(this.child2.eval()) ) ? high : low;
+    }
+    //lastEvent = eventCounter;
+    return this.state;
+  };  
+  this.wire = makeWire(x1,y1,this);
 }
 
 // NOT node
 function NOTNode(x1,y1,input1) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child1 = input1;
-    this.isInput = false;     
-    this.isHV = false;
-    this.state = low;
-    this.isSet = false;
-    this.eval = function() {
-      // loop protection
-      if( this.isSet ) {
-        this.isSet = false;
-        return this.state;
-      } else {
-        this.isSet = true;
-        this.state = (isHigh(this.child1.eval()) ) ? low : high ;
-        return this.state;
-      }
-    };
-    this.wire = makeWire(x1,y1,this);
+  this.x1 = x1;
+  this.y1 = y1;
+  this.child1 = input1;
+  this.isInput = false;     
+  this.isHV = false;
+  this.state = low;
+  var lastEvent = 0;
+  this.eval = function() {
+    // loop protection
+    if( lastEvent != eventCounter ) {
+      lastEvent = eventCounter;
+      this.state = (isHigh(this.child1.eval()) ) ? low : high ;
+    }
+    //lastEvent = eventCounter;
+    return this.state; 
+  }
+
+  this.wire = makeWire(x1,y1,this);
 }    
   
 // Comparator node
 function ComparatorNode(x1,y1,input1) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child1 = input1;
-    this.compare = low;
-    this.isInput = false;     
-    this.isHV = false;
-    this.state = low;
-    this.isSet = false;
-    this.eval = function() {
-      // loop protection
-      if( this.isSet ) {
-        this.isSet = false;
-        return this.state;
-      } else {
-        this.isSet = true;
-        this.state = (this.child1.eval() < this.compare) ? low : high ;
-        return this.state;
-      }
-    };
-
-    this.wire = makeWire(x1,y1,this);
+  this.x1 = x1;
+  this.y1 = y1;
+  this.child1 = input1;
+  this.compare = low;
+  this.isInput = false;     
+  this.isHV = false;
+  this.state = low;
+  var lastEvent = 0;
+  this.eval = function() {
+    // loop protection
+    if( lastEvent != eventCounter ) {
+      lastEvent = eventCounter;
+      this.state = (this.child1.eval() < this.compare) ? low : high ;
+    }
+    //lastEvent = eventCounter;
+    return this.state;
+  }
+  this.wire = makeWire(x1,y1,this);
 }  
     
 // Binary node
 function BinaryNode(x1,y1,input1,bin) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child1 = input1;
-    this.isInput = false;     
-    this.isHV = false;
-    this.state = low;
-    this.isSet = false;
-    this.eval = function() {
-      // loop protection
-      if( this.isSet ) {
-        this.isSet = false;
-        return this.state;
-      } else {
-        this.isSet = true;
-        var binary = (this.child1.eval() / high ) * 15;
-        var bit = (binary & (1<<bin)) >> bin;
-        this.state = ( bit == 1 ) ? high : low ;
-        return this.state;
-      }
-    };
-
-    this.wire = makeWire(x1,y1,this);
+  this.x1 = x1;
+  this.y1 = y1;
+  this.child1 = input1;
+  this.isInput = false;     
+  this.isHV = false;
+  this.state = low;
+  var lastEvent = 0;
+  this.eval = function() {
+    // loop protection
+    if( lastEvent != eventCounter ) {
+      lastEvent = eventCounter;
+      var binary = (this.child1.eval() / high ) * 15;
+      var bit = (binary & (1<<bin)) >> bin;
+      this.state = ( bit == 1 ) ? high : low ;
+    }
+    //lastEvent = eventCounter;
+    return this.state;
+  }
+  this.wire = makeWire(x1,y1,this);
 }    
 
 // Binary node with stored counter
@@ -238,7 +229,6 @@ function BinaryNodeS(x1,y1,bin) {
       var bit = (binary & (1<<bin)) >> bin;
       return ( bit == 1 ) ? high : low ;
     }
-
     this.wire = makeWire(x1,y1,this);
 }    
 
@@ -1197,13 +1187,14 @@ var elements = [];
 
 // Main engine: evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
-    //var t0 = performance.now()
-    for (i = 0; i < elements.length; i++) { 
-       elements[i].output();
-    } 
-    canvas.renderAll();
-    //var t1 = performance.now()
-    //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
+  //var t0 = performance.now()
+  eventCounter++;
+  for (i = 0; i < elements.length; i++) { 
+     elements[i].output();
+  } 
+  canvas.renderAll();
+  //var t1 = performance.now()
+  //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 }
 
 // Make sure that the engine is run every clockPeriod  
