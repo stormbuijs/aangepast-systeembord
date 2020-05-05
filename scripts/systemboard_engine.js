@@ -1146,8 +1146,43 @@ function SoundSensor(x1,y1) {
   // Hack for iOS to force audioContext to work (needs prompting user)
   var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
   if( iOS ) {
-      // Start a dummy audio stream
-      navigator.mediaDevices.getUserMedia({ audio: true, video: false });    
+      // Initialize the audio context
+      try {
+        audioContext = new (window.AudioContext || window.webkitAudioContext );
+      } catch (e) {
+        alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+             'the latest version or downloading Google Chrome or Mozilla Firefox');
+      }
+      
+      // Start the audio stream
+      var _this = this;
+      if( audioContext ) {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+      .then(function(stream) {
+          analyser = audioContext.createAnalyser();
+          microphone = audioContext.createMediaStreamSource(stream);
+          javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+          microphone.connect(analyser);
+          analyser.connect(javascriptNode);
+          javascriptNode.connect(audioContext.destination);
+          javascriptNode.onaudioprocess = function() {
+            var array = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(array);
+            var values = 0;
+            var length = array.length;
+            for (var i = 0; i < length; i++) { values += array[i]; };
+            var soundLevel = values / length;
+            _this.nodes[0].state = Math.min(0.05 * soundLevel, 5.0) ;
+          }
+      })
+      .catch(function(err) {
+          _this.textbox.setColor('darkgrey');
+          console.log("The following error occured: " + err.name);
+      });
+      } else {
+          _this.textbox.setColor('darkgrey');
+      }
+    }    
   }
    
 }    
