@@ -573,7 +573,6 @@ function Buzzer(x1,y1) {
         this.state = true;
         if( !audioCtx ) createAudioCtx();
         if( audioCtx ) {
-          audioCtx.resume();
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
           oscillator.start();
