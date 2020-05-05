@@ -1,0 +1,43 @@
+<systeembord>
+  <element name="Board" x="60" y="0"/>
+  <element name="LightSensor" x="70" y="25"/>
+  <element name="TemperatureSensor" x="70" y="75"/>
+  <element name="SoundSensor" x="70" y="125"/>
+  <element name="Switch" x="70" y="175"/>
+  <element name="Switch" x="70" y="225"/>
+  <element name="VarVoltage" x="70" y="275"/>
+  <element name="VarVoltage" x="70" y="325"/>
+  <element name="Pulse" x="70" y="375"/>
+  <element name="ADC" x="70" y="425"/>
+  <element name="Comparator" x="230" y="25">
+    <link id="0" toElement="2" toNode="0"/>
+  </element>
+  <element name="Comparator" x="380" y="25"/>
+  <element name="ANDPort" x="230" y="125"/>
+  <element name="ANDPort" x="380" y="125"/>
+  <element name="Memory" x="230" y="225"/>
+  <element name="ORPort" x="380" y="225"/>
+  <element name="NOTPort" x="230" y="325"/>
+  <element name="NOTPort" x="380" y="325">
+    <link id="0" toElement="10" toNode="1"/>
+  </element>
+  <element name="Counter" x="230" y="375"/>
+  <element name="LED" x="540" y="25"/>
+  <element name="LED" x="540" y="75"/>
+  <element name="LED" x="540" y="125"/>
+  <element name="LED" x="540" y="175"/>
+  <element name="LED" x="540" y="225"/>
+  <element name="LED" x="540" y="275">
+    <link id="0" toElement="17" toNode="1"/>
+  </element>
+  <element name="Buzzer" x="540" y="325"/>
+  <element name="Relais" x="540" y="375">
+    <link id="0" toElement="17" toNode="1"/>
+  </element>
+  <element name="Lightbulb" x="780" y="75"/>
+  <element name="Heater" x="800" y="420">
+    <link id="0" toElement="26" toNode="2"/>
+    <link id="1" toElement="26" toNode="1"/>
+  </element>
+  <element name="Voltmeter" x="5" y="100"/>
+</systeembord>
