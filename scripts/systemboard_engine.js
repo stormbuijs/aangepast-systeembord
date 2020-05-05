@@ -561,10 +561,16 @@ function Buzzer(x1,y1) {
   const audioCtx = new (window.AudioContext || window.webkitAudioContext);
 
   // Create the oscillator node for the buzzer sound
-  if( audioCtx ) {
+  //if( audioCtx ) {
     gainNode = audioCtx.createGain();
     gainNode.connect(audioCtx.destination);
-  }
+  //}
+
+            oscillator = audioCtx.createOscillator();      
+          oscillator.connect(gainNode);
+          oscillator.start();
+
+
   this.state = false;
   
   // Control buzzer behaviour
