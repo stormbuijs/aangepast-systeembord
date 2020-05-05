@@ -1139,7 +1139,10 @@ function SoundSensor(x1,y1) {
   this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor');
 
   // Default functions
-  this.output = function() { return true; };
+  this.output = function() { 
+    if( audioContext ) audioContext.resume();
+    return true; 
+  };
   this.remove = function() { };
 
   // Hack for iOS to force audioContext to work (needs prompting user)
