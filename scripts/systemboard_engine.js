@@ -730,7 +730,7 @@ function Comparator(x1,y1) {
   var elementName = "voltage"+x1.toString()+y1.toString();
       
   // Create an input DOM element
-  var input = inputDOM(x1+70,y1+60,elementName,"2.5","0.1","0.1","5");
+  var input = inputDOM(x1+70,y1+60,elementName,"2.5","0.1","0","5");
     
   // Create the node
   node2.compare = input.value; // set compare value
