@@ -269,7 +269,7 @@ function SoundSensorNode(x1,y1,element) {
   var audioContext = null;
 
   this.eval = function() { 
-    if( !audioContext ) {
+    /*if( !audioContext ) {
       // Initialize the audio context
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext );
@@ -306,7 +306,7 @@ function SoundSensorNode(x1,y1,element) {
       } else {
           element.textbox.setColor('darkgrey');
       }
-    }
+    }*/
     return this.state; 
   };
 }    
@@ -550,26 +550,19 @@ function Buzzer(x1,y1) {
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
   // Create the AudioContext
-  /*var audioCtx = oscillator = gainNode = null;
+  var audioCtx = oscillator = gainNode = null;
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext );
   } catch (e) {
     alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
           'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }*/
-  var oscillator = gainNode = null;
-  const audioCtx = new (window.AudioContext || window.webkitAudioContext);
+  }
 
   // Create the oscillator node for the buzzer sound
-  //if( audioCtx ) {
+  if( audioCtx ) {
     gainNode = audioCtx.createGain();
     gainNode.connect(audioCtx.destination);
-  //}
-
-            oscillator = audioCtx.createOscillator();      
-          oscillator.connect(gainNode);
-          oscillator.start();
-
+  }
 
   this.state = false;
   
@@ -1150,8 +1143,8 @@ function SoundSensor(x1,y1) {
   this.remove = function() { };
 
   // Hack for iOS to force audioContext to work (needs prompting user)
-  var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
-  if( iOS ) {
+  //var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+  //if( iOS ) {
       var audioContext = null;
       // Initialize the audio context
       try {
@@ -1189,7 +1182,7 @@ function SoundSensor(x1,y1) {
       } else {
           _this.textbox.setColor('darkgrey');
       }
-  }    
+  //}    
 }    
 
 // Voltmeter
