@@ -550,13 +550,16 @@ function Buzzer(x1,y1) {
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
   // Create the AudioContext
-  var audioCtx = oscillator = gainNode = null;
+  /*var audioCtx = oscillator = gainNode = null;
   try {
     audioCtx = new (window.AudioContext || window.webkitAudioContext );
   } catch (e) {
     alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
           'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }
+  }*/
+  var oscillator = gainNode = null;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext);
+
   // Create the oscillator node for the buzzer sound
   if( audioCtx ) {
     gainNode = audioCtx.createGain();
@@ -569,11 +572,11 @@ function Buzzer(x1,y1) {
     var result = this.nodes[0].eval();
       if( isHigh(result) && !this.state) {    
         this.state = true;
-        //if( audioCtx ) {
+        if( audioCtx ) {
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
           oscillator.start();
-        //}
+        }
         c1.set({strokeWidth: 1});
         c2.set({strokeWidth: 1});        
       } else if(!isHigh(result) && this.state) {
