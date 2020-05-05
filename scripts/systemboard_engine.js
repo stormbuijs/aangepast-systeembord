@@ -943,6 +943,16 @@ function Lightbulb(x1,y1) {
   canvas.add(this.imgBulbOff);  
   this.imgBulbOff.sendToBack();
   
+  /* // Alternative (no need to load image already in index.html)
+  var _this = this;
+  fabric.Image.fromURL("img/pic_bulboff.gif", function(img) {
+    _this.imgBulbOff = new fabric.Image(img.getElement(), {left: x1, top: y1, selectable: false, 
+                                                           evented: false,});
+    _this.imgBulbOff.scale(0.7);
+    canvas.add(_this.imgBulbOff);  
+    _this.imgBulbOff.sendToBack();                     
+  });*/
+
   this.output = function() {
     var newState = this.nodes[0].child && this.nodes[1].child && // nodes should be connected
                    this.nodes[0].child.child == this.nodes[1].child.child && // from the same relais
