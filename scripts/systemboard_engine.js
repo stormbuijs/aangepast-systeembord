@@ -551,18 +551,16 @@ function Buzzer(x1,y1) {
 
   // Create the AudioContext
   var audioCtx = oscillator = gainNode = null;
-  var createAudioCtx = function() {
-    try {
-      audioCtx = new (window.AudioContext || window.webkitAudioContext );
-    } catch (e) {
-      alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-           'the latest version or downloading Google Chrome or Mozilla Firefox');
-    }
-    // Create the oscillator node for the buzzer sound
-    if( audioCtx ) {
-      gainNode = audioCtx.createGain();
-      gainNode.connect(audioCtx.destination);
-    }
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext );
+  } catch (e) {
+    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+          'the latest version or downloading Google Chrome or Mozilla Firefox');
+  }
+  // Create the oscillator node for the buzzer sound
+  if( audioCtx ) {
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
   }
   this.state = false;
   
@@ -571,7 +569,6 @@ function Buzzer(x1,y1) {
     var result = this.nodes[0].eval();
       if( isHigh(result) && !this.state) {    
         this.state = true;
-        if( !audioCtx ) createAudioCtx();
         if( audioCtx ) {
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
