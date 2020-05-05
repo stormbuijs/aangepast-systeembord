@@ -1146,6 +1146,7 @@ function SoundSensor(x1,y1) {
   // Hack for iOS to force audioContext to work (needs prompting user)
   var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
   if( iOS ) {
+      var audioContext = null;
       // Initialize the audio context
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext );
@@ -1182,9 +1183,7 @@ function SoundSensor(x1,y1) {
       } else {
           _this.textbox.setColor('darkgrey');
       }
-    }    
-  }
-   
+  }    
 }    
 
 // Voltmeter
