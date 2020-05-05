@@ -1142,6 +1142,13 @@ function SoundSensor(x1,y1) {
   // Default functions
   this.output = function() { return true; };
   this.remove = function() { };
+
+  // Hack for iOS to force audioContext to work (needs prompting user)
+  var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
+  if( iOS ) {
+      // Start a dummy audio stream
+      navigator.mediaDevices.getUserMedia({ audio: true, video: false });    
+  }
    
 }    
 
