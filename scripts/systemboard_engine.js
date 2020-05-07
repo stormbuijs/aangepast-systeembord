@@ -650,7 +650,7 @@ function Pulse(x1,y1) {
   var elementName = "frequency"+x1.toString()+y1.toString();
     
   // Create an input DOM element
-  var input = inputDOM(x1+20,y1+10,elementName,"1","0.1","0.5","10");
+  var input = inputDOM(x1+20,y1+10,elementName,"1","0.1","0.1","10");
 
   this.pulseStarted = false;
   this.output = function() { return true; };
@@ -852,10 +852,12 @@ function Counter(x1,y1) {
 
   this.output = function() {
     // reset counter (check button or reset node)
-    if( isHigh(node6.state) || isHigh(node6.eval()) ) { 
-      this.counter = 0;
-      this.textbox.text = (this.counter).toString();
-      renderNeeded = true;
+    if( isHigh(node6.state) || isHigh(node6.eval())) { 
+      if( this.counter != 0 ) {
+        this.counter = 0;
+        this.textbox.text = (this.counter).toString();
+        renderNeeded = true;
+      }
     } else {
       // inhibit counter
       if( node5.child && !isHigh(node5.eval()) ) {
