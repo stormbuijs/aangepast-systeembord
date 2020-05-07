@@ -21,9 +21,16 @@ var powerHeater = 2500; // Watt
 // Global event counter for loop protection
 var eventCounter = 0;
 
+// Global flag for rendering
+var renderNeeded = true;
+
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
+
+// Create less blurry text
+fabric.Textbox.prototype.objectCaching = false;
+fabric.Text.prototype.objectCaching = false;
 
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
@@ -501,14 +508,18 @@ function LED(x1,y1) {
 
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
 
+  var lastResult = 0.0;
   // Control LED behaviour
   this.output = function() {
     var result = this.nodes[0].eval();
-    if( isHigh(result) ) {
+    if( isHigh(result) && !isHigh(lastResult) ) {
       c.set({fill : 'red'});
-    } else {
+      renderNeeded = true;
+    } else if( !isHigh(result) && isHigh(lastResult) ) {
       c.set({fill : 'darkred'});            
+      renderNeeded = true;
     }
+    lastResult = result;
     return result;
   };
 
@@ -577,12 +588,14 @@ function Buzzer(x1,y1) {
           oscillator.start();
         }
         c1.set({strokeWidth: 1});
-        c2.set({strokeWidth: 1});        
+        c2.set({strokeWidth: 1});
+        renderNeeded = true;
       } else if(!isHigh(result) && this.state) {
         this.state = false;
         if( oscillator ) oscillator.stop();
         c1.set({strokeWidth: 0});
         c2.set({strokeWidth: 0});        
+        renderNeeded = true;
       }
       return result;
   };
@@ -842,6 +855,7 @@ function Counter(x1,y1) {
     if( isHigh(node6.state) || isHigh(node6.eval()) ) { 
       this.counter = 0;
       this.textbox.text = (this.counter).toString();
+      renderNeeded = true;
     } else {
       // inhibit counter
       if( node5.child && !isHigh(node5.eval()) ) {
@@ -854,6 +868,7 @@ function Counter(x1,y1) {
         ++this.counter; // only count rising edge
         if( this.counter == 16) this.counter = 0; // reset counter
         this.textbox.text = (this.counter).toString();
+        renderNeeded = true;
       }
       if( isLow(currentState) && isHigh(this.state) ) { this.state = low;}
     }
@@ -958,6 +973,7 @@ function Lightbulb(x1,y1) {
                    isHigh( this.nodes[1].eval() ) ;// check node2
     if( (newState && !this.state) || (!newState && this.state) ) {
       this.state = newState;
+      renderNeeded = true;
       if( this.state ) { 
         canvas.remove(this.imgBulbOff);
 	      canvas.add(this.imgBulbOn);
@@ -1073,6 +1089,7 @@ function Heater(x1,y1) {
   canvas.add(this.imgRadiator);  
   this.imgRadiator.sendToBack();
   
+  var oldTemperature = temperatureInside;
   this.output = function() {
     var heatLoss = heatTransfer * (temperatureInside - temperatureOutside);
     temperatureInside += -heatLoss * clockPeriod*0.001 / heatCapacity;
@@ -1083,8 +1100,12 @@ function Heater(x1,y1) {
       temperatureInside += powerHeater * clockPeriod*0.001 / heatCapacity;
     }
     
-    this.textbox.text = temperatureInside.toFixed(1)+" \u2103";
-
+    var newTemperature = temperatureInside.toFixed(1);
+    if( Math.abs(oldTemperature-newTemperature) > 0.05 ) {
+      this.textbox.text = temperatureInside.toFixed(1)+" \u2103";
+      oldTemperature = newTemperature;
+      renderNeeded = true;
+    }
 
     return;
   }
@@ -1196,7 +1217,7 @@ function Voltmeter(x1,y1) {
   drawText(x1+4,y1+11,"0",8);
   drawText(x1+35,y1+11,"5",8);
   
-  this.display = new fabric.Line([x1+22,y1+22,x1+22,y1+4], {strokeWidth: 2, stroke: 'red' ,
+  this.display = new fabric.Line([x1+22,y1+22,x1+9,y1+9], {strokeWidth: 2, stroke: 'red' ,
                            selectable: false, evented: false});
   canvas.add(this.display); this.display.sendToBack();
 
@@ -1214,12 +1235,17 @@ function Voltmeter(x1,y1) {
   drawText(x1+1,y1+45,"volt-",12);
   drawElementBox(x1,y1,44,boxHeightSmall+10,'meter');
  
+  var lastState = 0.0;
   // Set voltage 
   this.output = function() { 
-    var angle = Math.PI*(0.25+0.5*(this.nodes[0].eval()/5.0));
+    var newState = this.nodes[0].eval();
+    if( Math.abs(newState-lastState) < 0.1) return true; 
+    var angle = Math.PI*(0.25+0.5*(newState/5.0));
     var x2 = x1+22 - 18*Math.cos(angle);
     var y2 = y1+22 - 18*Math.sin(angle);
     this.display.set({ 'x2': x2, 'y2': y2 });
+    renderNeeded = true;
+    lastState = newState;
     return true; 
   };
   this.remove = function() { };
@@ -1246,7 +1272,10 @@ function evaluateBoard() {
   for (i = 0; i < elements.length; i++) { 
      elements[i].output();
   } 
-  canvas.renderAll();
+  if( renderNeeded) {
+    canvas.requestRenderAll();
+    renderNeeded = false;
+  }
   //var t1 = performance.now()
   //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 }
@@ -1271,7 +1300,8 @@ canvas.on('mouse:up', function(e) {
     var p = e.target;
     if( !p || p.name != "button") return;
     // a mouse-click can be too short for the engine to evaluate itself
-    timeOutButton = setTimeout(function(){ p.node.state = low; }, clockPeriod+5); // add small delay
+    timeOutButton = setTimeout(function(){ p.node.state = low; renderNeeded = true}, 
+                               clockPeriod+5); // add small delay
     p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
     p.setGradient('stroke', gradientButtonUp );
 });     
