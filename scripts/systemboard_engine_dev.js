@@ -1405,6 +1405,13 @@ canvas.on('object:moved', function(e) {
         p.setCoords();
         p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
     }
+  
+  // test for iOS/Safari
+    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+    audioContext = new AudioContext();
+    audioContext.createGain();
+    console.log(audioContext.state); // running
+  
 });
 
 // Add listener for uploading files
