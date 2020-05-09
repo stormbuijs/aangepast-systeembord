@@ -32,6 +32,25 @@ fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 fabric.Textbox.prototype.objectCaching = false;
 fabric.Text.prototype.objectCaching = false;
 
+
+
+  // Create the AudioContext
+  var audioCtx = oscillator = gainNode = null;
+  try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext );
+  } catch (e) {
+    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+          'the latest version or downloading Google Chrome or Mozilla Firefox');
+  }
+
+  // Create the oscillator node for the buzzer sound
+  if( audioCtx ) {
+    console.log("add gain node 4");
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+  }
+
+
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
     var c = new fabric.Circle({left: left, top: top, radius: 3, fill: color, padding: 7});
@@ -563,21 +582,6 @@ function Buzzer(x1,y1) {
   
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
-  // Create the AudioContext
-  var audioCtx = oscillator = gainNode = null;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext );
-  } catch (e) {
-    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-          'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }
-
-  // Create the oscillator node for the buzzer sound
-  if( audioCtx ) {
-    console.log("add gain node 3");
-    gainNode = audioCtx.createGain();
-    gainNode.connect(audioCtx.destination);
-  }
 
   this.state = false;
   
@@ -1407,10 +1411,10 @@ canvas.on('object:moved', function(e) {
     }
   
   // test for iOS/Safari
-    window.AudioContext = window.AudioContext || window.webkitAudioContext;
-    audioContext = new AudioContext();
-    audioContext.createGain();
-    console.log(audioContext.state); // running
+  if( audioCtx.state == "suspended") {
+    audioCtx.createGain();
+    console.log("onmoved. audioCtx.state " + audioCtx.state); // running    
+  }
   
 });
 
