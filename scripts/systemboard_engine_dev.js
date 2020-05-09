@@ -38,6 +38,18 @@ fabric.Text.prototype.objectCaching = false;
   var audioCtx = oscillator = gainNode = null;
 
 
+function unlockAudioContext(context) {
+    if (context.state !== "suspended") return;
+    const b = document.body;
+    const events = ["touchstart", "touchend", "mousedown", "keydown"];
+    events.forEach(e => b.addEventListener(e, unlock, false));
+    function unlock() {context.resume().then(clean);console.log("context state="+context.state());}
+    function clean() {events.forEach(e => b.removeEventListener(e, unlock));}
+}
+
+//unlockAudioContext( audioCtx );
+
+
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
     var c = new fabric.Circle({left: left, top: top, radius: 3, fill: color, padding: 7});
@@ -1409,18 +1421,19 @@ canvas.on('object:moved', function(e) {
 
     // Create the oscillator node for the buzzer sound
   if( audioCtx ) {
-    console.log("add gain node 5");
+    console.log("add gain node 8");
     gainNode = audioCtx.createGain();
     gainNode.connect(audioCtx.destination);
   }
-
+  unlockAudioContext( audioCtx );
 
   }
   if( audioCtx.state == "suspended" ) {
   // Create the oscillator node for the buzzer sound
-    console.log("add gain node 6");
+    console.log("add gain node 9");
     gainNode = audioCtx.createGain();
     gainNode.connect(audioCtx.destination);
+    audioCtx.resume();
     console.log("onmoved. audioCtx.state " + audioCtx.state); // running    
   }
     
