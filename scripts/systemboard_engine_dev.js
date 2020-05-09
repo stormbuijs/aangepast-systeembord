@@ -591,7 +591,7 @@ function Buzzer(x1,y1) {
           audioCtx.resume();
           audioCtx.onstatechange = () => console.log(audioCtx.state);
           audioCtx.createGain();
-          console.log("Resumed? " + audioContext.state);
+          console.log("Resumed? " + audioCtx.state);
         }
         if( audioCtx ) {
             console.log("audioctx create osc "+audioCtx.state);
