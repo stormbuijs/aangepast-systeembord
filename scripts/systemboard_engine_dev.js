@@ -41,11 +41,41 @@ fabric.Text.prototype.objectCaching = false;
 function unlockAudioContext(context) {
     if (context.state !== "suspended") return;
     const b = document.body;
+  // Try to understand this below !!!
     const events = ["touchstart", "touchend", "mousedown", "keydown"];
     events.forEach(e => b.addEventListener(e, unlock, false));
-    function unlock() {context.resume().then(clean);console.log("context state="+context.state());}
+    function unlock() {context.resume().then(clean);console.log("context state="+context.state);}
     function clean() {events.forEach(e => b.removeEventListener(e, unlock));}
 }
+
+  // test for iOS/Safari
+  if( !audioCtx ) {
+      try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext );
+  } catch (e) {
+    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+          'the latest version or downloading Google Chrome or Mozilla Firefox');
+  }
+
+    // Create the oscillator node for the buzzer sound
+  if( audioCtx ) {
+    console.log("add gain node 10");
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+  }
+  unlockAudioContext( audioCtx );
+
+  }
+  if( audioCtx.state == "suspended" ) {
+  // Create the oscillator node for the buzzer sound
+    console.log("add gain node 11");
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+    audioCtx.resume();
+    console.log(". audioCtx.state " + audioCtx.state); // running    
+  }
+
+
 
 //unlockAudioContext( audioCtx );
 
@@ -1407,37 +1437,7 @@ canvas.on('object:moved', function(e) {
         p.set({ 'left': p.line1.x1, 'top' : p.line1.y1 } );
         p.setCoords();
         p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
-    }
-  
-  // test for iOS/Safari
-  if( !audioCtx ) {
-    
-      try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext );
-  } catch (e) {
-    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-          'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }
-
-    // Create the oscillator node for the buzzer sound
-  if( audioCtx ) {
-    console.log("add gain node 8");
-    gainNode = audioCtx.createGain();
-    gainNode.connect(audioCtx.destination);
-  }
-  unlockAudioContext( audioCtx );
-
-  }
-  if( audioCtx.state == "suspended" ) {
-  // Create the oscillator node for the buzzer sound
-    console.log("add gain node 9");
-    gainNode = audioCtx.createGain();
-    gainNode.connect(audioCtx.destination);
-    audioCtx.resume();
-    console.log("onmoved. audioCtx.state " + audioCtx.state); // running    
-  }
-    
- 
+    } 
   
 });
 
