@@ -574,7 +574,7 @@ function Buzzer(x1,y1) {
 
   // Create the oscillator node for the buzzer sound
   if( audioCtx ) {
-    console.log("add gain node 2");
+    console.log("add gain node 3");
     gainNode = audioCtx.createGain();
     gainNode.connect(audioCtx.destination);
   }
