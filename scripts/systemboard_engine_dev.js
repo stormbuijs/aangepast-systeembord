@@ -276,8 +276,8 @@ function SoundSensorNode(x1,y1,element) {
   var audioContext = null;
 
   this.eval = function() { 
-    /*if( !audioContext ) {
-      // Initialize the audio context
+    // Initialize the audio context
+    if( !audioContext ) {
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext );
       } catch (e) {
@@ -313,7 +313,10 @@ function SoundSensorNode(x1,y1,element) {
       } else {
           element.textbox.setColor('darkgrey');
       }
-    }*/
+    } else if (audioContext.state == 'suspended') {
+      audioContext.resume();
+    }
+
     return this.state; 
   };
 }    
@@ -582,6 +585,7 @@ function Buzzer(x1,y1) {
     var result = this.nodes[0].eval();
       if( isHigh(result) && !this.state) {    
         this.state = true;
+        if (audioCtx.state == 'suspended') audioCtx.resume();
         if( audioCtx ) {
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
@@ -1163,7 +1167,7 @@ function SoundSensor(x1,y1) {
 
   // Default functions
   this.output = function() { 
-    if( audioContext ) audioContext.resume();
+    //if( audioContext ) audioContext.resume();
     return true; 
   };
   this.remove = function() { };
@@ -1171,7 +1175,7 @@ function SoundSensor(x1,y1) {
   // Hack for iOS to force audioContext to work (needs prompting user)
   //var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
   //if( iOS ) {
-      var audioContext = null;
+  /*    var audioContext = null;
       // Initialize the audio context
       try {
         audioContext = new (window.AudioContext || window.webkitAudioContext );
@@ -1207,7 +1211,7 @@ function SoundSensor(x1,y1) {
       });
       } else {
           _this.textbox.setColor('darkgrey');
-      }
+      }*/
   //}    
 }    
 
