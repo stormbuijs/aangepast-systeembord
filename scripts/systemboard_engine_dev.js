@@ -574,7 +574,7 @@ function Buzzer(x1,y1) {
 
   // Create the oscillator node for the buzzer sound
   if( audioCtx ) {
-    console.log("add gain node");
+    console.log("add gain node 2");
     gainNode = audioCtx.createGain();
     gainNode.connect(audioCtx.destination);
   }
@@ -590,6 +590,8 @@ function Buzzer(x1,y1) {
         if (audioCtx.state == 'suspended') {
           audioCtx.resume();
           audioCtx.onstatechange = () => console.log(audioCtx.state);
+          audioCtx.createGain();
+          console.log("Resumed? " + audioContext.state);
         }
         if( audioCtx ) {
             console.log("audioctx create osc "+audioCtx.state);
