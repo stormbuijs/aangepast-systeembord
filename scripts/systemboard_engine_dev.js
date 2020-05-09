@@ -36,19 +36,6 @@ fabric.Text.prototype.objectCaching = false;
 
   // Create the AudioContext
   var audioCtx = oscillator = gainNode = null;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext );
-  } catch (e) {
-    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-          'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }
-
-  // Create the oscillator node for the buzzer sound
-  if( audioCtx ) {
-    console.log("add gain node 4");
-    gainNode = audioCtx.createGain();
-    gainNode.connect(audioCtx.destination);
-  }
 
 
 // Make movable circle for wire
@@ -1411,10 +1398,33 @@ canvas.on('object:moved', function(e) {
     }
   
   // test for iOS/Safari
-  if( audioCtx.state == "suspended") {
-    audioCtx.createGain();
+  if( !audioCtx ) {
+    
+      try {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext );
+  } catch (e) {
+    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+          'the latest version or downloading Google Chrome or Mozilla Firefox');
+  }
+
+    // Create the oscillator node for the buzzer sound
+  if( audioCtx ) {
+    console.log("add gain node 5");
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
+  }
+
+
+  }
+  if( audioCtx.state == "suspended" ) {
+  // Create the oscillator node for the buzzer sound
+    console.log("add gain node 6");
+    gainNode = audioCtx.createGain();
+    gainNode.connect(audioCtx.destination);
     console.log("onmoved. audioCtx.state " + audioCtx.state); // running    
   }
+    
+ 
   
 });
 
