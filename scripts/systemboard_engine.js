@@ -32,6 +32,61 @@ fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 fabric.Textbox.prototype.objectCaching = false;
 fabric.Text.prototype.objectCaching = false;
 
+// Set empty AudioContext, etc
+var audioCtx = null, oscillator = null, gainNode = null;
+
+// audioContext starts always in suspended mode in iOS/Safari. 
+// Requires user interaction (event) to resume.
+function unlockAudioContext(context) {
+  if (context.state !== "suspended") return;
+  const b = document.body;
+  const events = ["touchstart", "touchend", "mousedown", "keydown"];
+  events.forEach(e => b.addEventListener(e, unlock, false));
+  function unlock() {context.resume().then(clean);}
+  function clean() {
+    events.forEach(e => b.removeEventListener(e, unlock));
+    console.log("AudioContext unlocked. State="+context.state);
+  }
+}
+
+// Initialize AudioContext for buzzer and microphone
+try {
+  audioCtx = new (window.AudioContext || window.webkitAudioContext );
+} catch (e) {
+  alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
+        'the latest version or downloading Google Chrome or Mozilla Firefox');
+}
+    
+// Create the gain node for the buzzer sound
+if( audioCtx ) {
+  gainNode = audioCtx.createGain();
+  gainNode.connect(audioCtx.destination);
+  unlockAudioContext( audioCtx );
+}
+
+// Play a buzzing sound (until stopBuzzer is called)
+function startBuzzer() {
+  if( audioCtx && gainNode ) {
+    if (audioCtx.state == 'suspended') {
+      audioCtx.resume().then( function() {
+        oscillator = audioCtx.createOscillator();      
+        oscillator.connect(gainNode);
+        oscillator.start();
+      });
+    } else {
+      oscillator = audioCtx.createOscillator();      
+      oscillator.connect(gainNode);
+      oscillator.start();
+    }
+  }
+}
+
+// Stop the buzzer
+function stopBuzzer() {
+  if( oscillator ) oscillator.stop();
+}
+
+
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
     var c = new fabric.Circle({left: left, top: top, radius: 3, fill: color, padding: 7});
@@ -273,29 +328,23 @@ function SoundSensorNode(x1,y1,element) {
   this.wire = makeWire(x1,y1,this);
   this.element = element
 
-  var audioContext = null;
-
+  var micStarted = false;
+  var analyser = null, microphone = null, javascriptNode = null;
   this.eval = function() { 
-    /*if( !audioContext ) {
-      // Initialize the audio context
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext );
-      } catch (e) {
-        alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-             'the latest version or downloading Google Chrome or Mozilla Firefox');
-      }
-      
-      // Start the audio stream
-      var _this = this;
-      if( audioContext ) {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      .then(function(stream) {
-          analyser = audioContext.createAnalyser();
-          microphone = audioContext.createMediaStreamSource(stream);
-          javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+    // Initialize the microphone
+    if( audioCtx ) {
+      if( !micStarted ) {      
+        micStarted = true;
+        var _this = this;
+        // Start the audio stream
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then(function(stream) {
+          analyser = audioCtx.createAnalyser();
+          microphone = audioCtx.createMediaStreamSource(stream);
+          javascriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
           microphone.connect(analyser);
           analyser.connect(javascriptNode);
-          javascriptNode.connect(audioContext.destination);
+          javascriptNode.connect(audioCtx.destination);
           javascriptNode.onaudioprocess = function() {
             var array = new Uint8Array(analyser.frequencyBinCount);
             analyser.getByteFrequencyData(array);
@@ -305,17 +354,21 @@ function SoundSensorNode(x1,y1,element) {
             var soundLevel = values / length;
             _this.state = Math.min(0.05 * soundLevel, 5.0) ;
           }
-      })
-      .catch(function(err) {
+        })
+        .catch(function(err) {
           element.textbox.setColor('darkgrey');
+          renderNeeded = true;
           console.log("The following error occured: " + err.name);
-      });
-      } else {
-          element.textbox.setColor('darkgrey');
+        });
+      } else if (audioCtx.state == 'suspended') {
+        audioCtx.resume();
       }
-    }*/
+    } else { // no audioCtx
+      element.textbox.setColor('darkgrey');
+      renderNeeded = true;
+    }
     return this.state; 
-  };
+  }
 }    
 
 
@@ -560,20 +613,6 @@ function Buzzer(x1,y1) {
   
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
-  // Create the AudioContext
-  var audioCtx = oscillator = gainNode = null;
-  try {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext );
-  } catch (e) {
-    alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-          'the latest version or downloading Google Chrome or Mozilla Firefox');
-  }
-
-  // Create the oscillator node for the buzzer sound
-  if( audioCtx ) {
-    gainNode = audioCtx.createGain();
-    gainNode.connect(audioCtx.destination);
-  }
 
   this.state = false;
   
@@ -582,17 +621,13 @@ function Buzzer(x1,y1) {
     var result = this.nodes[0].eval();
       if( isHigh(result) && !this.state) {    
         this.state = true;
-        if( audioCtx ) {
-          oscillator = audioCtx.createOscillator();      
-          oscillator.connect(gainNode);
-          oscillator.start();
-        }
+        startBuzzer();
         c1.set({strokeWidth: 1});
         c2.set({strokeWidth: 1});
         renderNeeded = true;
       } else if(!isHigh(result) && this.state) {
         this.state = false;
-        if( oscillator ) oscillator.stop();
+        stopBuzzer();
         c1.set({strokeWidth: 0});
         c2.set({strokeWidth: 0});        
         renderNeeded = true;
@@ -1162,53 +1197,8 @@ function SoundSensor(x1,y1) {
   this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor');
 
   // Default functions
-  this.output = function() { 
-    if( audioContext ) audioContext.resume();
-    return true; 
-  };
+  this.output = function() { return true; }
   this.remove = function() { };
-
-  // Hack for iOS to force audioContext to work (needs prompting user)
-  //var iOS = !!navigator.platform && /iPad|iPhone|iPod/.test(navigator.platform);
-  //if( iOS ) {
-      var audioContext = null;
-      // Initialize the audio context
-      try {
-        audioContext = new (window.AudioContext || window.webkitAudioContext );
-      } catch (e) {
-        alert('Web Audio API not supported by your browser. Please, consider upgrading to '+
-             'the latest version or downloading Google Chrome or Mozilla Firefox');
-      }
-      
-      // Start the audio stream
-      var _this = this;
-      if( audioContext ) {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-      .then(function(stream) {
-          analyser = audioContext.createAnalyser();
-          microphone = audioContext.createMediaStreamSource(stream);
-          javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
-          microphone.connect(analyser);
-          analyser.connect(javascriptNode);
-          javascriptNode.connect(audioContext.destination);
-          javascriptNode.onaudioprocess = function() {
-            var array = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(array);
-            var values = 0;
-            var length = array.length;
-            for (var i = 0; i < length; i++) { values += array[i]; };
-            var soundLevel = values / length;
-            _this.nodes[0].state = Math.min(0.05 * soundLevel, 5.0) ;
-          }
-      })
-      .catch(function(err) {
-          _this.textbox.setColor('darkgrey');
-          console.log("The following error occured: " + err.name);
-      });
-      } else {
-          _this.textbox.setColor('darkgrey');
-      }
-  //}    
 }    
 
 // Voltmeter
@@ -1392,7 +1382,8 @@ canvas.on('object:moved', function(e) {
         p.set({ 'left': p.line1.x1, 'top' : p.line1.y1 } );
         p.setCoords();
         p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
-    }
+    } 
+  
 });
 
 // Add listener for uploading files
