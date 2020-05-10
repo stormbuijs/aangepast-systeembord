@@ -670,7 +670,7 @@ function inputDOM(x1,y1,name,value,step,min,max){
 }
     
 // Create a pulse generator
-function Pulse(x1,y1) {
+function Pulse(x1,y1,inputValue="1") {
   this.x = x1;
   this.y = y1; 
   drawText(x1+70,y1+30,"Hz",12);
@@ -685,7 +685,8 @@ function Pulse(x1,y1) {
   var elementName = "frequency"+x1.toString()+y1.toString();
     
   // Create an input DOM element
-  var input = inputDOM(x1+20,y1+10,elementName,"1","0.1","0.1","10");
+  inputValue = (inputValue == "" ) ? "1" : inputValue;
+  this.input = inputDOM(x1+20,y1+10,elementName,inputValue,"0.1","0.1","10");
 
   this.pulseStarted = false;
   this.output = function() { return true; };
@@ -694,9 +695,11 @@ function Pulse(x1,y1) {
   var timer;
   this.startPulse = function() {
     node.state = invert(node.state);
-    var myElement = document.getElementById(elementName);
+    //var myElement = document.getElementById(elementName);
     var _this = this;
-    timer = setTimeout(function() { _this.startPulse(); }, 500/(myElement.value));
+    //timer = setTimeout(function() { _this.startPulse(); }, 500/(myElement.value));
+    timer = setTimeout(function() { _this.startPulse(); }, 500/(_this.input.value));
+
   }
   this.startPulse();
   
@@ -705,14 +708,15 @@ function Pulse(x1,y1) {
     // Stop the pulse generator
     clearTimeout(timer);
     // Remove the DOM element
-    var myElement = document.getElementById(elementName);
-    myElement.remove();
+    //var myElement = document.getElementById(elementName);
+    this.input.remove();
+    //myElement.remove();
   }
   
 }    
 
 // Variable voltage power
-function VarVoltage(x1,y1) {
+function VarVoltage(x1,y1,inputValue="0") {
   this.x = x1;
   this.y = y1;
   
@@ -728,27 +732,29 @@ function VarVoltage(x1,y1) {
   var elementName = "voltage"+x1.toString()+y1.toString();
 
   // Create an input DOM element
-  var input = inputDOM(x1+20,y1+10,elementName,"0","0.1","0","5");
+  inputValue = (inputValue == "") ? "0" : inputValue;
+  this.input = inputDOM(x1+20,y1+10,elementName,inputValue,"0.1","0","5");
 
   // Create an ouput node and set voltage from the DOM element
-  node.state = input.value;
+  node.state = this.input.value;
   this.output = function() {
-    this.nodes[0].state = input.value;
+    this.nodes[0].state = this.input.value;
     return true;
   };
 
   // Delete the dom element
-    this.remove = function() {
-      // Remove the DOM element
-      var myElement = document.getElementById(elementName);
-      myElement.remove();
-    }
+  this.remove = function() {
+    // Remove the DOM element
+    //var myElement = document.getElementById(elementName);
+    //myElement.remove();
+    this.input.remove();
+  }
 
 
 }    
 
 // Comparator
-function Comparator(x1,y1) {
+function Comparator(x1,y1,inputValue="2.5") {
   this.x = x1;
   this.y = y1;
   drawText(x1+120,y1+80,"V",12);
@@ -778,20 +784,22 @@ function Comparator(x1,y1) {
   var elementName = "voltage"+x1.toString()+y1.toString();
       
   // Create an input DOM element
-  var input = inputDOM(x1+70,y1+60,elementName,"2.5","0.1","0","5");
+  inputValue = (inputValue == "") ? "2.5" : inputValue;
+  this.input = inputDOM(x1+70,y1+60,elementName,inputValue,"0.1","0","5");
     
   // Create the node
-  node2.compare = input.value; // set compare value
+  node2.compare = this.input.value; // set compare value
   this.output = function() {
-      this.nodes[1].compare = input.value;
+      this.nodes[1].compare = this.input.value;
       return true;
   };
   
   // Delete the dom element
   this.remove = function() {
-  // Remove the DOM element
-  var myElement = document.getElementById(elementName);
-    myElement.remove();
+    // Remove the DOM element
+    //var myElement = document.getElementById(elementName);
+    //myElement.remove();
+    this.input.remove();
   }
   
 }
@@ -1421,7 +1429,14 @@ function parseFile(xml) {
      
     var x = parseInt( domElements[i].getAttribute('x')); 
     var y = parseInt( domElements[i].getAttribute('y'));
-    addElement(className,x,y); 
+    var inputValue = "";
+    if( className == "Comparator" || 
+        className == "VarVoltage" ||
+        className == "Pulse" ) {
+      inputValue = domElements[i].getAttribute('inputValue');
+      if( !inputValue ) inputValue = "";
+    }
+    addElement(className,x,y,inputValue); 
   }    
   
   // Second loop to add the links
@@ -1453,7 +1468,7 @@ function parseFile(xml) {
 }
 
 
-function addElement(className,x1,y1){
+function addElement(className,x1,y1,inputValue){
   switch( className ) {
     case "Board" :
       elements.push(new Board(x1,y1));
@@ -1462,13 +1477,13 @@ function addElement(className,x1,y1){
       elements.push(new Switch(x1,y1));
     break;
     case "Pulse" :
-      elements.push(new Pulse(x1,y1));
+      elements.push(new Pulse(x1,y1,inputValue));
     break;
     case "VarVoltage" :
-      elements.push(new VarVoltage(x1,y1));
+      elements.push(new VarVoltage(x1,y1,inputValue));
     break;
     case "Comparator" :
-      elements.push(new Comparator(x1,y1));
+      elements.push(new Comparator(x1,y1,inputValue));
     break;
     case "ANDPort" :
       elements.push(new ANDPort(x1,y1));
@@ -1553,6 +1568,15 @@ function createXmlFile(){
     var attPosY = xmlDoc.createAttribute("y");
     attPosY.nodeValue = elements[i].y.toString();
     newElement.setAttributeNode(attPosY);
+    
+    //console.log("Node name="+attName.nodeValue);
+    if( attName.nodeValue == "Comparator" || 
+        attName.nodeValue == "VarVoltage" ||
+        attName.nodeValue == "Pulse" ) {
+      var attInput = xmlDoc.createAttribute("inputValue");
+      attInput.nodeValue = elements[i].input.value.toString();
+      newElement.setAttributeNode(attInput);
+    }
 
     x.appendChild(newElement);
     for (var j = 0; j < elements[i].nodes.length; j++) {
