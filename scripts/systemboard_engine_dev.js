@@ -35,19 +35,17 @@ fabric.Text.prototype.objectCaching = false;
 // Set empty AudioContext, etc
 var audioCtx = null, oscillator = null, gainNode = null;
 
-// audioContext starts always in resumed mode in iOS/Safari. 
-// Requires user interaction (event) to start
+// audioContext starts always in suspended mode in iOS/Safari. 
+// Requires user interaction (event) to resume.
 function unlockAudioContext(context) {
-  alert("AudioContext unlocking6. State="+context.state);
   if (context.state !== "suspended") return;
   const b = document.body;
   const events = ["touchstart", "touchend", "mousedown", "keydown"];
   events.forEach(e => b.addEventListener(e, unlock, false));
-  function unlock() {context.resume().then(clean);alert("Resume called. State="+context.state);}
+  function unlock() {context.resume().then(clean);}
   function clean() {
     events.forEach(e => b.removeEventListener(e, unlock));
     console.log("AudioContext unlocked. State="+context.state);
-    alert("AudioContext unlocked. State="+context.state);
   }
 }
 
@@ -65,6 +63,29 @@ if( audioCtx ) {
   gainNode.connect(audioCtx.destination);
   unlockAudioContext( audioCtx );
 }
+
+// Play a buzzing sound (until stopBuzzer is called)
+function startBuzzer() {
+  if( audioCtx && gainNode ) {
+    if (audioCtx.state == 'suspended') {
+      audioCtx.resume().then( function() {
+        oscillator = audioCtx.createOscillator();      
+        oscillator.connect(gainNode);
+        oscillator.start();
+      });
+    } else {
+      oscillator = audioCtx.createOscillator();      
+      oscillator.connect(gainNode);
+      oscillator.start();
+    }
+  }
+}
+
+// Stop the buzzer
+function stopBuzzer() {
+  if( oscillator ) oscillator.stop();
+}
+
 
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
@@ -600,28 +621,13 @@ function Buzzer(x1,y1) {
     var result = this.nodes[0].eval();
       if( isHigh(result) && !this.state) {    
         this.state = true;
-        if( audioCtx && gainNode ) {
-          alert("AudioContext buzzer1. State="+audioCtx.state);
-          if (audioCtx.state == 'suspended') {
-            audioCtx.resume().then( function() {
-              alert("AudioContext buzzer2. State="+audioCtx.state);
-              oscillator = audioCtx.createOscillator();      
-              oscillator.connect(gainNode);
-              oscillator.start();
-            });
-          } else {
-          alert("AudioContext buzzer3. State="+audioCtx.state);
-          oscillator = audioCtx.createOscillator();      
-          oscillator.connect(gainNode);
-          oscillator.start();
-          }
-        }
+        startBuzzer();
         c1.set({strokeWidth: 1});
         c2.set({strokeWidth: 1});
         renderNeeded = true;
       } else if(!isHigh(result) && this.state) {
         this.state = false;
-        if( oscillator ) oscillator.stop();
+        stopBuzzer();
         c1.set({strokeWidth: 0});
         c2.set({strokeWidth: 0});        
         renderNeeded = true;
