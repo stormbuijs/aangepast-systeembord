@@ -32,6 +32,8 @@
           <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
           <input id="download_xml" type="button" value="Sla op (download) als:">
           <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
+          <button onclick="oscillator=audioCtx.createOscillator(); oscillator.connect(gainNode);oscillator.start();">play</button>
+                    <button onclick="oscillator.stop();">stop</button>
         </div>
       </div>
       <div class="column right">
