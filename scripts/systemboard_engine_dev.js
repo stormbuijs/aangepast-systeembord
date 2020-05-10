@@ -601,16 +601,20 @@ function Buzzer(x1,y1) {
       if( isHigh(result) && !this.state) {    
         this.state = true;
         if( audioCtx && gainNode ) {
-          alert("AudioContext buzzer. State="+audioCtx.state);
+          alert("AudioContext buzzer1. State="+audioCtx.state);
           if (audioCtx.state == 'suspended') {
-            audioCtx.resume();
-            audioCtx.onstatechange = () => console.log("audioCtx suspended->"+ 
-                                                       audioCtx.state);
-          }
-          alert("AudioContext buzzer2. State="+audioCtx.state);
+            audioCtx.resume().then( function() {
+              alert("AudioContext buzzer2. State="+audioCtx.state);
+              oscillator = audioCtx.createOscillator();      
+              oscillator.connect(gainNode);
+              oscillator.start();
+            });
+          } else {
+          alert("AudioContext buzzer3. State="+audioCtx.state);
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
           oscillator.start();
+          }
         }
         c1.set({strokeWidth: 1});
         c2.set({strokeWidth: 1});
