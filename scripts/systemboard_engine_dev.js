@@ -601,11 +601,13 @@ function Buzzer(x1,y1) {
       if( isHigh(result) && !this.state) {    
         this.state = true;
         if( audioCtx && gainNode ) {
+          alert("AudioContext buzzer. State="+context.state);
           if (audioCtx.state == 'suspended') {
             audioCtx.resume();
             audioCtx.onstatechange = () => console.log("audioCtx suspended->"+ 
                                                        audioCtx.state);
           }
+          alert("AudioContext buzzer2. State="+context.state);
           oscillator = audioCtx.createOscillator();      
           oscillator.connect(gainNode);
           oscillator.start();
