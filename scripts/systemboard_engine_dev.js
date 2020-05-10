@@ -38,7 +38,7 @@ var audioCtx = null, oscillator = null, gainNode = null;
 // audioContext starts always in resumed mode in iOS/Safari. 
 // Requires user interaction (event) to start
 function unlockAudioContext(context) {
-  alert("AudioContext unlocking3. State="+context.state);
+  alert("AudioContext unlocking4. State="+context.state);
   if (context.state !== "suspended") return;
   const b = document.body;
   const events = ["touchstart", "touchend", "mousedown", "keydown"];
