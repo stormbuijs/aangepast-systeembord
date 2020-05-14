@@ -24,6 +24,12 @@ var eventCounter = 0;
 // Global flag for rendering
 var renderNeeded = true;
 
+// Global flag to fix position of components
+var moveComponents = false;
+
+// Global flag to delete components on mouse click
+var deleteComponents = false;
+
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, preserveObjectStacking: true  });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
@@ -555,20 +561,21 @@ function ANDPort(x1,y1) {
   drawElementBox(x1,y1,boxWidth,boxHeight,'EN-poort');
 */
   
-  var group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeight,'EN-poort'),
-                                drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
-                                drawLine([25, 25, 25, 40]),
-                                drawLine([25, 40, 0.5*boxWidth, 40]),
-                                drawLine([25, boxHeight-25, 25, boxHeight-40]),
-                                drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
-                                drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "&")]
-                                .concat(drawCircles(x1,y1,this.nodes, "blue")),
-                                {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
-                                 hasControls: false, hasBorders: false });
-  group.name = "element";
-  group.element = this;
-  canvas.add(group)
-  group.sendToBack();
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeight,'EN-poort'),
+                                 drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                                 drawLine([25, 25, 25, 40]),
+                                 drawLine([25, 40, 0.5*boxWidth, 40]),
+                                 drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                                 drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                                 drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "&")]
+                                 .concat(drawCircles(x1,y1,this.nodes, "blue")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: false, evented: false });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group)
+  this.group.sendToBack();
   
     
   this.output = function() {return true;};
@@ -1356,11 +1363,11 @@ function Voltmeter(x1,y1) {
 
 
 function removeElements() {
-  canvas.clear();
   for (i = 0; i < elements.length; i++) { 
     elements[i].remove();
   }
   elements = [];
+  canvas.clear();
 }
 
 
@@ -1370,7 +1377,7 @@ var elements = [];
 function evaluateBoard() {
   //var t0 = performance.now()
   eventCounter++;
-  for (i = 0; i < elements.length; i++) { 
+  for (var i = 0; i < elements.length; i++) { 
      elements[i].output();
   } 
   if( renderNeeded) {
@@ -1384,6 +1391,24 @@ function evaluateBoard() {
 // Make sure that the engine is run every clockPeriod  
 setInterval(evaluateBoard, clockPeriod);
 
+
+function toggleMoving() {
+  // Toggle 
+  moveComponents = !moveComponents;
+
+  // Make the components evented
+  for (var i = 0; i < elements.length; i++) { 
+    if( elements[i].constructor.name == "ANDPort" ){
+    if( moveComponents ) elements[i].group.set({selectable: true, evented: true});
+    else elements[i].group.set({selectable: false, evented: false});
+    }
+  }
+  
+  // Change button text
+  var checkbox = document.getElementById("toggleMoving");
+  if( moveComponents ) checkbox.innerHTML = "Verplaatsen... &#10003;";
+  else checkbox.innerHTML = "Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;";    
+}
 
 // Change button color and state of OutputNode when pushed
 canvas.on({'mouse:down':mouseClick});
@@ -1476,12 +1501,14 @@ function moveElement(p){
 
   // Update the wire
   for( var i = 0; i < nodes.length; i++) {
+    // Connected input node 
     if( nodes[i].isInput && nodes[i].child ) {
       var wires = nodes[i].child.wires;
       for( var j = 0; j< wires.length; j++ ) {
         var wire = wires[j];
         if( wire.connection == nodes[i] ) {
           wire.set({ 'left': wire.left+diffX, 'top': wire.top+diffY });
+          wire.setCoords();
           wire.line1.set({ 'x2': wire.left, 'y2': wire.top });
         }
       }
@@ -1494,6 +1521,7 @@ function moveElement(p){
         wire.line1.set({ 'x1': wire.line1.x1+diffX, 'y1': wire.line1.y1+diffY });
         if( !wire.connection ) {
           wire.set({ 'left': wire.left+diffX, 'top': wire.top+diffY });
+          wire.setCoords();
           wire.line1.set({ 'x2': wire.line1.x2+diffX, 'y2': wire.line1.y2+diffY });
         }
         //wire.line1.bringToFront();
@@ -1518,6 +1546,7 @@ canvas.on('object:moved', function(e) {
         var node2 = elements[i].nodes[j];
         if( p.left == node2.x1 && p.top == node2.y1 ) {
           if( node1.isInput && !(node2.isInput) && !(node1.child) ) {
+            console.log("Deze code kan weg. Hier zou je nooit mogen komen.");
             node1.child = node2;
             p.connection = node1;
             p.bringToFront();
@@ -1536,9 +1565,11 @@ canvas.on('object:moved', function(e) {
       }
     }
     if( snapped == false ) {
-        p.set({ 'left': p.line1.x1, 'top' : p.line1.y1 } );
-        p.setCoords();
-        p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
+      // Set back to original position
+      p.connection = null;
+      p.set({ 'left': p.line1.x1, 'top' : p.line1.y1 } );
+      p.setCoords();
+      p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
     } 
   
 });
