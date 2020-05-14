@@ -1609,7 +1609,7 @@ function moveElement(p){
 
 
 
-// After moving wire: destroy create new links
+// After moving wire: destroy and create new links
 canvas.on('object:moved', function(e) {
     var p = e.target;
     if( p.name != "wire" ) return;
@@ -1620,7 +1620,7 @@ canvas.on('object:moved', function(e) {
       for (j = 0; j < elements[i].nodes.length; j++) {
         var node1 = p.node;
         var node2 = elements[i].nodes[j];
-        if( p.left == node2.x1 && p.top == node2.y1 ) {
+        if( p.left == node2.x1 && p.top == node2.y1 ) { // Not such a good check...
           if( node1.isInput && !(node2.isInput) && !(node1.child) ) {
             console.log("Deze code kan weg. Hier zou je nooit mogen komen.");
             node1.child = node2;
@@ -1641,11 +1641,19 @@ canvas.on('object:moved', function(e) {
       }
     }
     if( snapped == false ) {
-      // Set back to original position
-      p.connection = null;
-      p.set({ 'left': p.line1.x1, 'top' : p.line1.y1 } );
-      p.setCoords();
-      p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
+      if( p.connection ) { // wire can be removed from list and canvas
+        var wires = p.node.wires;
+        var index = wires.indexOf(p);
+        if (index > -1) wires.splice(index, 1);
+        canvas.remove(p.line1);
+        canvas.remove(p);
+        //console.log( "Number of wires ="+wires.length.toString() );
+      } else {
+        // Set back to original position
+        p.set({ 'left': p.line1.x1, 'top' : p.line1.y1 } );
+        p.setCoords();
+        p.line1.set({ 'x2': p.line1.x1, 'y2': p.line1.y1 });
+      }
     } 
   
 });
