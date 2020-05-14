@@ -577,9 +577,46 @@ function ANDPort(x1,y1) {
   canvas.add(this.group)
   this.group.sendToBack();
   
-    
   this.output = function() {return true;};
-  this.remove = function() { };
+  this.remove = function() { 
+    canvas.remove( this.group );
+
+    // loop over nodes and remove wires
+    for( var i=0; i<this.nodes.length; ++i) {
+      var node = this.nodes[i];
+      // Remove input node
+      if( node.isInput ) {
+        if( node.child ) {
+          for( var j=0; j<node.child.wires.length; ++j) {
+            var wire = node.child.wires[j];
+            if( wire.connection == node  ) {
+              // remove wire
+              wire.connection = null;
+              canvas.remove( wire.line1 );
+              canvas.remove( wire );
+            }
+          }
+        }
+        node.child = null;
+      }
+      // Remove output node
+      if( !node.isInput ) {
+        for( var j=0; j<node.wires.length; ++j) {
+          var wire = node.wires[j];
+          canvas.remove( wire.line1 );
+          canvas.remove( wire );
+          if( wire.connection ) {
+            wire.connection.child = null;
+          }
+          wire.connection = null; 
+          wire.node = null; // better to remove wire object itself
+
+        }
+      }
+    }
+    // remove element object itself
+    // ...
+  }
 }
 
 // Create OR port with its nodes
@@ -1396,6 +1433,8 @@ function toggleMoving() {
   // Toggle 
   moveComponents = !moveComponents;
 
+  if( deleteComponents && moveComponents ) toggleDelete();
+
   // Make the components evented
   for (var i = 0; i < elements.length; i++) { 
     if( elements[i].constructor.name == "ANDPort" ){
@@ -1410,26 +1449,63 @@ function toggleMoving() {
   else checkbox.innerHTML = "Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;";    
 }
 
+
+function toggleDelete() {
+  // Toggle 
+  deleteComponents = !deleteComponents;
+  
+  if( deleteComponents && moveComponents ) toggleMoving();
+
+  // Make the components evented
+  for (var i = 0; i < elements.length; i++) { 
+    if( elements[i].constructor.name == "ANDPort" ){
+    if( deleteComponents ) elements[i].group.set({selectable: false, evented: true});
+    else elements[i].group.set({selectable: false, evented: false});
+    }
+  }
+  
+  // Change button text
+  var checkbox = document.getElementById("toggleDelete");
+  if( deleteComponents ) checkbox.innerHTML = "Verwijderen... &#10003;";
+  else checkbox.innerHTML = "Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;";    
+}
+
+
+
 // Change button color and state of OutputNode when pushed
 canvas.on({'mouse:down':mouseClick});
 function mouseClick(e) {
-    var p = e.target;
-    if( !p || p.name != "button") return;
+  var p = e.target;
+  if( p && p.name == "button") {
     p.node.state = invert(p.node.state);
     p.node.state = high;
     p.set({ fill: '#333333', strokeWidth: 3, radius: 10});
-    p.setGradient('stroke', gradientButtonDw );  
+    p.setGradient('stroke', gradientButtonDw );
+  }
 }
     
 // Change button color and state of OutputNode to low when mouse is up
 canvas.on('mouse:up', function(e) {
-    var p = e.target;
-    if( !p || p.name != "button") return;
+  var p = e.target;
+  if( deleteComponents && p && p.name == "element") {
+    p.element.remove();
+    // Delete the element from the list of elements
+    // ...
+    //console.log("before");
+    //console.log(elements);
+    var index = elements.indexOf(p.element);
+    if (index > -1) elements.splice(index, 1);
+    //console.log("after");
+    //console.log(elements);   
+    
+  }
+  if( p && p.name == "button") {
     // a mouse-click can be too short for the engine to evaluate itself
     timeOutButton = setTimeout(function(){ p.node.state = low; renderNeeded = true}, 
                                clockPeriod+5); // add small delay
     p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
     p.setGradient('stroke', gradientButtonUp );
+  }
 });     
     
 // Control behaviour when moving wire
