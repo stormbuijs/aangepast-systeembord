@@ -440,8 +440,8 @@ function drawSymbolBox(x1,y1,text){
 
 function drawText(x1,y1,text,fontsize=10){
   // Draw text
-  var txt = new fabric.Textbox(text, {left: x1, top: y1, originX: 'left', originY: 'bottom', 
-                                      width: 20, fontSize: fontsize, fontFamily: 'Arial', 
+  var txt = new fabric.Text(text, {left: x1, top: y1, originX: 'left', originY: 'bottom', 
+                                      width: 5, fontSize: fontsize, fontFamily: 'Arial', 
                                       selectable: true, evented: true });
   //canvas.add(txt)
   //txt.sendToBack();
@@ -848,12 +848,10 @@ function Switch(x1,y1) {
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;
   //drawConnectors(this.nodes, "yellow");
-  // Draw the push button
-  //drawButton(x1+25, y1+0.5*boxHeightSmall, node);
   //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
   
   this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'drukschakelaar'), 
-                                 drawButton(25, 0.5*boxHeightSmall, node)]
+                                 /*drawButton(25, 0.5*boxHeightSmall, node)*/]
                                  .concat(drawCircles(x1,y1,this.nodes, "yellow")),
                                  {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
                                   hasControls: false, hasBorders: false, 
@@ -865,6 +863,11 @@ function Switch(x1,y1) {
   // Move output wires back to front
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
   
+  // Draw the push button
+  this.button = drawButton(x1+25, y1+0.5*boxHeightSmall, node);
+  canvas.add(this.button);
+  //this.button.sendToBack();
+
   this.remove = function() { };
 }
 
@@ -1199,7 +1202,7 @@ function Counter(x1,y1) {
                                  drawText(2*boxWidth-78,14,"4"),
                                  drawText(2*boxWidth-53,14,"2"),
                                  drawText(2*boxWidth-28,14,"1"),
-                                 drawButton(100, boxHeight-20, node6) ]
+                                 /*drawButton(100, boxHeight-20, node6)*/ ]
                                  .concat(drawCircles(x1,y1,this.nodes, "blue")),
                                  {left: x1+boxWidth, top: y1+0.5*boxHeight,
                                   hasControls: false, hasBorders: false, 
@@ -1210,6 +1213,10 @@ function Counter(x1,y1) {
   canvas.add(this.group);
   // Move output wires back to front
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
+    // Draw the push button
+  this.button = drawButton(x1+100, y1+boxHeight-20, node6) ;
+  canvas.add(this.button);
   
   this.output = function() {
     // reset counter (check button or reset node)
@@ -1598,27 +1605,44 @@ function Voltmeter(x1,y1) {
   this.x = x1;
   this.y = y1;
 
-  drawText(x1+4,y1+11,"0",8);
-  drawText(x1+35,y1+11,"5",8);
+  //drawText(x1+4,y1+11,"0",8);
+  //drawText(x1+35,y1+11,"5",8);
   
   this.display = new fabric.Line([x1+22,y1+22,x1+9,y1+9], {strokeWidth: 2, stroke: 'red' ,
                            selectable: false, evented: false});
-  canvas.add(this.display); this.display.sendToBack();
 
-  var r = new fabric.Rect({left: x1+22, top: y1+12, height: 20, width: 40, 
+  var r = new fabric.Rect({left: 22, top: 12, height: 20, width: 40, 
                            fill: 'white', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 1   });   
-  canvas.add(r); r.sendToBack();
+  //canvas.add(r); r.sendToBack();
 
   //this.display = makeDisplay(x1-50,y1);
   
   let node = new InputNode(x1+35, y1+35 );
   this.nodes = [ node ] ;   
-  drawConnectors(this.nodes, "white");
+  //drawConnectors(this.nodes, "white");
 
-  drawText(x1+1,y1+45,"volt-",12);
-  drawElementBox(x1,y1,44,boxHeightSmall+10,'meter');
- 
+  //drawText(x1+1,y1+45,"volt-",12);
+  //drawElementBox(x1,y1,44,boxHeightSmall+10,'meter');
+
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,44,60,'meter'), 
+                                 drawText(1,45,"volt-",12),
+                                 r, //this.display,
+                                 drawText(4,11,"0",8),
+                                 drawText(35,11,"5",8) ]
+                                 .concat(drawCircles(x1,y1,this.nodes, "white")),
+                                 {left: x1+22, top: y1+30,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  
+  canvas.add(this.display); //this.display.sendToBack();
+
+
   var lastState = 0.0;
   // Set voltage 
   this.output = function() { 
