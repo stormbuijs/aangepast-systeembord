@@ -36,8 +36,29 @@
             Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
           <button onclick="toggleDelete();" id="toggleDelete">
             Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
-
-          <!--input type="checkbox" onclick="toggleMoving();">Verplaatsen...</input-->
+          <select name="type" onmousedown="this.value='';" onchange="addElement(this.value);">
+              <option value="">Voeg toe...</option>
+              <option value="Switch">Drukschakelaar</option>
+              <option value="VarVoltage">Variabele spanning</option>
+              <option value="Pulse">Pulsgenerator</option>
+              <option value="ADC">AD omzetter</option>
+              <option value="LightSensor">Lichtsensor</option>
+              <option value="TemperatureSensor">Temperatuursensor</option>
+              <option value="SoundSensor">Geluidsensor</option>
+              <option value="ANDPort">EN-poort</option>
+              <option value="ORPort">OF-poort</option>
+              <option value="NOTPort">invertor</option>
+              <option value="Comparator">Comparator</option>
+              <option value="Memory">Geheugencel</option>
+              <option value="Counter">Pulsenteller</option>
+              <option value="LED">LED</option>
+              <option value="Buzzer">Zoemer</option>
+              <option value="Relais">Relais</option>
+              <option value="Lightbulb">Lamp</option>
+              <option value="Heater">Verwarming</option>
+              <option value="Voltmeter">Voltmeter</option>
+              <option value="Board">Leeg bord</option>          
+          </select>
         </div>
       </div>
       <div class="column right">

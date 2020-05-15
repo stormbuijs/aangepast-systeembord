@@ -4,19 +4,19 @@ function isHigh(x) {return x >= hiThreshold; };
 function isLow(x) {return x < loThreshold; }; 
 function invert(x) {return isHigh(x) ? low : high; };
 
-var clockPeriod = 50; // time between evaluate-calls (speed of the engine)
-
-var snapTolerance = 12;
+var clockPeriod   = 50; // time between evaluate-calls (speed of the engine)
+var snapTolerance = 12; // snap wire to node
+var edgedetection = 10; // snap components
 
 // Sizes of the elements
 var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
 
 // Globals for the temperature and heater
-var heatTransfer = 100; // Means that Tmax=40
-var heatCapacity = 5000; // Determines speed of heating
-var temperatureInside = 15.0; // Celcius
+var heatTransfer = 100;        // Means that Tmax=40
+var heatCapacity = 5000;       // Determines speed of heating
+var temperatureInside = 15.0;  // Celcius
 var temperatureOutside = 15.0; // Celcius
-var powerHeater = 2500; // Watt
+var powerHeater = 2500;        // Watt
 
 // Global event counter for loop protection
 var eventCounter = 0;
@@ -153,9 +153,9 @@ function drawButton(left, top, node){
   c.setGradient('stroke', gradientButtonUp );
   c.name = "button";
   c.node = node;
-  canvas.add(c);
-  c.sendToBack();
-  //  return c;
+  //canvas.add(c);
+  //c.sendToBack();
+  return c;
 }    
   
 // Generic input node (has a child to follow)
@@ -441,10 +441,11 @@ function drawSymbolBox(x1,y1,text){
 function drawText(x1,y1,text,fontsize=10){
   // Draw text
   var txt = new fabric.Textbox(text, {left: x1, top: y1, originX: 'left', originY: 'bottom', 
-                                      width: 100, fontSize: fontsize, fontFamily: 'Arial', 
-                                      selectable: false, evented: false });
-  canvas.add(txt)
-  txt.sendToBack();
+                                      width: 20, fontSize: fontsize, fontFamily: 'Arial', 
+                                      selectable: true, evented: true });
+  //canvas.add(txt)
+  //txt.sendToBack();
+  return txt;
 }
 
 function drawConnection(coords){
@@ -528,11 +529,14 @@ function Board(x1,y1) {
                            originX: 'left', originY: 'top',
                            fill: 'lightgrey', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 2   });
-  var group = new fabric.Group([ r, drawHeader(80, 11,"INVOER"),
+  this.group = new fabric.Group([ r, drawHeader(80, 11,"INVOER"),
                                  drawHeader(316, 11,"VERWERKING"),
                                  drawHeader(550, 11, "UITVOER") ], 
-                               {left: x1, top: y1+5, originX: 'left', originY: 'top'});
-  canvas.setBackgroundImage(group);
+                               {left: x1, top: y1+5, originX: 'left', originY: 'top',
+                                selectable: false, evented: false });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.sendToBack(this.group); //settBackgroundImage(group);
   
   // Dummy functions
   this.nodes = [];
@@ -571,51 +575,17 @@ function ANDPort(x1,y1) {
                                  .concat(drawCircles(x1,y1,this.nodes, "blue")),
                                  {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
                                   hasControls: false, hasBorders: false, 
-                                  selectable: false, evented: false });
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
   this.group.name = "element";
   this.group.element = this;
-  canvas.add(this.group)
-  this.group.sendToBack();
-  
+  canvas.add(this.group);
+  //this.group.sendToBack(); // get rid of this....
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+
   this.output = function() {return true;};
   this.remove = function() { 
-    canvas.remove( this.group );
-
-    // loop over nodes and remove wires
-    for( var i=0; i<this.nodes.length; ++i) {
-      var node = this.nodes[i];
-      // Remove input node
-      if( node.isInput ) {
-        if( node.child ) {
-          for( var j=0; j<node.child.wires.length; ++j) {
-            var wire = node.child.wires[j];
-            if( wire.connection == node  ) {
-              // remove wire
-              wire.connection = null;
-              canvas.remove( wire.line1 );
-              canvas.remove( wire );
-            }
-          }
-        }
-        node.child = null;
-      }
-      // Remove output node
-      if( !node.isInput ) {
-        for( var j=0; j<node.wires.length; ++j) {
-          var wire = node.wires[j];
-          canvas.remove( wire.line1 );
-          canvas.remove( wire );
-          if( wire.connection ) {
-            wire.connection.child = null;
-          }
-          wire.connection = null; 
-          wire.node = null; // better to remove wire object itself
-
-        }
-      }
-    }
-    // remove element object itself
-    // ...
   }
 }
 
@@ -628,7 +598,7 @@ function ORPort(x1,y1) {
   let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
   this.output = function() { return true; };
   this.nodes = [ node1, node2 , node3 ] ;
-  drawConnectors(this.nodes, "blue");
+  /*drawConnectors(this.nodes, "blue");
 
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "\u22651");
@@ -638,6 +608,26 @@ function ORPort(x1,y1) {
   drawConnection([x1+25, y1+boxHeight-25, x1+25, y1+boxHeight-40]);
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
   drawElementBox(x1,y1,boxWidth,boxHeight,'OF-poort');
+  */
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeight,'OF-poort'),
+                                 drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                                 drawLine([25, 25, 25, 40]),
+                                 drawLine([25, 40, 0.5*boxWidth, 40]),
+                                 drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                                 drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                                 drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "\u22651")]
+                                 .concat(drawCircles(x1,y1,this.nodes, "blue")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   this.remove = function() { };
 }
 
@@ -648,7 +638,7 @@ function NOTPort(x1,y1) {
   let node1 = new InputNode(x1+25, y1+0.5*boxHeightSmall );
   let node2 = new NOTNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, node1);
   this.nodes = [ node1, node2 ] ;     
-  drawConnectors(this.nodes, "blue");
+  /*drawConnectors(this.nodes, "blue");
 
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1-7+0.5*boxHeightSmall, "1");
@@ -656,6 +646,24 @@ function NOTPort(x1,y1) {
   drawConnection([x1+15+0.5*boxWidth, y1-5+0.5*boxHeightSmall, 
                   x1+20+0.5*boxWidth, y1+0.5*boxHeightSmall]);
   drawElementBox(x1,y1,boxWidth,boxHeightSmall,'invertor');
+  */
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'invertor'),
+                                 drawLine([25, 0.5*boxHeightSmall, boxWidth-25, 0.5*boxHeightSmall]),
+                                 drawLine([15+0.5*boxWidth, -5+0.5*boxHeightSmall, 
+                                           20+0.5*boxWidth, 0.5*boxHeightSmall]),
+                                 drawBoxWithSymbol(0.5*boxWidth, -7+0.5*boxHeightSmall, "1")]
+                                 .concat(drawCircles(x1,y1,this.nodes, "blue")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   this.output = function() { return true; };
   this.remove = function() { };
 }
@@ -668,7 +676,7 @@ function Memory(x1,y1) {
   let node2 = new InputNode(x1+25, y1+boxHeight-25 );
   let node3 = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeight);
   this.nodes = [ node1, node2, node3 ] ;     
-  drawConnectors(this.nodes, "blue");
+  /*drawConnectors(this.nodes, "blue");
 
   // Draw symbols and wires
   drawSymbolBox(x1+0.5*boxWidth, y1+0.5*boxHeight, "M");
@@ -679,7 +687,28 @@ function Memory(x1,y1) {
   drawConnection([x1+25, y1+boxHeight-40, x1+0.5*boxWidth, y1+boxHeight-40]);
   drawText(x1+35,y1+31,"set");
   drawText(x1+35,y1+boxHeight-19,"reset");
-  drawElementBox(x1,y1,boxWidth,boxHeight,'geheugencel');
+  drawElementBox(x1,y1,boxWidth,boxHeight,'geheugencel');*/
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeight,'geheugencel'),
+                                 drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                                 drawLine([25, 25, 25, 40]),
+                                 drawLine([25, 40, 0.5*boxWidth, 40]),
+                                 drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                                 drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                                 drawText(35,31,"set"),
+                                 drawText(35,boxHeight-19,"reset"),
+                                 drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "M")]
+                                 .concat(drawCircles(x1,y1,this.nodes, "blue")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   this.output = function() { 
     if( isHigh(node2.eval()) ) this.nodes[2].state = low;
     if( isHigh(node1.eval()) ) this.nodes[2].state = high; // set always wins
@@ -694,18 +723,27 @@ function LED(x1,y1) {
   this.y = y1;
     
   this.nodes = [ new InputNode(x1+25, y1+20 ) ] ;    
-  drawConnectors(this.nodes, "white");
+  //drawConnectors(this.nodes, "white");
 
   // Draw LED
-  var c = new fabric.Circle({left: x1+boxWidth-25, top: y1+20, radius: 5, 
+  var c = new fabric.Circle({left: boxWidth-25, top: 20, radius: 5, 
                              fill: 'darkred', selectable: false, evented: false,
                              stroke: 'black', strokeWidth: 2   });
   c.setGradient('stroke', gradientButtonDw );
-  canvas.add(c);
-  c.sendToBack();
-
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
-
+  //canvas.add(c);
+  //c.sendToBack();
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'LED');
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), c]
+                                 .concat(drawCircles(x1,y1,this.nodes, "white")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  
   var lastResult = 0.0;
   // Control LED behaviour
   this.output = function() {
@@ -730,34 +768,52 @@ function Buzzer(x1,y1) {
   this.y = y1;
   this.nodes = [ new InputNode(x1+25, y1+0.5*boxHeightSmall) ] ;    
 
-  drawConnectors(this.nodes, "white");
+  //drawConnectors(this.nodes, "white");
 
   // Draw speaker
-  var c1 = new fabric.Path('M '+(x1+130).toString()+' '+(y1+15).toString()+' Q '+
-                           (x1+135).toString()+', '+(y1+25).toString()+', '+
-                           (x1+130).toString()+', '+(y1+35).toString(), 
+  var c1 = new fabric.Path('M 130 15 Q 135, 25, 130, 35', 
                              { fill: '', stroke: 'black',
                                selectable: false, evented: false, strokeWidth: 0 });
-  canvas.add(c1); c1.sendToBack();    
-  var c2 = new fabric.Path('M '+(x1+135).toString()+' '+(y1+10).toString()+' Q '+
+
+  /*var c1 = new fabric.Path('M '+(130).toString()+' '+(15).toString()+' Q '+
+                           (135).toString()+', '+(25).toString()+', '+
+                           (130).toString()+', '+(35).toString(), 
+                             { fill: '', stroke: 'black',
+                               selectable: false, evented: false, strokeWidth: 0 });*/
+  //canvas.add(c1); c1.sendToBack();    
+  var c2 = new fabric.Path('M 135 10 Q 145, 25, 135, 40', 
+                             { fill: '', stroke: 'black',
+                               selectable: false, evented: false, strokeWidth: 0 });
+
+  /*var c2 = new fabric.Path('M '+(x1+135).toString()+' '+(y1+10).toString()+' Q '+
                            (x1+145).toString()+', '+(y1+25).toString()+', '+
                            (x1+135).toString()+', '+(y1+40).toString(), 
                              { fill: '', stroke: 'black',
-                               selectable: false, evented: false, strokeWidth: 0 });
-  canvas.add(c2); c2.sendToBack();    
+                               selectable: false, evented: false, strokeWidth: 0 });*/
+  //canvas.add(c2); c2.sendToBack();    
 
-  var r = new fabric.Rect({left: x1+117, top: y1+25, height: 20, width: 10, 
+  var r = new fabric.Rect({left: 117, top: 25, height: 20, width: 10, 
                              fill: 'lightgrey', selectable: false, evented: false,
                              stroke: 'black', strokeWidth: 1   });   
-  canvas.add(r); r.sendToBack();
+  //canvas.add(r); r.sendToBack();
 
-  var t = new fabric.Triangle({left: x1+120, top: y1+25, height: 15, width: 30, 
+  var t = new fabric.Triangle({left: 120, top: 25, height: 15, width: 30, 
                            fill: 'lightgrey', selectable: false, evented: false, angle:-90,
                            stroke: 'black', strokeWidth: 1 });
-  canvas.add(t); t.sendToBack();     
+  //canvas.add(t); t.sendToBack();     
   
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'zoemer');
 
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'zoemer'), c1,c2,t,r]
+                                 .concat(drawCircles(x1,y1,this.nodes, "white")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group); 
 
   this.state = false;
   
@@ -791,10 +847,24 @@ function Switch(x1,y1) {
   this.output = function() { return true;};
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;
-  drawConnectors(this.nodes, "yellow");
+  //drawConnectors(this.nodes, "yellow");
   // Draw the push button
-  drawButton(x1+25, y1+0.5*boxHeightSmall, node);
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
+  //drawButton(x1+25, y1+0.5*boxHeightSmall, node);
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'drukschakelaar');
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'drukschakelaar'), 
+                                 drawButton(25, 0.5*boxHeightSmall, node)]
+                                 .concat(drawCircles(x1,y1,this.nodes, "yellow")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);  
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   this.remove = function() { };
 }
 
@@ -818,16 +888,29 @@ function inputDOM(x1,y1,name,value,step,min,max){
 function Pulse(x1,y1,inputValue="1") {
   this.x = x1;
   this.y = y1; 
-  drawText(x1+70,y1+30,"Hz",12);
+  //drawText(x1+70,y1+30,"Hz",12);
   
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ; 
 
-  drawConnectors(this.nodes, "yellow");
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'pulsgenerator');
+  //drawConnectors(this.nodes, "yellow");
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'pulsgenerator');
 
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'pulsgenerator'), 
+                                 drawText(70,30,"Hz",12) ]
+                                 .concat(drawCircles(x1,y1,this.nodes, "yellow")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+    // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   // Create unique element ID
-  var elementName = "frequency"+x1.toString()+y1.toString();
+  var elementName = "frequency"+x1.toString()+y1.toString(); // This does not work anymore .....
     
   // Create an input DOM element
   inputValue = (inputValue == "" ) ? "1" : inputValue;
@@ -865,16 +948,29 @@ function VarVoltage(x1,y1,inputValue="0") {
   this.x = x1;
   this.y = y1;
   
-  drawText(x1+70,y1+30,"V",12);
+  //drawText(x1+70,y1+30,"V",12);
   
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ; 
   
-  drawConnectors(this.nodes, "yellow");
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'variabele spanning');
+  //drawConnectors(this.nodes, "yellow");
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'variabele spanning');
  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'variabele spanning'), 
+                                 drawText(70,30,"V",12) ]
+                                 .concat(drawCircles(x1,y1,this.nodes, "yellow")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+    // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   // Create unique element ID
-  var elementName = "voltage"+x1.toString()+y1.toString();
+  var elementName = "voltage"+x1.toString()+y1.toString(); // this does not work anymore....
 
   // Create an input DOM element
   inputValue = (inputValue == "") ? "0" : inputValue;
@@ -902,31 +998,52 @@ function VarVoltage(x1,y1,inputValue="0") {
 function Comparator(x1,y1,inputValue="2.5") {
   this.x = x1;
   this.y = y1;
-  drawText(x1+120,y1+80,"V",12);
-  drawText(x1+57,y1+31,"+");
-  drawText(x1+57,y1+53,"\u2212");
-  var r = new fabric.Triangle({left: x1+0.5*boxWidth, top: y1+35, height: 40, width: 40, 
-                           fill: 'lightgrey', selectable: false, evented: false, angle:90,
-                           stroke: 'black', strokeWidth: 1 });
-  canvas.add(r);
-  r.sendToBack();  
+  //drawText(x1+120,y1+80,"V",12);
+  //drawText(x1+57,y1+31,"+");
+  //drawText(x1+57,y1+53,"\u2212");
+  var r = new fabric.Triangle({left: 0.5*boxWidth, top: 35, height: 40, width: 40, 
+                               fill: 'lightgrey', selectable: false, evented: false, angle:90,
+                               stroke: 'black', strokeWidth: 1 });
+  //canvas.add(r);
+  //r.sendToBack();  
   
   let node1 = new InputNode(x1+25, y1+25 );
   let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
   this.nodes = [ node1, node2 ] ;     
 
-  drawConnectors(this.nodes, "blue");
+  //drawConnectors(this.nodes, "blue");
 
-  drawConnection([x1+25, y1+25, x1+60, y1+25]);
+  /*drawConnection([x1+25, y1+25, x1+60, y1+25]);
   drawConnection([x1+60, y1+35, x1+boxWidth-25, y1+35]);
   drawConnection([x1+40, y1+45, x1+60, y1+45]);
   drawConnection([x1+40, y1+45, x1+40, y1+70]);
   drawConnection([x1+40, y1+70, x1+70, y1+70]);
-
   drawElementBox(x1,y1,boxWidth,boxHeight,'comparator');
-    
+  */
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeight,'comparator'),
+                                 drawLine([25, 25, 60, 25]),
+                                 drawLine([60, 35, boxWidth-25, 35]),
+                                 drawLine([40, 45, 60, 45]),
+                                 drawLine([40, 45, 40, 70]),
+                                 drawLine([40, 70, 70, 70]), r,
+                                 drawText(120, 80,"V",12),
+                                 drawText(57, 31,"+"),
+                                 drawText(57, 53,"\u2212")
+                                ]
+                                 .concat(drawCircles(x1,y1,this.nodes, "blue")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+
   // Create unique element ID
-  var elementName = "voltage"+x1.toString()+y1.toString();
+  var elementName = "voltage"+x1.toString()+y1.toString(); // This does not work anymore...
       
   // Create an input DOM element
   inputValue = (inputValue == "") ? "2.5" : inputValue;
@@ -961,20 +1078,42 @@ function ADC(x1,y1) {
   let node1 = new BinaryNode(x1+boxWidth-45, y1+17, node4, 1 );
   let node0 = new BinaryNode(x1+boxWidth-25, y1+17, node4, 0 );
   this.nodes = [ node4,node3,node2,node1,node0 ] ;
-  drawConnectors(this.nodes.slice(1,5), "yellow");
-  drawConnectors([this.nodes[0]], "white");
+  //drawConnectors(this.nodes.slice(1,5), "yellow");
+  //drawConnectors([this.nodes[0]], "white");
 
-  drawText(x1+22,y1+36,"in");
+  /*drawText(x1+22,y1+36,"in");
   drawText(x1+boxWidth-60,y1+36,"uit");
   drawText(x1+boxWidth-88,y1+12,"8");
   drawText(x1+boxWidth-68,y1+12,"4");
   drawText(x1+boxWidth-48,y1+12,"2");
-  drawText(x1+boxWidth-28,y1+12,"1");
-  drawConnection([x1+boxWidth-92, y1+30, x1+boxWidth-62, y1+30]);
-  drawConnection([x1+boxWidth-46, y1+30, x1+boxWidth-18, y1+30]);
+  drawText(x1+boxWidth-28,y1+12,"1");*/
+  //drawConnection([x1+boxWidth-92, y1+30, x1+boxWidth-62, y1+30]);
+  //drawConnection([x1+boxWidth-46, y1+30, x1+boxWidth-18, y1+30]);
 
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'AD omzetter');
   
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'AD omzetter'),
+                                 drawLine([boxWidth-92, 30, boxWidth-62, 30]),
+                                 drawLine([boxWidth-46, 30, boxWidth-18, 30]),
+                                 drawText(22,36,"in"),
+                                 drawText(boxWidth-60,36,"uit"),
+                                 drawText(boxWidth-88,12,"8"),
+                                 drawText(boxWidth-68,12,"4"),
+                                 drawText(boxWidth-48,12,"2"),
+                                 drawText(boxWidth-28,12,"1")]
+                                 .concat(drawCircles(x1,y1,this.nodes.slice(1,5), "yellow"),
+                                         drawCircles(x1,y1,[this.nodes[0]], "white")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+    // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+
   this.remove = function() {};
 }
 
@@ -994,24 +1133,24 @@ function Counter(x1,y1) {
   let node0 = new BinaryNodeS(x1+2*boxWidth-25, y1+20, 0 );
   this.nodes = [ node6,node5,node4,node3,node2,node1,node0 ] ;
   // Draw the push button
-  drawButton(x1+100, y1+boxHeight-20, node6) ;
+  //drawButton(x1+100, y1+boxHeight-20, node6) ;
  
-  drawConnectors(this.nodes, "blue");
+  //drawConnectors(this.nodes, "blue");
 
-  var r = new fabric.Rect({left: x1+120, top: y1+35, height: 50, width: 50, 
+  var r = new fabric.Rect({left: 120, top: 35, height: 50, width: 50, 
                            fill: 'lightgrey', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 1 });
-  canvas.add(r); r.sendToBack();  
+  //canvas.add(r); r.sendToBack();  
 
-  drawText(x1+10,y1+14,"tel pulsen");
+  /*drawText(x1+10,y1+14,"tel pulsen");
   drawText(x1+10,y1+44,"tellen aan/uit");
   drawText(x1+10,y1+74,"reset");
   drawText(x1+2*boxWidth-103,y1+14,"8");
   drawText(x1+2*boxWidth-78,y1+14,"4");
   drawText(x1+2*boxWidth-53,y1+14,"2");
   drawText(x1+2*boxWidth-28,y1+14,"1");
-
-  drawConnection([x1+25, y1+20, x1+120, y1+20]);
+  */
+  /*drawConnection([x1+25, y1+20, x1+120, y1+20]);
   drawConnection([x1+25, y1+50, x1+120, y1+50]);
   drawConnection([x1+25, y1+80, x1+100, y1+80]);
   drawConnection([x1+100, y1+80, x1+100, y1+50]);
@@ -1025,19 +1164,53 @@ function Counter(x1,y1) {
   drawConnection([x1+2*boxWidth-50, y1+36,x1+2*boxWidth-50, y1+20]);
   drawConnection([x1+2*boxWidth-25, y1+39,x1+2*boxWidth-25, y1+20]);  
   drawConnection([x1+85, y1+50, x1+2*boxWidth-75, y1+50]);
-
+  */
   this.counter = 0;
   this.state = low;
   
   this.textbox = new fabric.Textbox((this.counter).toString(), {
-        left: x1+2*boxWidth-50, top: y1+70, width: 60, fontSize: 44, textAlign: 'right',
+        left: 2*boxWidth-50, top: 70, width: 60, fontSize: 44, textAlign: 'right',
         fill: 'red', backgroundColor: '#330000', fontFamily: 'Courier New',
         selectable: false, evented: false });
-  canvas.add(this.textbox);
-  this.textbox.sendToBack();
+  //canvas.add(this.textbox);
+  //this.textbox.sendToBack();
 
-  drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
+  //drawElementBox(x1,y1,2*boxWidth,boxHeight,'pulsenteller');
 
+  this.group = new fabric.Group([drawBoxAndText(0,0,2*boxWidth,boxHeight,'pulsenteller'),
+                                 drawLine([25, 20, 120, 20]),
+                                 drawLine([25, 50, 120, 50]),
+                                 drawLine([25, 80, 100, 80]),
+                                 drawLine([100, 80, 100, 50]),
+                                 drawLine([120, 30, 2*boxWidth-100, 30]),
+                                 drawLine([120, 33, 2*boxWidth-75, 33]),
+                                 drawLine([120, 36, 2*boxWidth-50, 36]),
+                                 drawLine([120, 39, 2*boxWidth-25, 39]),
+                                 drawLine([2*boxWidth-100, 30, 2*boxWidth-100, 20]),
+                                 drawLine([2*boxWidth-75, 33, 2*boxWidth-75, 20]),
+                                 drawLine([2*boxWidth-50, 36, 2*boxWidth-50, 20]),
+                                 drawLine([2*boxWidth-25, 39, 2*boxWidth-25, 20]),
+                                 drawLine([85, 50, 2*boxWidth-75, 50]),
+                                 r, this.textbox,
+                                 drawText(10,14,"tel pulsen"),
+                                 drawText(10,44,"tellen aan/uit"),
+                                 drawText(10,74,"reset"),
+                                 drawText(2*boxWidth-103,14,"8"),
+                                 drawText(2*boxWidth-78,14,"4"),
+                                 drawText(2*boxWidth-53,14,"2"),
+                                 drawText(2*boxWidth-28,14,"1"),
+                                 drawButton(100, boxHeight-20, node6) ]
+                                 .concat(drawCircles(x1,y1,this.nodes, "blue")),
+                                 {left: x1+boxWidth, top: y1+0.5*boxHeight,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+  
   this.output = function() {
     // reset counter (check button or reset node)
     if( isHigh(node6.state) || isHigh(node6.eval())) { 
@@ -1084,26 +1257,26 @@ function Relais(x1,y1) {
   let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
   let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
   this.nodes = [ node1, node2, node3 ] ;
-  drawConnectors([this.nodes[0]], "white");
+  //drawConnectors([this.nodes[0]], "white");
 
-  drawConnectors(this.nodes.slice(1,3), "black");
+  //drawConnectors(this.nodes.slice(1,3), "black");
 
   // Draw symbols and wires
-  drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
-  var r = new fabric.Rect({left: x1+25, top: y1+0.5*boxHeight, width: 20, height: 10, 
+  //drawConnection([x1+30, y1+0.5*boxHeight-5, x1+20, y1+0.5*boxHeight+5]);
+  var r = new fabric.Rect({left: 25, top: 0.5*boxHeight, width: 20, height: 10, 
                              fill: 'lightgrey', selectable: false, evented: false,
                              stroke: 'black', strokeWidth: 1   });   
-  canvas.add(r); r.sendToBack();
-  var textbox = new fabric.Textbox("~", { left: x1+boxWidth-50, top: y1+25, width: 20,
+  //canvas.add(r); r.sendToBack();
+  var textbox = new fabric.Textbox("~", { left: boxWidth-50, top: 25, width: 20,
                                           fontSize: 20, textAlign: 'center', fontFamily:'Arial',
                                           selectable: false, evented: false });
-  canvas.add(textbox);
-  textbox.sendToBack();
-  var circ = new fabric.Circle({left: x1+boxWidth-50, top: y1+25, strokeWidth: 1, stroke: 'black' ,
+  //canvas.add(textbox);
+  //textbox.sendToBack();
+  var circ = new fabric.Circle({left: boxWidth-50, top: 25, strokeWidth: 1, stroke: 'black' ,
                                 radius: 10, fill: 'lightgrey', selectable: false, evented: false});
-  canvas.add(circ);
-  circ.sendToBack();
-  drawConnection([x1+25, y1+25, x1+25, y1+boxHeight-25]);
+  //canvas.add(circ);
+  //circ.sendToBack();
+  /*drawConnection([x1+25, y1+25, x1+25, y1+boxHeight-25]);
   drawConnection([x1+20, y1+boxHeight-25, x1+30, y1+boxHeight-25]);
   drawConnection([x1+25, y1+0.5*boxHeight, x1+boxWidth-70, y1+0.5*boxHeight]);  
   drawConnection([x1+boxWidth-25, y1+25, x1+boxWidth-25, y1+boxHeight-25]);
@@ -1113,6 +1286,33 @@ function Relais(x1,y1) {
   drawConnection([x1+boxWidth-75, y1+25, x1+boxWidth-25, y1+25]);
 
   drawElementBox(x1,y1,boxWidth,boxHeight,'Relais');
+  */
+  
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeight,'Relais'),
+                                 drawLine([25, 25, 25, boxHeight-25]),
+                                 drawLine([20, boxHeight-25, 30, boxHeight-25]),
+                                 drawLine([25, 0.5*boxHeight, boxWidth-70, 0.5*boxHeight]),
+                                 drawLine([boxWidth-25, 25, boxWidth-25, boxHeight-25]),
+                                 drawLine([boxWidth-75, 25, boxWidth-75, 40]),
+                                 drawLine([boxWidth-65, 40, boxWidth-75, 60]),
+                                 drawLine([boxWidth-75, 60, boxWidth-75, boxHeight-25]),
+                                 drawLine([boxWidth-75, 25, boxWidth-25, 25]),
+                                 circ, textbox,r,
+                                 drawLine([30, 0.5*boxHeight-5, 20, 0.5*boxHeight+5])]
+                                 .concat(drawCircles(x1,y1,[this.nodes[0]], "white"),
+                                         drawCircles(x1,y1,this.nodes.slice(1,3), "black")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeight,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+  // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
+
+
 
   this.remove = function() {};
 
@@ -1234,11 +1434,24 @@ function LightSensor(x1,y1) {
   
   let node = new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1+25, y1+25 );
   this.nodes = [ node ] ; 
+  
+  //drawConnectors(this.nodes, "yellow");
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'lichtsensor');
+  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'lichtsensor')]
+                                 .concat(drawCircles(x1,y1,this.nodes, "yellow")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+    // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });  
+
   var ldr = makeLDR(node.xLDR, node.yLDR, this.nodes[0]);
   canvas.add(ldr);
-  
-  drawConnectors(this.nodes, "yellow");
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'lichtsensor');
  
   // Set voltage 
   this.output = function() { 
@@ -1315,9 +1528,21 @@ function TemperatureSensor(x1,y1) {
   
   let node = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall );
   this.nodes = [ node ] ;   
-  drawConnectors(this.nodes, "yellow");
-  drawElementBox(x1,y1,boxWidth,boxHeightSmall,'temperatuursensor');
+  //drawConnectors(this.nodes, "yellow");
+  //drawElementBox(x1,y1,boxWidth,boxHeightSmall,'temperatuursensor');
  
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'temperatuursensor')]
+                                 .concat(drawCircles(x1,y1,this.nodes, "yellow")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+    // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });  
+  
   // Set voltage 
   this.output = function() { 
     var voltage = (temperatureInside - 15.0) * 0.2;
@@ -1339,16 +1564,30 @@ function SoundSensor(x1,y1) {
   this.y = y1;
   
   // Draw circle for input hole microphone
-  var circ = new fabric.Circle({left: x1+25, top: y1+0.5*boxHeightSmall, radius: 2, 
+  var circ = new fabric.Circle({left: 25, top: 0.5*boxHeightSmall, radius: 2, 
                                   fill: "black", selectable: false, evented: false});
-  canvas.add(circ);
-  circ.sendToBack();
+  //canvas.add(circ);
+  //circ.sendToBack();
     
   let node = new SoundSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, this );
   this.nodes = [ node ] ;   
-  drawConnectors(this.nodes, "yellow");
-  this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor').item(1);
+  //drawConnectors(this.nodes, "yellow");
+  //this.textbox = drawElementBox(x1,y1,boxWidth,boxHeightSmall,'geluidsensor').item(1);
 
+  this.group = new fabric.Group([drawBoxAndText(0,0,boxWidth,boxHeightSmall,'geluidsensor'), circ]
+                                 .concat(drawCircles(x1,y1,this.nodes, "yellow")),
+                                 {left: x1+0.5*boxWidth, top: y1+0.5*boxHeightSmall,
+                                  hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+    // Move output wires back to front
+  this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });  
+  
+  this.textbox = this.group.item(0).item(1);
+  
   // Default functions
   this.output = function() { return true; }
   this.remove = function() { };
@@ -1437,9 +1676,9 @@ function toggleMoving() {
 
   // Make the components evented
   for (var i = 0; i < elements.length; i++) { 
-    if( elements[i].constructor.name == "ANDPort" ){
-    if( moveComponents ) elements[i].group.set({selectable: true, evented: true});
-    else elements[i].group.set({selectable: false, evented: false});
+    if( elements[i].group ){
+      if( moveComponents ) elements[i].group.set({selectable: true, evented: true});
+      else elements[i].group.set({selectable: false, evented: false});
     }
   }
   
@@ -1458,9 +1697,9 @@ function toggleDelete() {
 
   // Make the components evented
   for (var i = 0; i < elements.length; i++) { 
-    if( elements[i].constructor.name == "ANDPort" ){
-    if( deleteComponents ) elements[i].group.set({selectable: false, evented: true});
-    else elements[i].group.set({selectable: false, evented: false});
+    if( elements[i].group ){
+      if( deleteComponents ) elements[i].group.set({selectable: false, evented: true});
+      else elements[i].group.set({selectable: false, evented: false});
     }
   }
   
@@ -1487,18 +1726,7 @@ function mouseClick(e) {
 // Change button color and state of OutputNode to low when mouse is up
 canvas.on('mouse:up', function(e) {
   var p = e.target;
-  if( deleteComponents && p && p.name == "element") {
-    p.element.remove();
-    // Delete the element from the list of elements
-    // ...
-    //console.log("before");
-    //console.log(elements);
-    var index = elements.indexOf(p.element);
-    if (index > -1) elements.splice(index, 1);
-    //console.log("after");
-    //console.log(elements);   
-    
-  }
+  if( deleteComponents && p && p.name == "element") removeElement(p.element);
   if( p && p.name == "button") {
     // a mouse-click can be too short for the engine to evaluate itself
     timeOutButton = setTimeout(function(){ p.node.state = low; renderNeeded = true}, 
@@ -1506,7 +1734,53 @@ canvas.on('mouse:up', function(e) {
     p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
     p.setGradient('stroke', gradientButtonUp );
   }
-});     
+});
+
+function removeElement( element ) {
+  // Remove the group from the canvas
+  canvas.remove( element.group );
+
+  // loop over nodes and remove wires
+  for( var i=0; i<element.nodes.length; ++i) {
+    var node = element.nodes[i];
+    // Remove input node
+    if( node.isInput ) {
+      if( node.child ) {
+        for( var j=0; j<node.child.wires.length; ++j) {
+          var wire = node.child.wires[j];
+          if( wire.connection == node  ) {
+            // remove wire
+            wire.connection = null;
+            canvas.remove( wire.line1 );
+            canvas.remove( wire );
+          }
+        }
+      }
+      node.child = null;
+    }
+    // Remove output node
+    if( !node.isInput ) {
+      for( var j=0; j<node.wires.length; ++j) {
+        var wire = node.wires[j];
+        canvas.remove( wire.line1 );
+        canvas.remove( wire );
+        if( wire.connection ) {
+          wire.connection.child = null;
+        }
+        wire.connection = null; 
+        wire.node = null; // better to remove wire object itself ....
+      }
+    }
+  }
+  
+  // Delete the element from the list of elements
+  var index = elements.indexOf(element);
+  if (index > -1) elements.splice(index, 1);
+  
+  // remove element object itself
+  // ...
+
+}
     
 // Control behaviour when moving wire
 canvas.on('object:moving', function(e) {
@@ -1539,6 +1813,8 @@ function updateLDR(node){
 }
 
 function moveWire(p){
+  canvas.bringToFront(p);
+  canvas.bringToFront(p.line1);
   p.line1.set({ 'x2': p.left, 'y2': p.top });
   // Snap to any node
   for (i = 0; i < elements.length; i++) {
@@ -1560,6 +1836,60 @@ function moveWire(p){
 
 
 function moveElement(p){
+  
+  // Bring the component in front of rest
+  canvas.bringToFront(p);
+  
+  p.setCoords(); //Sets corner position coordinates based on current angle, width and height
+  elements.forEach(function (element) {    
+    var targ = element.group;
+    if ( !targ || targ === p) return;
+
+    // Snap horizontally
+    if (Math.abs(p.oCoords.tr.x - targ.oCoords.tl.x) < edgedetection) {
+        //p.left += targ.oCoords.tl.x - p.oCoords.tr.x + 1;
+        //p.setCoords();
+        p.set({left: targ.oCoords.tl.x - 0.5*p.width + 1} );
+    }
+    else if (Math.abs(p.oCoords.tl.x - targ.oCoords.tr.x) < edgedetection) {
+        //p.left += targ.oCoords.tr.x - p.oCoords.tl.x - 1;
+        //p.setCoords();
+        p.set({left: targ.oCoords.tr.x + 0.5*p.width - 1} );
+    }
+    else if (Math.abs(p.oCoords.tl.x - targ.oCoords.tl.x) < edgedetection ) {
+        //p.left += targ.oCoords.tl.x - p.oCoords.tl.x ;
+        //p.setCoords();
+        p.set({left: targ.oCoords.tl.x + 0.5*p.width});
+    }
+    else if (Math.abs(p.oCoords.tr.x - targ.oCoords.tr.x) < edgedetection) {
+        //p.left += targ.oCoords.tr.x - p.oCoords.tr.x ;
+        //p.setCoords();
+        p.set({left: targ.oCoords.tr.x - 0.5*p.width});
+    }
+
+    // Snap vertically
+    if (Math.abs(p.oCoords.br.y - targ.oCoords.tr.y) < edgedetection) {
+        //p.top += targ.oCoords.tr.y - p.oCoords.br.y + 1;
+        //p.setCoords();
+        p.set({top: targ.oCoords.tr.y - 0.5*p.height + 1} );
+    }
+    else if (Math.abs(targ.oCoords.br.y - p.oCoords.tr.y) < edgedetection) {
+        //p.top += targ.oCoords.br.y - p.oCoords.tr.y - 1;
+        //p.setCoords();
+        p.set({top: targ.oCoords.br.y + 0.5*p.height - 1} );
+    } 
+    else if (Math.abs(targ.oCoords.br.y - p.oCoords.br.y) < edgedetection) {
+        //p.top += targ.oCoords.br.y - p.oCoords.br.y;
+        //p.setCoords();
+        p.set({top: targ.oCoords.br.y - 0.5*p.height} );
+    } 
+    else if (Math.abs(targ.oCoords.tr.y - p.oCoords.tr.y) < edgedetection) {
+        //p.top += targ.oCoords.br.y - p.oCoords.br.y;
+        //p.setCoords();
+        p.set({top: targ.oCoords.tr.y + 0.5*p.height} );
+    }    
+  });
+  
   // Update x and y for element and its nodes
   var element = p.element;
   var nodes = element.nodes;
@@ -1586,6 +1916,8 @@ function moveElement(p){
           wire.set({ 'left': wire.left+diffX, 'top': wire.top+diffY });
           wire.setCoords();
           wire.line1.set({ 'x2': wire.left, 'y2': wire.top });
+          canvas.bringToFront(wire.line1);
+          canvas.bringToFront(wire, 1002);
         }
       }
     }
@@ -1602,6 +1934,13 @@ function moveElement(p){
         }
         //wire.line1.bringToFront();
         //wire.bringToFront();
+        canvas.bringToFront(wire.line1);
+        canvas.bringToFront(wire);
+        //console.log( "zIndex wire " + canvas.getObjects().indexOf(wire));
+        //console.log( "zIndex p    " + canvas.getObjects().indexOf(p));
+
+
+        //canvas.renderAll();
       }
     }
   }
@@ -1731,8 +2070,7 @@ function parseFile(xml) {
   
 }
 
-
-function addElement(className,x1,y1,inputValue){
+function addElement(className,x1=0,y1=0,inputValue=""){
   switch( className ) {
     case "Board" :
       elements.push(new Board(x1,y1));
