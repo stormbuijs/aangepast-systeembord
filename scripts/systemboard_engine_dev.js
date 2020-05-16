@@ -506,6 +506,7 @@ function drawCircles(x1,y1,nodes,color) {
                                   stroke: color , radius: 5, 
                                   fill: "darkgrey", selectable: false, evented: false});
     circles.push(circ);
+    //console.log("circle pos " + circ.left + " " + circ.top);
     // Add red dot for output nodes
     if( !(nodes[i].isInput) ) {
       var color2 = nodes[i].isHV ? '#444444' : '#dd0000';
@@ -1394,16 +1395,17 @@ function Lightbulb(x1,y1) {
                                   evented: (moveComponents||deleteComponents) });
   //console.log("group: "+this.group.width + ", " + this.group.height );
 
-  this.group.set({left: x1+0.5*this.group.width, top: y1+0.5*this.group.height });  
-  var circles = drawCircles(0,0,this.nodes, "black");
+  this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });  
+  var circles = drawCircles(0,0,this.nodes, "black");  
+  //var circles = drawCircles(this.group.left,this.group.top,this.nodes, "black");
   for( var i=0; i<circles.length; ++i ) {
     this.group.addWithUpdate( circles[i] ); 
   }
+  //this.group.setCoords();
 
   this.group.name = "element";
   this.group.element = this;
   canvas.add(this.group);
-  console.log(this.imgBulbOff);
   this.imgBulbOn.set({left: this.imgBulbOff.left, top: this.imgBulbOff.top });  // update to same pos
   
   this.output = function() {
@@ -1554,12 +1556,16 @@ function Heater(x1,y1) {
                                   evented: (moveComponents||deleteComponents) });
   //console.log("group: "+this.group.width + ", " + this.group.height );
   
-  this.group.set({left: x1+0.5*this.group.width, top: y1+0.5*this.group.height });
+  this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });
   
-  //var circles = drawCircles(this.group.left,this.group.top,this.nodes, "black");
-  var circles = drawCircles(0,0,this.nodes, "black");
+  var circles = drawCircles(this.group.left,this.group.top,this.nodes, "black");
+  //var circles = drawCircles(0,0,this.nodes, "black");
   for( var i=0; i<circles.length; ++i ) {
-    this.group.addWithUpdate( circles[i] ); 
+    //this.group.addWithUpdate( circles[i] );
+    this.group.add( circles[i] );
+    //console.log("circle2 pos " + (circles[i].left+this.group.left) + " " +
+    //            (circles[i].top+this.group.top));
+    //console.log("node  2 pos " + this.nodes[i].x1 + " " + this.nodes[i].y1);
   }
 
   this.group.name = "element";
@@ -2009,8 +2015,12 @@ function moveElement(p){
   element.x = newX;
   element.y = newY;
   for (i = 0; i < nodes.length; i++) {
+    console.log( "node left  " + nodes[i].x1 + " " + diffX);
+    console.log( "node top   " + nodes[i].y1 + " " + diffY);
+
+
     nodes[i].x1 += diffX;
-    nodes[i].y1 += diffY;    
+    nodes[i].y1 += diffY;
   }
   if( element.button ) {
     var button = element.button;
@@ -2019,7 +2029,6 @@ function moveElement(p){
   }
   if( element.input ) {
     var input = element.input;
-    //console.log( "left " + input.offsetLeft + " " + diffX + " " + (input.offsetLeft + diffX) );
     //console.log( "top " + input.offsetTop +" " + diffY + " " + (input.offsetTop + diffY));
     //const rect = input.getBoundingClientRect();
     //console.log("rect top " + (rect.top + window.scrollY)) ;
@@ -2036,6 +2045,8 @@ function moveElement(p){
       for( var j = 0; j< wires.length; j++ ) {
         var wire = wires[j];
         if( wire.connection == nodes[i] ) {
+          //console.log( "wire left " + wire.left + " " + diffX);
+          //console.log( "wire top " + wire.top + " " + diffY);
           wire.set({ 'left': wire.left+diffX, 'top': wire.top+diffY });
           wire.setCoords();
           wire.line1.set({ 'x2': wire.left, 'y2': wire.top });
