@@ -123,7 +123,7 @@ function makeWire(x1,y1,node,isHV=false) {
   return endCircle;
 }
 
-function drawConnectors(nodes,color) {
+/*function drawConnectors(nodes,color) {
   for(var i=0; i<nodes.length; ++i) {
     if( !(nodes[i].isInput) ) {
       var color2 = nodes[i].isHV ? '#444444' : '#dd0000';
@@ -138,7 +138,7 @@ function drawConnectors(nodes,color) {
     canvas.add(circ);
     circ.sendToBack();
   }
-}
+}*/
 
 // Set nice-looking gradients for buttons
 var gradientButtonUp = { x1: -10, y1: -10, x2: 20, y2: 20,
@@ -388,7 +388,7 @@ function SoundSensorNode(x1,y1,element) {
 
 
 // Draw the box plus text
-function drawElementBox(x1,y1,width,height,text) {
+/*function drawElementBox(x1,y1,width,height,text) {
     // Draw text in box
     //var textbox = new fabric.Textbox(text, { left: x1+0.5*width, top: y1+(height-10), width: width,
 
@@ -437,25 +437,24 @@ function drawSymbolBox(x1,y1,text){
   group.sendToBack();
   return group;
 }
+*/
 
 function drawText(x1,y1,text,fontsize=10){
   // Draw text
   var txt = new fabric.Text(text, {left: x1, top: y1, originX: 'left', originY: 'bottom', 
-                                      width: 5, fontSize: fontsize, fontFamily: 'Arial', 
-                                      selectable: true, evented: true });
+                                    /*width: 5,*/ fontSize: fontsize, fontFamily: 'Arial', 
+                                    selectable: false, evented: false });
   //canvas.add(txt)
   //txt.sendToBack();
   return txt;
 }
 
-function drawConnection(coords){
+/*function drawConnection(coords){
   var line = new fabric.Line(coords, {stroke: 'black', strokeWidth: 1,
                               selectable: false, evented: false });
   canvas.add(line);
   line.sendToBack();
-}
-
-
+}*/
 
 
 // Draw the box plus text
@@ -490,14 +489,15 @@ function drawLine(coords){
   return line;
 }
 
-function drawHeader(x1,y1,text) {
-    // Draw text in box
-    var textbox = new fabric.Textbox(text, { left: x1, top: y1, width: 150,
-                                           fontSize: 16, textAlign: 'center', fontFamily:'Arial',
-                                           selectable: false, evented: false });
-    //canvas.setBackgroundImage(textbox);
-    return textbox;
-}
+/*function drawHeader(x1,y1,text) {
+  // Draw text in box
+  var textbox = new fabric.Text(text, { left: x1, top: y1, 
+                                        fontSize: 16, textAlign: 'center', fontFamily:'Arial',
+                                        selectable: false, evented: false });
+
+  //canvas.setBackgroundImage(textbox);
+  return textbox;
+}*/
 
 function drawCircles(x1,y1,nodes,color) {
   var circles = [];
@@ -529,10 +529,15 @@ function Board(x1,y1) {
                            originX: 'left', originY: 'top',
                            fill: 'lightgrey', selectable: false, evented: false,
                            stroke: 'black', strokeWidth: 2   });
-  this.group = new fabric.Group([ r, drawHeader(80, 11,"INVOER"),
+  /*this.group = new fabric.Group([ r, drawHeader(80, 11,"INVOER"),
                                  drawHeader(316, 11,"VERWERKING"),
                                  drawHeader(550, 11, "UITVOER") ], 
+  */
+  this.group = new fabric.Group([ r, drawText(60, 21,"INVOER",16),
+                                 drawText(265, 21,"VERWERKING",16),
+                                 drawText(520, 21, "UITVOER",16) ], 
                                {left: x1, top: y1+5, originX: 'left', originY: 'top',
+                                hasControls: false, hasBorders: false,
                                 selectable: false, evented: false });
   this.group.name = "element";
   this.group.element = this;
@@ -913,8 +918,13 @@ function Pulse(x1,y1,inputValue="1") {
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
   
   // Create unique element ID
-  var elementName = "frequency"+x1.toString()+y1.toString(); // This does not work anymore .....
-    
+  var nPulse = 0;
+  elements.forEach((element) => {
+    if( element.constructor.name == "Pulse") ++nPulse;
+  });
+  //var elementName = "frequency"+x1.toString()+y1.toString(); // This does not work anymore .....
+  var elementName = "frequency"+nPulse.toString(); 
+  
   // Create an input DOM element
   inputValue = (inputValue == "" ) ? "1" : inputValue;
   this.input = inputDOM(x1+20,y1+10,elementName,inputValue,"0.1","0.1","10");
@@ -940,8 +950,10 @@ function Pulse(x1,y1,inputValue="1") {
     clearTimeout(timer);
     // Remove the DOM element
     //var myElement = document.getElementById(elementName);
-    this.input.remove();
     //myElement.remove();
+    //body = document.getElementById("canvas1");
+    //body.removeChild(this.input);
+    this.input.remove();
   }
   
 }    
@@ -973,7 +985,11 @@ function VarVoltage(x1,y1,inputValue="0") {
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
   
   // Create unique element ID
-  var elementName = "voltage"+x1.toString()+y1.toString(); // this does not work anymore....
+  var nVarVoltage = 0;
+  elements.forEach((element) => {
+    if( element.constructor.name == "VarVoltage") ++nPulse;
+  });
+  var elementName = "voltage"+nVarVoltage.toString();
 
   // Create an input DOM element
   inputValue = (inputValue == "") ? "0" : inputValue;
@@ -1046,7 +1062,11 @@ function Comparator(x1,y1,inputValue="2.5") {
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
 
   // Create unique element ID
-  var elementName = "voltage"+x1.toString()+y1.toString(); // This does not work anymore...
+  var nComparator = 0;
+  elements.forEach((element) => {
+    if( element.constructor.name == "Comparator") ++nPulse;
+  });
+  var elementName = "comparator"+nComparator.toString();
       
   // Create an input DOM element
   inputValue = (inputValue == "") ? "2.5" : inputValue;
@@ -1237,8 +1257,11 @@ function Counter(x1,y1) {
         this.state = high;
         ++this.counter; // only count rising edge
         if( this.counter == 16) this.counter = 0; // reset counter
-        this.textbox.text = (this.counter).toString();
+        this.textbox.set( {'text' : this.counter.toString() });
         renderNeeded = true;
+        //this.textbox.dirty = true;
+        //this.group.dirty = true;
+        //console.log( this.textbox.text );
       }
       if( isLow(currentState) && isHigh(this.state) ) { this.state = low;}
     }
@@ -1333,26 +1356,26 @@ function Lightbulb(x1,y1) {
 
   this.state = false;
   var isHV = true;
-  let node1 = new InputNode(x1-17, y1+35, isHV );
-  let node2 = new InputNode(x1, y1+65, isHV );
+  let node1 = new InputNode(x1+18, y1+96, isHV );
+  let node2 = new InputNode(x1+35, y1+129, isHV );
   this.nodes = [ node1, node2 ] ;
-  drawConnectors(this.nodes, "black");
+  //drawConnectors(this.nodes, "black");
 
   var imgElementOn = document.getElementById('lighton');
   this.imgBulbOn = new fabric.Image(imgElementOn, {
-    left: x1, 
-    top: y1, selectable: false, evented: false,
+    left: 0, 
+    top: 0, selectable: false, evented: false,
   });
   this.imgBulbOn.scale(0.7);
   
   var imgElementOff = document.getElementById('lightoff');
   this.imgBulbOff = new fabric.Image(imgElementOff, {
-    left: x1,
-    top: y1, selectable: false, evented: false,
+    left: 0,
+    top: 0, selectable: false, evented: false,
   });
   this.imgBulbOff.scale(0.7);
-  canvas.add(this.imgBulbOff);  
-  this.imgBulbOff.sendToBack();
+  //canvas.add(this.imgBulbOff);  
+  //this.imgBulbOff.sendToBack();
   
   /* // Alternative (no need to load image already in index.html)
   var _this = this;
@@ -1364,6 +1387,25 @@ function Lightbulb(x1,y1) {
     _this.imgBulbOff.sendToBack();                     
   });*/
 
+  
+  this.group = new fabric.Group([ this.imgBulbOff ],
+                                 {hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  //console.log("group: "+this.group.width + ", " + this.group.height );
+  
+  this.group.set({left: x1+0.5*this.group.width, top: y1+0.5*this.group.height });  
+  var circles = drawCircles(0,0,this.nodes, "black");
+  for( var i=0; i<circles.length; ++i ) {
+    this.group.addWithUpdate( circles[i] ); 
+  }
+
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
+
+
+  
   this.output = function() {
     var newState = this.nodes[0].child && this.nodes[1].child && // nodes should be connected
                    this.nodes[0].child.child == this.nodes[1].child.child && // from the same relais
@@ -1372,13 +1414,17 @@ function Lightbulb(x1,y1) {
       this.state = newState;
       renderNeeded = true;
       if( this.state ) { 
-        canvas.remove(this.imgBulbOff);
+        /*canvas.remove(this.imgBulbOff);
 	      canvas.add(this.imgBulbOn);
-        this.imgBulbOn.sendToBack();
+        this.imgBulbOn.sendToBack();*/
+        this.group.remove(this.imgBulbOff);
+	      this.group.add(this.imgBulbOn);
       } else {
-        canvas.remove(this.imgBulbOn);
+        /*canvas.remove(this.imgBulbOn);
 	      canvas.add(this.imgBulbOff);
-        this.imgBulbOff.sendToBack();
+        this.imgBulbOff.sendToBack();*/
+        this.group.remove(this.imgBulbOn);
+        this.group.add(this.imgBulbOff);
       }
       // also update all light sensors
       for (var i = 0; i < elements.length; i++) { 
@@ -1402,7 +1448,7 @@ function makeLDR(left, top, node){
   var imgLDR = new fabric.Image(domLDR, { left: left, top: top });
   imgLDR.scale(0.15);
   //canvas.add(imgLDR);  
-  imgLDR.sendToBack();
+  //imgLDR.sendToBack();
   imgLDR.hasControls = c.hasBorders = false;
   imgLDR.name = "LDR";
   imgLDR.node = node;
@@ -1410,7 +1456,7 @@ function makeLDR(left, top, node){
 }
 
 // Make display for sensor
-function makeDisplay(x1, y1){
+/*function makeDisplay(x1, y1){
 
   var l = new fabric.Line([x1+75,y1+30,x1+75,y1+12], {strokeWidth: 2, stroke: 'red' ,
                            selectable: false, evented: false});
@@ -1422,7 +1468,7 @@ function makeDisplay(x1, y1){
   canvas.add(r); r.sendToBack();
 
   return l;
-}
+}*/
 
 // Light sensor
 function LightSensor(x1,y1) {
@@ -1457,8 +1503,8 @@ function LightSensor(x1,y1) {
     // Move output wires back to front
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });  
 
-  var ldr = makeLDR(node.xLDR, node.yLDR, this.nodes[0]);
-  canvas.add(ldr);
+  this.ldr = makeLDR(node.xLDR, node.yLDR, this.nodes[0]);
+  canvas.add(this.ldr);
  
   // Set voltage 
   this.output = function() { 
@@ -1469,7 +1515,7 @@ function LightSensor(x1,y1) {
     this.display.set({ 'x2': x2, 'y2': y2 });*/
     return true; 
   };
-  this.remove = function() { };
+  this.remove = function() { canvas.remove( this.ldr ); };
 }    
 
 
@@ -1481,23 +1527,42 @@ function Heater(x1,y1) {
 
   this.state = false;
   var isHV = true;
-  let node1 = new InputNode(x1-48, y1+25, isHV );
-  let node2 = new InputNode(x1-48, y1+50, isHV );
+  let node1 = new InputNode(x1+10, y1+85, isHV );
+  let node2 = new InputNode(x1+10, y1+110, isHV );
   this.nodes = [ node1, node2 ] ;
-  drawConnectors(this.nodes, "black");
+  //drawConnectors(this.nodes, "black");
 
   this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
-        left: x1+25, top: y1-55, width: 50, fontSize: 12, textAlign: 'right',
+        left: 25, top: -55, width: 50, fontSize: 12, textAlign: 'right',
         fill: 'red', backgroundColor: '#330000', fontFamily: 'Arial',
         selectable: false, evented: false });
-  canvas.add(this.textbox);
+  //canvas.add(this.textbox);
 
   var imgElement = document.getElementById('radiator');
   this.imgRadiator = new fabric.Image(imgElement, {
-    left: x1, top: y1, selectable: false, evented: false, });
+    left: 0, top: 0, selectable: false, evented: false, });
   this.imgRadiator.scale(0.35);  
-  canvas.add(this.imgRadiator);  
-  this.imgRadiator.sendToBack();
+  //canvas.add(this.imgRadiator);  
+  //this.imgRadiator.sendToBack();
+  
+  this.group = new fabric.Group([ this.imgRadiator, this.textbox ],
+                                 //.concat(drawCircles(x1,y1+2,this.nodes, "black")),
+                                 {hasControls: false, hasBorders: false, 
+                                  selectable: moveComponents, 
+                                  evented: (moveComponents||deleteComponents) });
+  //console.log("group: "+this.group.width + ", " + this.group.height );
+  
+  this.group.set({left: x1+0.5*this.group.width, top: y1+0.5*this.group.height });
+  
+  //var circles = drawCircles(this.group.left,this.group.top,this.nodes, "black");
+  var circles = drawCircles(0,0,this.nodes, "black");
+  for( var i=0; i<circles.length; ++i ) {
+    this.group.addWithUpdate( circles[i] ); 
+  }
+
+  this.group.name = "element";
+  this.group.element = this;
+  canvas.add(this.group);
   
   var oldTemperature = temperatureInside;
   this.output = function() {
@@ -1512,7 +1577,7 @@ function Heater(x1,y1) {
     
     var newTemperature = temperatureInside.toFixed(1);
     if( Math.abs(oldTemperature-newTemperature) > 0.05 ) {
-      this.textbox.text = temperatureInside.toFixed(1)+" \u2103";
+      this.textbox.set({ text : temperatureInside.toFixed(1)+" \u2103"});
       oldTemperature = newTemperature;
       renderNeeded = true;
     }
@@ -1608,7 +1673,7 @@ function Voltmeter(x1,y1) {
   //drawText(x1+4,y1+11,"0",8);
   //drawText(x1+35,y1+11,"5",8);
   
-  this.display = new fabric.Line([x1+22,y1+22,x1+9,y1+9], {strokeWidth: 2, stroke: 'red' ,
+  this.display = new fabric.Line([22,22,9,9], {strokeWidth: 2, stroke: 'red' ,
                            selectable: false, evented: false});
 
   var r = new fabric.Rect({left: 22, top: 12, height: 20, width: 40, 
@@ -1628,7 +1693,7 @@ function Voltmeter(x1,y1) {
   
   this.group = new fabric.Group([drawBoxAndText(0,0,44,60,'meter'), 
                                  drawText(1,45,"volt-",12),
-                                 r, //this.display,
+                                 r, this.display,
                                  drawText(4,11,"0",8),
                                  drawText(35,11,"5",8) ]
                                  .concat(drawCircles(x1,y1,this.nodes, "white")),
@@ -1639,9 +1704,7 @@ function Voltmeter(x1,y1) {
   this.group.name = "element";
   this.group.element = this;
   canvas.add(this.group);
-  
-  canvas.add(this.display); //this.display.sendToBack();
-
+  this.display.set({ 'x1': 0, 'y1': -8, 'x2': -13, 'y2': -22 });
 
   var lastState = 0.0;
   // Set voltage 
@@ -1649,8 +1712,8 @@ function Voltmeter(x1,y1) {
     var newState = this.nodes[0].eval();
     if( Math.abs(newState-lastState) < 0.1) return true; 
     var angle = Math.PI*(0.25+0.5*(newState/5.0));
-    var x2 = x1+22 - 18*Math.cos(angle);
-    var y2 = y1+22 - 18*Math.sin(angle);
+    var x2 = -18*Math.cos(angle);
+    var y2 = -8 - 18*Math.sin(angle);
     this.display.set({ 'x2': x2, 'y2': y2 });
     renderNeeded = true;
     lastState = newState;
@@ -1659,15 +1722,20 @@ function Voltmeter(x1,y1) {
   this.remove = function() { };
 }    
 
-
-
+function requestRemoveElements() {
+  if ( confirm("Weet je zeker dat je alles wilt verwijderen?") ) removeElements();
+}
 
 function removeElements() {
-  for (i = 0; i < elements.length; i++) { 
-    elements[i].remove();
-  }
+  /*for (i = 0; i < elements.length; i++) { 
+    //elements[i].remove();
+    removeElement(elements[i]);
+  }*/
+  elements.forEach(function(element) { removeElement(element);});
   elements = [];
-  canvas.clear();
+  
+  //console.log(elements);
+  //canvas.clear();
 }
 
 
@@ -1750,7 +1818,12 @@ function mouseClick(e) {
 // Change button color and state of OutputNode to low when mouse is up
 canvas.on('mouse:up', function(e) {
   var p = e.target;
-  if( deleteComponents && p && p.name == "element") removeElement(p.element);
+  if( deleteComponents && p && p.name == "element") {
+    removeElement(p.element);
+    // Delete the element from the list of elements
+    var index = elements.indexOf(p.element);
+    if (index > -1) elements.splice(index, 1);
+  }
   if( p && p.name == "button") {
     // a mouse-click can be too short for the engine to evaluate itself
     timeOutButton = setTimeout(function(){ p.node.state = low; renderNeeded = true}, 
@@ -1763,6 +1836,9 @@ canvas.on('mouse:up', function(e) {
 function removeElement( element ) {
   // Remove the group from the canvas
   canvas.remove( element.group );
+
+  // Remove possible buttons from the canvas
+  if( element.button ) canvas.remove( element.button );
 
   // loop over nodes and remove wires
   for( var i=0; i<element.nodes.length; ++i) {
@@ -1796,14 +1872,10 @@ function removeElement( element ) {
       }
     }
   }
-  
-  // Delete the element from the list of elements
-  var index = elements.indexOf(element);
-  if (index > -1) elements.splice(index, 1);
-  
+    
   // remove element object itself
   // ...
-
+  element.remove();
 }
     
 // Control behaviour when moving wire
@@ -1811,6 +1883,7 @@ canvas.on('object:moving', function(e) {
   var p = e.target;
   if( p.name == "wire" ) moveWire(p);
   if( p.name == "LDR" ) {
+    canvas.bringToFront(p);
     p.node.xLDR = p.left;
     p.node.yLDR = p.top;
     updateLDR(p.node);
@@ -1826,7 +1899,9 @@ function updateLDR(node){
     if( elements[i].constructor.name == "Lightbulb" ) {
 	    lightbulb = elements[i];
       if( lightbulb && lightbulb.state ) {
-        var dist = Math.pow(node.xLDR-lightbulb.x,2)+Math.pow(node.yLDR-lightbulb.y,2);
+        var xPosLight = lightbulb.x + 0.5*lightbulb.group.width;
+        var yPosLight = lightbulb.y + 0.5*lightbulb.group.height;
+        var dist = Math.pow(node.xLDR-xPosLight,2)+Math.pow(node.yLDR-yPosLight,2);
         var voltage = 5.0/(1.0+dist/20000.0);
         // Normalize distance (maximum is around 1000) to 5 V
         node.state += voltage;
@@ -1862,60 +1937,67 @@ function moveWire(p){
 function moveElement(p){
   
   // Bring the component in front of rest
-  canvas.bringToFront(p);
-  
-  p.setCoords(); //Sets corner position coordinates based on current angle, width and height
-  elements.forEach(function (element) {    
-    var targ = element.group;
-    if ( !targ || targ === p) return;
+  var element = p.element;
+  if( element.constructor.name != "Board" ) canvas.bringToFront(p);
+  if( element.button ) canvas.bringToFront(element.button);
+  if( element.ldr ) canvas.bringToFront(element.ldr);
 
-    // Snap horizontally
-    if (Math.abs(p.oCoords.tr.x - targ.oCoords.tl.x) < edgedetection) {
+  if( element.constructor.name != "Board" &&
+      element.constructor.name != "Heater" &&
+      element.constructor.name != "Lightbulb" && 
+      element.constructor.name != "Voltmeter" ) {  
+    p.setCoords(); //Sets corner position coordinates based on current angle, width and height
+    elements.forEach(function (element) {    
+      var targ = element.group;
+      if ( !targ || targ === p) return;
+
+      // Snap horizontally
+      if (Math.abs(p.oCoords.tr.x - targ.oCoords.tl.x) < edgedetection) {
         //p.left += targ.oCoords.tl.x - p.oCoords.tr.x + 1;
         //p.setCoords();
         p.set({left: targ.oCoords.tl.x - 0.5*p.width + 1} );
-    }
-    else if (Math.abs(p.oCoords.tl.x - targ.oCoords.tr.x) < edgedetection) {
+      }
+      else if (Math.abs(p.oCoords.tl.x - targ.oCoords.tr.x) < edgedetection) {
         //p.left += targ.oCoords.tr.x - p.oCoords.tl.x - 1;
         //p.setCoords();
         p.set({left: targ.oCoords.tr.x + 0.5*p.width - 1} );
-    }
-    else if (Math.abs(p.oCoords.tl.x - targ.oCoords.tl.x) < edgedetection ) {
+      }
+      else if (Math.abs(p.oCoords.tl.x - targ.oCoords.tl.x) < edgedetection ) {
         //p.left += targ.oCoords.tl.x - p.oCoords.tl.x ;
         //p.setCoords();
         p.set({left: targ.oCoords.tl.x + 0.5*p.width});
-    }
-    else if (Math.abs(p.oCoords.tr.x - targ.oCoords.tr.x) < edgedetection) {
+      }
+      else if (Math.abs(p.oCoords.tr.x - targ.oCoords.tr.x) < edgedetection) {
         //p.left += targ.oCoords.tr.x - p.oCoords.tr.x ;
         //p.setCoords();
         p.set({left: targ.oCoords.tr.x - 0.5*p.width});
-    }
+      }
 
-    // Snap vertically
-    if (Math.abs(p.oCoords.br.y - targ.oCoords.tr.y) < edgedetection) {
+      // Snap vertically
+      if (Math.abs(p.oCoords.br.y - targ.oCoords.tr.y) < edgedetection) {
         //p.top += targ.oCoords.tr.y - p.oCoords.br.y + 1;
         //p.setCoords();
         p.set({top: targ.oCoords.tr.y - 0.5*p.height + 1} );
-    }
-    else if (Math.abs(targ.oCoords.br.y - p.oCoords.tr.y) < edgedetection) {
+      }
+      else if (Math.abs(targ.oCoords.br.y - p.oCoords.tr.y) < edgedetection) {
         //p.top += targ.oCoords.br.y - p.oCoords.tr.y - 1;
         //p.setCoords();
         p.set({top: targ.oCoords.br.y + 0.5*p.height - 1} );
-    } 
-    else if (Math.abs(targ.oCoords.br.y - p.oCoords.br.y) < edgedetection) {
+      } 
+      else if (Math.abs(targ.oCoords.br.y - p.oCoords.br.y) < edgedetection) {
         //p.top += targ.oCoords.br.y - p.oCoords.br.y;
         //p.setCoords();
         p.set({top: targ.oCoords.br.y - 0.5*p.height} );
-    } 
-    else if (Math.abs(targ.oCoords.tr.y - p.oCoords.tr.y) < edgedetection) {
+      } 
+      else if (Math.abs(targ.oCoords.tr.y - p.oCoords.tr.y) < edgedetection) {
         //p.top += targ.oCoords.br.y - p.oCoords.br.y;
         //p.setCoords();
         p.set({top: targ.oCoords.tr.y + 0.5*p.height} );
-    }    
-  });
+      }    
+    });
+  }
   
   // Update x and y for element and its nodes
-  var element = p.element;
   var nodes = element.nodes;
 
   var newX = p.left-0.5*p.width+0.5;
@@ -1928,7 +2010,22 @@ function moveElement(p){
     nodes[i].x1 += diffX;
     nodes[i].y1 += diffY;    
   }
-
+  if( element.button ) {
+    var button = element.button;
+    button.set({ 'left': button.left+diffX, 'top': button.top+diffY }) ;
+    button.setCoords();
+  }
+  if( element.input ) {
+    var input = element.input;
+    //console.log( "left " + input.offsetLeft + " " + diffX + " " + (input.offsetLeft + diffX) );
+    //console.log( "top " + input.offsetTop +" " + diffY + " " + (input.offsetTop + diffY));
+    //const rect = input.getBoundingClientRect();
+    //console.log("rect top " + (rect.top + window.scrollY)) ;
+    input.style.left = (parseFloat(input.style.left.slice(0,-2)) + diffX) + 'px';
+    input.style.top = (parseFloat(input.style.top.slice(0,-2)) + diffY) + 'px';
+    //console.log( "top " + input.style.top);
+  }
+  
   // Update the wire
   for( var i = 0; i < nodes.length; i++) {
     // Connected input node 
@@ -1941,7 +2038,7 @@ function moveElement(p){
           wire.setCoords();
           wire.line1.set({ 'x2': wire.left, 'y2': wire.top });
           canvas.bringToFront(wire.line1);
-          canvas.bringToFront(wire, 1002);
+          canvas.bringToFront(wire);
         }
       }
     }

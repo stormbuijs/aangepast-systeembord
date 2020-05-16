@@ -28,14 +28,12 @@
         </div>
         <div>
           <br/>
+          <span class="menu">Bestand:</span>
           <input id="fileinput" type="file" style="display: none;">
           <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
           <input id="download_xml" type="button" value="Sla op (download) als:">
           <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
-          <button onclick="toggleMoving();" id="toggleMoving">
-            Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
-          <button onclick="toggleDelete();" id="toggleDelete">
-            Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
+          <span class="menu">Componenten:</span>
           <select name="type" onmousedown="this.value='';" onchange="addElement(this.value);">
               <option value="">Voeg toe...</option>
               <option value="Switch">Drukschakelaar</option>
@@ -47,7 +45,7 @@
               <option value="SoundSensor">Geluidsensor</option>
               <option value="ANDPort">EN-poort</option>
               <option value="ORPort">OF-poort</option>
-              <option value="NOTPort">invertor</option>
+              <option value="NOTPort">Invertor</option>
               <option value="Comparator">Comparator</option>
               <option value="Memory">Geheugencel</option>
               <option value="Counter">Pulsenteller</option>
@@ -59,6 +57,11 @@
               <option value="Voltmeter">Voltmeter</option>
               <option value="Board">Leeg bord</option>          
           </select>
+          <button onclick="toggleMoving();" id="toggleMoving">
+            Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
+          <button onclick="toggleDelete();" id="toggleDelete">
+            Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
+          <button onclick="requestRemoveElements();">Alles verwijderen</button>
         </div>
       </div>
       <div class="column right">
@@ -141,8 +144,8 @@ $("document").ready(function(){
               new LED(540,275),
               new Buzzer(540,325),
               new Relais(540,375),
-              new Lightbulb(780,75),
-              new Heater(800,420),          
+              new Lightbulb(745,11),
+              new Heater(742,360),          
               new Voltmeter(5,100),          
              ];  
 });
