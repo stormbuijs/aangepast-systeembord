@@ -1393,7 +1393,7 @@ function Lightbulb(x1,y1) {
                                   selectable: moveComponents, 
                                   evented: (moveComponents||deleteComponents) });
   //console.log("group: "+this.group.width + ", " + this.group.height );
-  
+
   this.group.set({left: x1+0.5*this.group.width, top: y1+0.5*this.group.height });  
   var circles = drawCircles(0,0,this.nodes, "black");
   for( var i=0; i<circles.length; ++i ) {
@@ -1403,8 +1403,8 @@ function Lightbulb(x1,y1) {
   this.group.name = "element";
   this.group.element = this;
   canvas.add(this.group);
-
-
+  console.log(this.imgBulbOff);
+  this.imgBulbOn.set({left: this.imgBulbOff.left, top: this.imgBulbOff.top });  // update to same pos
   
   this.output = function() {
     var newState = this.nodes[0].child && this.nodes[1].child && // nodes should be connected
@@ -1419,12 +1419,14 @@ function Lightbulb(x1,y1) {
         this.imgBulbOn.sendToBack();*/
         this.group.remove(this.imgBulbOff);
 	      this.group.add(this.imgBulbOn);
+        this.imgBulbOn.moveTo(0);
       } else {
         /*canvas.remove(this.imgBulbOn);
 	      canvas.add(this.imgBulbOff);
         this.imgBulbOff.sendToBack();*/
         this.group.remove(this.imgBulbOn);
         this.group.add(this.imgBulbOff);
+        this.imgBulbOff.moveTo(0);
       }
       // also update all light sensors
       for (var i = 0; i < elements.length; i++) { 
