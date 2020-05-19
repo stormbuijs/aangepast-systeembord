@@ -988,7 +988,7 @@ function VarVoltage(x1,y1,inputValue="0") {
   // Create unique element ID
   var nVarVoltage = 0;
   elements.forEach((element) => {
-    if( element.constructor.name == "VarVoltage") ++nPulse;
+    if( element.constructor.name == "VarVoltage") ++nVarVoltage;
   });
   var elementName = "voltage"+nVarVoltage.toString();
 
@@ -1065,9 +1065,10 @@ function Comparator(x1,y1,inputValue="2.5") {
   // Create unique element ID
   var nComparator = 0;
   elements.forEach((element) => {
-    if( element.constructor.name == "Comparator") ++nPulse;
+    if( element.constructor.name == "Comparator") ++nComparator;
   });
   var elementName = "comparator"+nComparator.toString();
+  //console.log(elementName);
       
   // Create an input DOM element
   inputValue = (inputValue == "") ? "2.5" : inputValue;
