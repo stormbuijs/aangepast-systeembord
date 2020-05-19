@@ -1362,7 +1362,6 @@ function Lightbulb(x1,y1) {
   let node1 = new InputNode(x1+18, y1+96, isHV );
   let node2 = new InputNode(x1+35, y1+129, isHV );
   this.nodes = [ node1, node2 ] ;
-  //drawConnectors(this.nodes, "black");
 
   var imgElementOn = document.getElementById('lighton');
   this.imgBulbOn = new fabric.Image(imgElementOn, {
@@ -1377,33 +1376,17 @@ function Lightbulb(x1,y1) {
     top: 0, selectable: false, evented: false,
   });
   this.imgBulbOff.scale(0.7);
-  //canvas.add(this.imgBulbOff);  
-  //this.imgBulbOff.sendToBack();
-  
-  /* // Alternative (no need to load image already in index.html)
-  var _this = this;
-  fabric.Image.fromURL("img/pic_bulboff.gif", function(img) {
-    _this.imgBulbOff = new fabric.Image(img.getElement(), {left: x1, top: y1, selectable: false, 
-                                                           evented: false,});
-    _this.imgBulbOff.scale(0.7);
-    canvas.add(_this.imgBulbOff);  
-    _this.imgBulbOff.sendToBack();                     
-  });*/
-
-  
+    
   this.group = new fabric.Group([ this.imgBulbOff ],
                                  {hasControls: false, hasBorders: false, 
                                   selectable: moveComponents, 
                                   evented: (moveComponents||deleteComponents) });
-  //console.log("group: "+this.group.width + ", " + this.group.height );
 
   this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });  
   var circles = drawCircles(0,0,this.nodes, "black");  
-  //var circles = drawCircles(this.group.left,this.group.top,this.nodes, "black");
   for( var i=0; i<circles.length; ++i ) {
     this.group.addWithUpdate( circles[i] ); 
   }
-  //this.group.setCoords();
 
   this.group.name = "element";
   this.group.element = this;
@@ -1418,16 +1401,10 @@ function Lightbulb(x1,y1) {
       this.state = newState;
       renderNeeded = true;
       if( this.state ) { 
-        /*canvas.remove(this.imgBulbOff);
-	      canvas.add(this.imgBulbOn);
-        this.imgBulbOn.sendToBack();*/
         this.group.remove(this.imgBulbOff);
 	      this.group.add(this.imgBulbOn);
         this.imgBulbOn.moveTo(0);
       } else {
-        /*canvas.remove(this.imgBulbOn);
-	      canvas.add(this.imgBulbOff);
-        this.imgBulbOff.sendToBack();*/
         this.group.remove(this.imgBulbOn);
         this.group.add(this.imgBulbOff);
         this.imgBulbOff.moveTo(0);
