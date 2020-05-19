@@ -1245,7 +1245,8 @@ function Counter(x1,y1) {
     if( isHigh(node6.state) || isHigh(node6.eval())) { 
       if( this.counter != 0 ) {
         this.counter = 0;
-        this.textbox.text = (this.counter).toString();
+        //this.textbox.text = (this.counter).toString();
+        this.textbox.set( {'text' : this.counter.toString() });
         renderNeeded = true;
       }
     } else {
