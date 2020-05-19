@@ -2190,10 +2190,11 @@ function parseFile(xml) {
       var toNode = elements[iToElement].nodes[iToNode];
       var wire = toNode.wires[toNode.wires.length-1]; // last wire
       wire.connection = node;
-      wire.bringToFront();
       wire.set({ 'left': node.x1, 'top' : node.y1 } );
       wire.setCoords();
       wire.line1.set({ 'x2': node.x1, 'y2': node.y1 });
+      wire.bringToFront();
+      wire.line1.bringToFront();
 
       // Create extra wire for output node
       toNode.wires.push( makeWire(toNode.x1,toNode.y1,toNode,toNode.isHV) );
