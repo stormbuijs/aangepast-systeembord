@@ -2271,6 +2271,7 @@ function addElement(className,x1=0,y1=0,inputValue=""){
     break;
 
   } 
+  document.getElementById('addElement').selectedIndex = 0;
 }
 
 // Add listener for download button

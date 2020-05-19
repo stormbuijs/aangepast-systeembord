@@ -34,7 +34,7 @@
           <input id="download_xml" type="button" value="Sla op (download) als:">
           <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
           <span class="menu">Componenten:</span>
-          <select name="type" onmousedown="this.value='';" onchange="addElement(this.value);">
+          <select id="addElement" name="type" onchange="addElement(this.value);">
               <option value="">Voeg toe...</option>
               <option value="Switch">Drukschakelaar</option>
               <option value="VarVoltage">Variabele spanning</option>
