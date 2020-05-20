@@ -35,9 +35,9 @@
           <br/>
           <span class="menu">Bestand:</span>
           <input id="fileinput" type="file" style="display: none;">
-          <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
-          <input id="download_xml" type="button" value="Sla op (download) als:">
-          <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
+          <button id="stupid_hack" onclick="fileinput.click()">Open bestand...</button>
+          <input id="download_xml" type="button" value="Opslaan als ...">
+          <!--input type="text" id="xml_filename" value="systeembord.xml" size=20--><br>
           <span class="menu">Componenten:</span>
           <select id="addElement" name="type" onchange="addElement(this.value);">
               <option value="">Voeg toe...</option>
@@ -63,12 +63,12 @@
               <option value="Board">Leeg bord</option>          
           </select>
           <button onclick="toggleMoving();" id="toggleMoving">
-            Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
+            Verplaatsen&nbsp;&nbsp;&nbsp;&nbsp;</button>
           <button onclick="toggleDelete();" id="toggleDelete">
-            Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
+            Verwijderen&nbsp;&nbsp;&nbsp;&nbsp;</button>
           <button onclick="requestRemoveElements();">Alles verwijderen</button><br/>
           <span class="menu">Help</span>          
-          <button onclick="toggleText('shortInfo',this)">Beknopte instuctie &nbsp;&nbsp;&nbsp;&nbsp;</button>
+          <button onclick="toggleText('shortInfo',this)">Toon beknopte instuctie &nbsp;&nbsp;&nbsp;&nbsp;</button>
         </div>
       </div>
       <div id="shortInfo" style="display:none" class="column right">

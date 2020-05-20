@@ -1763,8 +1763,10 @@ function toggleMoving() {
   
   // Change button text
   var checkbox = document.getElementById("toggleMoving");
-  if( moveComponents ) checkbox.innerHTML = "Verplaatsen... &#10003;";
-  else checkbox.innerHTML = "Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;";    
+  //if( moveComponents ) checkbox.innerHTML = "Verplaatsen... &#10003;";
+  //else checkbox.innerHTML = "Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;";    
+  if( moveComponents ) addCheckMark(checkbox);
+  else removeCheckMark(checkbox);
 }
 
 
@@ -1784,22 +1786,37 @@ function toggleDelete() {
   
   // Change button text
   var checkbox = document.getElementById("toggleDelete");
-  if( deleteComponents ) checkbox.innerHTML = "Verwijderen... &#10003;";
-  else checkbox.innerHTML = "Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;";    
+  //if( deleteComponents ) checkbox.innerHTML = "Verwijderen... &#10003;";
+  //else checkbox.innerHTML = "Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;";    
+  if( deleteComponents ) addCheckMark(checkbox);
+  else removeCheckMark(checkbox);
 }
 
 
 function toggleText(name,button) {
   var text = document.getElementById(name);
-  var buttonText = button.innerHTML;
+  //var buttonText = button.innerHTML;
   if (text.style.display === "none") {
     text.style.display = "block";
-    button.innerHTML = buttonText.substr(0,buttonText.length-24).concat("&#10003;");
+    addCheckMark(button);
+    //button.innerHTML = buttonText.substr(0,buttonText.length-24).concat("&#10003;");
   } else {
     text.style.display = "none";
-    button.innerHTML = buttonText.substr(0,buttonText.length-1).concat("&nbsp;&nbsp;&nbsp;&nbsp;");
+    removeCheckMark(button);
+    //button.innerHTML = buttonText.substr(0,buttonText.length-1).concat("&nbsp;&nbsp;&nbsp;&nbsp;");
   }
 }
+
+function addCheckMark(button) {
+  var buttonText = button.innerHTML;
+  button.innerHTML = buttonText.substr(0,buttonText.length-24).concat("&nbsp;&#10003;");
+}
+
+function removeCheckMark(button) {
+  var buttonText = button.innerHTML;
+  button.innerHTML = buttonText.substr(0,buttonText.length-7).concat("&nbsp;&nbsp;&nbsp;&nbsp;");
+}
+
 
 
 // Change button color and state of OutputNode when pushed
@@ -2267,7 +2284,11 @@ function addElement(className,x1=0,y1=0,inputValue=""){
 
 // Add listener for download button
 document.getElementById("download_xml").addEventListener("click", function(){
-   download( document.getElementById("xml_filename").value, createXmlFile());
+  var filename = prompt("Sla op als...", "systeembord.xml");
+  if (filename != null && filename != "") {
+    download( filename, createXmlFile());
+  }  
+  //download( document.getElementById("xml_filename").value, createXmlFile());
 }, false);
 
 // Create an invisible download element
