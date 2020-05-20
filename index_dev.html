@@ -61,10 +61,12 @@
             Verplaatsen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
           <button onclick="toggleDelete();" id="toggleDelete">
             Verwijderen...&nbsp;&nbsp;&nbsp;&nbsp;</button>
-          <button onclick="requestRemoveElements();">Alles verwijderen</button>
+          <button onclick="requestRemoveElements();">Alles verwijderen</button><br/>
+          <span class="menu">Help</span>          
+          <button onclick="toggleText('shortInfo',this)">Beknopte instuctie &nbsp;&nbsp;&nbsp;&nbsp;</button>
         </div>
       </div>
-      <div class="column right">
+      <div id="shortInfo" style="display:none" class="column right">
           <h3>Beknopte instructie:</h3>
         <ul> 
           <li><b>Verbindingssnoeren maken:</b><br/>
@@ -93,17 +95,18 @@
           <li><b>Meer informatie:</b><br/>
             Zie de handleiding van het <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li>  
         </ul>
-        <img width=0 src="img/pic_bulboff.gif" id="lightoff">
-        <img width=0 src="img/pic_bulbon.gif" id="lighton">
-        <img width=0 src="img/ldr.png" id="ldr">
-        <img width=0 src="img/radiator.jpg" id="radiator">
       </div>
     </div>
     
+    <img width=0 src="img/pic_bulboff.gif" id="lightoff">
+    <img width=0 src="img/pic_bulbon.gif" id="lighton">
+    <img width=0 src="img/ldr.png" id="ldr">
+    <img width=0 src="img/radiator.jpg" id="radiator">
+
     <hr>
     &copy; 2020 Jeroen van Tilburg | Feedback naar jvantilburg apestaartje gmail punt com | 
     <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> |
-    <a href="index_dev.html">Ontwikkelversie</a>
+    <a href="index.html">Standaardversie</a>
 
     <script src="scripts/fabric.min.js"></script>
     <script src="scripts/jquery-3.5.0.min.js"></script>

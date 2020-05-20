@@ -1789,6 +1789,18 @@ function toggleDelete() {
 }
 
 
+function toggleText(name,button) {
+  var text = document.getElementById(name);
+  var buttonText = button.innerHTML;
+  if (text.style.display === "none") {
+    text.style.display = "block";
+    button.innerHTML = buttonText.substr(0,buttonText.length-24).concat("&#10003;");
+  } else {
+    text.style.display = "none";
+    button.innerHTML = buttonText.substr(0,buttonText.length-1).concat("&nbsp;&nbsp;&nbsp;&nbsp;");
+  }
+}
+
 
 // Change button color and state of OutputNode when pushed
 canvas.on({'mouse:down':mouseClick});
