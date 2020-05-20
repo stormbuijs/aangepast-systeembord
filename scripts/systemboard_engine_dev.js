@@ -1948,8 +1948,12 @@ function moveElement(p){
     p.setCoords(); //Sets corner position coordinates based on current angle, width and height
     elements.forEach(function (element) {    
       var targ = element.group;
-      if ( !targ || targ === p) return;
-
+      if ( !targ || targ === p ||
+           element.constructor.name == "Board" ||
+           element.constructor.name == "Heater" ||
+           element.constructor.name == "Lightbulb" ||
+           element.constructor.name == "Voltmeter"    ) return;
+      
       // Snap horizontally
       if (Math.abs(p.oCoords.tr.x - targ.oCoords.tl.x) < edgedetection) {
         //p.left += targ.oCoords.tl.x - p.oCoords.tr.x + 1;
@@ -2006,10 +2010,8 @@ function moveElement(p){
   element.x = newX;
   element.y = newY;
   for (i = 0; i < nodes.length; i++) {
-    console.log( "node left  " + nodes[i].x1 + " " + diffX);
-    console.log( "node top   " + nodes[i].y1 + " " + diffY);
-
-
+    //console.log( "node left  " + nodes[i].x1 + " " + diffX);
+    //console.log( "node top   " + nodes[i].y1 + " " + diffY);
     nodes[i].x1 += diffX;
     nodes[i].y1 += diffY;
   }
