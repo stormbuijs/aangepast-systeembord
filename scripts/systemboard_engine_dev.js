@@ -538,8 +538,9 @@ function Board(x1,y1) {
                                  drawText(265, 21,"VERWERKING",16),
                                  drawText(520, 21, "UITVOER",16) ], 
                                {left: x1, top: y1+5, originX: 'left', originY: 'top',
-                                hasControls: false, hasBorders: false,
-                                selectable: false, evented: false });
+                                hasControls: false, hasBorders: false,                          
+                                selectable: moveComponents, 
+                                evented: (moveComponents||deleteComponents) });
   this.group.name = "element";
   this.group.element = this;
   canvas.sendToBack(this.group); //settBackgroundImage(group);
