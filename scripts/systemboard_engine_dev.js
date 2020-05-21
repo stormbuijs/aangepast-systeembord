@@ -2216,6 +2216,8 @@ function parseFile(xml) {
 }
 
 function addElement(className,x1=0,y1=0,inputValue=""){
+  elements.push(new window[className](x1,y1,inputValue));
+  /*
   switch( className ) {
     case "Board" :
       elements.push(new Board(x1,y1));
@@ -2278,7 +2280,7 @@ function addElement(className,x1=0,y1=0,inputValue=""){
       elements.push(new Voltmeter(x1,y1));
     break;
 
-  } 
+  } */
   document.getElementById('addElement').selectedIndex = 0;
 }
 
@@ -2314,11 +2316,11 @@ function createXmlFile(){
     newElement.setAttributeNode(attName);
 
     var attPosX = xmlDoc.createAttribute("x");
-    attPosX.nodeValue = elements[i].x.toString();
+    attPosX.nodeValue = Math.round(elements[i].x).toString();
     newElement.setAttributeNode(attPosX);
 
     var attPosY = xmlDoc.createAttribute("y");
-    attPosY.nodeValue = elements[i].y.toString();
+    attPosY.nodeValue = Math.round(elements[i].y).toString();
     newElement.setAttributeNode(attPosY);
     
     //console.log("Node name="+attName.nodeValue);
