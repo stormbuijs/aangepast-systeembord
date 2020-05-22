@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>Online systeembord test</title>
+  <title>Online systeembord test2</title>
   <meta charset="UTF-8">
   <meta name="description" content="Online Systeembord">
   <meta name="keywords" content="natuurkunde, technische automatisering, systeembord">
@@ -95,8 +95,9 @@ $("document").ready(function(){
   // Read the default file
   //readFile("xml/"+xmlFile);
   //Use createObjectURL, this should address any CORS issues.
-  let filePath = URL.createObjectURL(files[0]);
-  readFile(xmlFile);
+  let filePath = URL.createObjectURL(xmlFile);
+  //readFile(xmlFile);
+  readFile(filePath);
 });
   
 })();
