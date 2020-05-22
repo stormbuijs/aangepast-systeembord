@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Online systeembord</title>
+  <meta charset="UTF-8">
+  <meta name="description" content="Online Systeembord">
+  <meta name="keywords" content="natuurkunde, technische automatisering, systeembord">
+  <meta name="author" content="Jeroen van Tilburg">
+  <meta name="viewport" content="width=930">
+  <meta property="og:image" content="https://jeroenvantilburg.github.io/systeembord/screenshot.png" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://jeroenvantilburg.github.io/systeembord/" />
+  <meta property="og:title" content="Online systeembord" />
+  <meta property="og:description" content="Bouw je eigen automatisch systeem en leer hoe logische schakelingen werken" />
+  <link rel="apple-touch-icon-precomposed" sizes="57x57" href="favicon-apple-touch-114.png">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="favicon-apple-touch-114.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="favicon-apple-touch-144.png">
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="favicon-apple-touch-144.png">
+  <link rel="icon" type="image/vnd.microsoft.icon" sizes="32x32 48x48" href="favicon.ico">
+  <link rel="icon" sizes="128x128" href="favicon.icns">
+  <link rel="icon" href="favicon.png" type="image/x-icon">
+  <link rel="stylesheet" type="text/css" href="style.css" media="screen,projection" />
+</head>
+  <body>
+    <div class="row">
+      <div class="column left">
+        <h2>Online Systeembord</h2>
+        <div id="canvas1" 
+             style="position:relative;width:900px;height:500px;top:0px; left:0px">
+          <canvas id="c" width="900" height="500" style="border:1px solid #ccc">
+            Your browser does not support HTML5 Canvas.
+          </canvas>
+        </div>
+        <div>
+          <br/>
+          <input id="fileinput" type="file" style="display: none;">
+          <button id="stupid_hack" onclick="fileinput.click()">Open bestand</button>
+          <input id="download_xml" type="button" value="Sla op (download) als:">
+          <input type="text" id="xml_filename" value="systeembord.xml" size=20><br>
+        </div>
+      </div>
+      <div class="column right">
+          <h3>Beknopte instructie:</h3>
+        <ul> 
+          <li><b>Verbindingssnoeren maken:</b><br/>
+            De snoeren moeten van een uitgang naar ingang worden getrokken. Klik op een
+            uitgang (rode cirkel) en sleep het snoer naar een (grijze) ingang.</li>
+          <li><b>Meerdere verbindingssnoeren:</b><br/>
+            Een uitgang kan met meerdere ingangen worden verbonden.</li>
+          <li><b>Verbindingssnoeren verwijderen:</b><br/>
+            Sleep het snoer weg van de ingang.</li>
+          <li><b>Drukschakelaar:</b><br/>
+            Met een klik-sleep kan de schakelaar worden vastgezet.</li>
+          <li><b>Relais:</b><br/>
+            De relais is al aangesloten op een wisselspanningbron.
+            De zwarte uitgangen kunnen worden verbonden met de lamp of 
+            de elektrische verwarming.</li>
+          <li><b>Sensoren:</b><br/>
+            De geluidsensor is aangesloten op de ingebouwde microfoon van
+            de computer (je moet hiervoor wel toestemming geven).
+            De LDR van de lichtsensor kan worden gesleept. De spanning is 
+            afhankelijk van de afstand tot de lamp, wanneer die aan staat.
+            De temperatuursensor is (draadloos) verbonden met de thermometer
+            bij de verwarming.</li>
+          <li><b>Voltmeter:</b><br/>
+            Met de voltmeter kan de spanning op een uitgang worden gemeten.
+            De andere ingang van de voltmeter is al verbonden met de aarde.</li>
+          <li><b>Compatibiliteit</b><br/>
+            Online Syteembord werkt niet met Internet Explorer.</li>
+          <li><b>Meer informatie:</b><br/>
+            Zie de handleiding van het <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li>  
+        </ul>
+        <img width=0 src="img/pic_bulboff.gif" id="lightoff">
+        <img width=0 src="img/pic_bulbon.gif" id="lighton">
+        <img width=0 src="img/ldr.png" id="ldr">
+        <img width=0 src="img/radiator.jpg" id="radiator">
+      </div>
+    </div>
+
+    <hr>
+    &copy; 2020 Jeroen van Tilburg | Feedback naar jvantilburg apestaartje gmail punt com | 
+    <a href="index_dev.html">Ontwikkelversie</a>
+
+    <script src="scripts/fabric.min.js"></script>
+    <script src="scripts/jquery-3.5.0.min.js"></script>
+    <!--script src="http://webrtc.github.io/adapter/adapter-latest.js"></script-->
+    <script src="scripts/systemboard_engine.js"></script>
+    <script id="main">
+(function() {
+
+// load all code after the document
+$("document").ready(function(){
+  var xmlFile = window.location.hash.substr(1);
+  if( xmlFile == "") xmlFile = "systeembord.xml";
+  // Read the default file
+  //readFile("xml/"+xmlFile);
+  readFile(xmlFile);
+});
+  
+})();
+</script>
+
+<script data-goatcounter="https://onlinesysteembord.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+
+</body>
+</html>
