@@ -24,7 +24,7 @@
   <body>
     <div class="row">
       <div class="column left">
-        <h2>Online Systeembord test</h2>
+        <h2>Online Systeembord test2</h2>
         <div id="canvas1" 
              style="position:relative;width:900px;height:500px;top:0px; left:0px">
           <canvas id="c" width="900" height="500" style="border:1px solid #ccc">
@@ -142,11 +142,16 @@ function readFile2(url) {
 function parseFile2(xml) {
   removeElements();
   var i,j;
-  var parser = new DOMParser();
-  var xmlDoc = parser.parseFromString(xml,"text/xml");
-  console.log(xml);
+  console.log(typeof xml);
+  var xmlDoc = xml;
+  if( typeof xml === "string" ) {
+    var parser = new DOMParser();
+    xmlDoc = parser.parseFromString(xml,"text/xml");
+  }
   console.log(xmlDoc);
+
   //var xmlDoc = xml.responseXML;
+  
   var x = xmlDoc.getElementsByTagName("systeembord");
   var domElements = x[0].getElementsByTagName("element");
 
