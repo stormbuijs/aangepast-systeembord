@@ -103,6 +103,8 @@ $("document").ready(function(){
     xmlFile = "systeembord.xml";
     // Read the default file
     xmlFile = "xml/"+xmlFile;
+    //readFile2(xmlFile);
+    console.log(xmlFile);
     $.get(xmlFile, function(data) {
       //console.log(data);
       parseFile2( data );

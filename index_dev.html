@@ -120,17 +120,16 @@
     <script id="main">
 (function() {
 
-  //var xmlFile = window.location.hash.substr(1);
-  //if( xmlFile == "") xmlFile = "systeembord.xml";
-  //console.log("load xmlFile "+ xmlFile);
-
-  
 // load all code after the document
 $("document").ready(function(){
-  //readFile("xml/systeembord.xml");
-
+  var xmlFile = window.location.hash.substr(1);
+  // If hash is empty read the default file
+  if( xmlFile == "") xmlFile = "systeembord_dev.xml";
+  // Read the xml file
+  readFile("xml/"+xmlFile);
+  
   // Define the elements of the systemboard
-  elements =[ new Board(60,0),
+  /*elements =[ new Board(60,0),
               new LightSensor(70,25),
               new TemperatureSensor(70,75),
               new SoundSensor(70,125),
@@ -160,7 +159,7 @@ $("document").ready(function(){
               new Lightbulb(745,11),
               new Heater(742,360),          
               new Voltmeter(5,100),          
-             ];  
+             ];  */
 });
   
 })();

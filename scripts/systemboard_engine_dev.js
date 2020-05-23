@@ -1746,20 +1746,29 @@ control.addEventListener("change", function(event) {
 });
 
 function readFile(url) {
-  var xhttp = new XMLHttpRequest();
+  /*var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       parseFile(this);
     }
   };
   xhttp.open("GET", url, true);
-  xhttp.send();
+  xhttp.send();*/
+  // Get the xml file using jQuery get method
+  $.get(url, function(xmlDoc) {
+      parseFile( xmlDoc );
+  });
 }
 
 function parseFile(xml) {
   removeElements();
   var i,j;
-  var xmlDoc = xml.responseXML;
+  //var xmlDoc = xml.responseXML;
+  var xmlDoc = xml;
+  if( typeof xml === "string" ) {
+    var parser = new DOMParser();
+    xmlDoc = parser.parseFromString(xml,"text/xml");
+  }
   var x = xmlDoc.getElementsByTagName("systeembord");
   var domElements = x[0].getElementsByTagName("element");
 
