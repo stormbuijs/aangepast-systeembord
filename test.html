@@ -91,10 +91,117 @@
 // load all code after the document
 $("document").ready(function(){
   var xmlFile = window.location.hash.substr(1);
-  if( xmlFile == "") xmlFile = "systeembord.xml";
-  // Read the default file
-  //readFile("xml/"+xmlFile);
+
+  // temporary direct link (works)
+  //xmlFile = "https://dl.dropboxusercontent.com/1/view/65b1g2xv2cy9ojd/ANDport.xml";
   
+  // Shared link (needs to be scraper)
+  //xmlFile = "https://www.dropbox.com/s/dl/ts6xlkh5gemhtjx/ANDport.xml?raw=1";
+  //xmlFile = "https://www.dropbox.com/s/dl/ts6xlkh5gemhtjx/ANDport.xml";
+
+  if( xmlFile == "") {
+    xmlFile = "systeembord.xml";
+    // Read the default file
+    xmlFile = "xml/"+xmlFile;
+    $.get(xmlFile, function(data) {
+      //console.log(data);
+      parseFile2( data );
+    });
+  }
+  else if ( xmlFile.includes("https") && xmlFile.includes("dropbox") ) {
+    $.get(xmlFile, function(data) {
+      // scrape the html to look for direct link
+      var bla = (data.split('<iframe src="')[1]).split('">')[0];
+      xmlFile = bla;
+      console.log(bla);    
+      $.get(bla, function(data2) {
+        console.log(data2);
+        parseFile2( data2 );
+      });
+    });
+  } else {
+    xmlFile = "xml/"+xmlFile;
+    // Read the default file
+    readFile(xmlFile);
+  }
+  
+
+function readFile2(url) {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      //document.getElementById("bla").innerHTML = this.responseText;
+      console.log(this);
+      parseFile(this);
+    }
+  };
+  xhttp.open("GET", url, true);
+  xhttp.send();
+}
+
+function parseFile2(xml) {
+  removeElements();
+  var i,j;
+  var parser = new DOMParser();
+  var xmlDoc = parser.parseFromString(xml,"text/xml");
+  console.log(xml);
+  console.log(xmlDoc);
+  //var xmlDoc = xml.responseXML;
+  var x = xmlDoc.getElementsByTagName("systeembord");
+  var domElements = x[0].getElementsByTagName("element");
+
+  for (i = 0; i < domElements.length; i++) { 
+    var className = domElements[i].getAttribute('name');
+     
+    var x = parseInt( domElements[i].getAttribute('x')); 
+    var y = parseInt( domElements[i].getAttribute('y'));
+    var inputValue = "";
+    if( className == "Comparator" || 
+        className == "VarVoltage" ||
+        className == "Pulse" ) {
+      inputValue = domElements[i].getAttribute('inputValue');
+      if( !inputValue ) inputValue = "";
+    }
+    addElement(className,x,y,inputValue); 
+  }    
+  
+  // Second loop to add the links
+  for (i = 0; i < domElements.length; i++) { 
+    var domLinks = domElements[i].getElementsByTagName("link");
+    for (j = 0; j < domLinks.length; j++) { 
+      var iNode = parseInt( domLinks[j].getAttribute('id')); 
+      var iToElement = parseInt( domLinks[j].getAttribute('toElement')); 
+      var iToNode = parseInt( domLinks[j].getAttribute('toNode')); 
+      
+      // Update drawing of wire
+      var node = elements[i].nodes[iNode];
+      var toNode = elements[iToElement].nodes[iToNode];
+      var wire = toNode.wire; 
+      wire.connection = node;
+      wire.bringToFront();
+      wire.set({ 'left': node.x1, 'top' : node.y1 } );
+      wire.setCoords();
+      wire.line1.set({ 'x2': node.x1, 'y2': node.y1 });
+
+      // Create extra wire for output node
+      toNode.wire = makeWire(toNode.x1,toNode.y1,toNode,toNode.isHV);
+
+      // Set the link in the right element
+      node.child = toNode;
+    }
+  }
+  
+}
+
+
+  
+  
+
+  // Scraped link (works)
+  //xmlFile = "https://ucadb50e12ec0571e0e6c92154c1.dl.dropboxusercontent.com/cd/0/get/A4RSpz_vvrr25UyyCoa7icdhPY5ssMjbR5eSqrDEpJcElxAthLqmiGpg6iOwSUDVxEgNGWwgIBuCrbYXcSAGBIHjsfDDpMdgwNuiFxu9UwIedR8u0EaEaFkJeHoK76erLa4/file?dl=1#";
+
+  
+
   
   /*function readFile2(url) {
     var xhttp = new XMLHttpRequest();
@@ -111,44 +218,11 @@ $("document").ready(function(){
   readFile2("https://www.dropbox.com/s/dl/ts6xlkh5gemhtjx/ANDport.xml");
   */
   
-  //https://dl.dropboxusercontent.com/1/view/65b1g2xv2cy9ojd/ANDport.xml
-  
-  //$.get("https://www.dropbox.com/s/dl/ts6xlkh5gemhtjx/ANDport.xml?raw=1", function(data) {
-  //  console.log(data);    
-  //});
-  
-  
-  
-    var https = require('https');
-    var fs = require('fs');
-
-    // (...)
-
-    var myDropboxURL = 'https://www.dropbox.com/s/dl/ts6xlkh5gemhtjx/ANDport.xml?dl=1';
-    var file = fs.createWriteStream('path/to/the/dest/file');
-
-    var request = (url) => {
-      https.get(url, (response) => {
-        if (response.statusCode == 302) { // it's a redirect!
-          request(response.headers.location);
-        } else {
-          response.pipe(fp);
-          file.on('finish', () => {
-            file.close(() => {
-              // You may do something here
-              console.log(file);
-            });
-          });
-        }
-      }).on('error', (err) => {
-        // Do something if the request fails
-         console.log(file);
-      });
-    };  
-  
-    // Here we start the request
-    request(myDropboxURL);
     
+  
+  
+  
+     
   
   
 });
