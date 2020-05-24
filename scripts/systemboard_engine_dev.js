@@ -1,3 +1,7 @@
+/* ========== GLOBAL SECTION =================
+   Global variables are defined here
+   =========================================== */
+
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
 function isHigh(x) {return x >= hiThreshold; };
@@ -39,6 +43,10 @@ fabric.Textbox.prototype.objectCaching = false;
 fabric.Text.prototype.objectCaching = false;
 
 
+/* ========== SHARED FUNCTIONS ===============
+   
+   =========================================== */
+
 // Set a warning messsage when using Internet Explorer
 function isIE() {
   // IE 10 and IE 11
@@ -58,6 +66,10 @@ let showBrowserAlert = (function () {
 
 document.addEventListener('DOMContentLoaded', showBrowserAlert);
 
+
+/* ========== AUDIO SECTION ====================
+   Start the audioContext and set the microphone
+   ============================================= */
 
 // Set empty AudioContext, etc
 var audioCtx = null, oscillator = null, gainNode = null;
@@ -114,6 +126,10 @@ function stopBuzzer() {
 }
 
 
+/* ========== DRAWING SECTION ==================
+   General functions to draw wires, buttons, etc
+   ============================================= */
+
 // Make movable circle for wire
 function makeCircle(left, top, line1, node, color){
     var c = new fabric.Circle({left: left, top: top, radius: 3, fill: color, padding: 7});
@@ -156,235 +172,12 @@ function drawButton(left, top, node){
   c.node = node;
   return c;
 }    
-  
-// Generic input node (has a child to follow)
-function InputNode(x1,y1, isHV=false) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child = null;
-    this.state = low; // only used by reset button of pulse counter
-    this.eval = function() { return (this.child) ? this.child.eval() : false ; };
-    this.isInput = true;
-    this.isHV = isHV;
-}
-
-// Generic output node (has a state=voltage)
-function OutputNode(x1,y1) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.state = low;
-    this.eval = function() { return this.state; };      
-    this.isInput = false;     
-    this.isHV = false;
-    this.wires = [ makeWire(x1,y1,this) ];
-}    
-
-// AND node
-function ANDNode(x1,y1,input1,input2, color) { 
-  this.x1 = x1;
-  this.y1 = y1;
-  this.child1 = input1;
-  this.child2 = input2;
-  this.isInput = false;
-  this.isHV = false;
-  this.state = low;
-  var lastEvent = 0;
-  this.eval = function() {
-    // loop protection
-    if( lastEvent != eventCounter ) {
-      lastEvent = eventCounter;
-      this.state = (isHigh(this.child1.eval()) && isHigh(this.child2.eval()) ) ? high : low;
-    }
-    return this.state;
-  };      
-  this.wires = [ makeWire(x1,y1,this) ];
-}
-
-// OR node
-function ORNode(x1,y1,input1,input2) { 
-  this.x1 = x1;
-  this.y1 = y1;
-  this.child1 = input1;
-  this.child2 = input2;
-  this.isInput = false;
-  this.isHV = false;
-  this.state = low;
-  var lastEvent = 0;
-  this.eval = function() {
-    // loop protection
-    if( lastEvent != eventCounter ) {
-      lastEvent = eventCounter;
-      this.state = (isHigh(this.child1.eval()) || isHigh(this.child2.eval()) ) ? high : low;
-    }
-    return this.state;
-  };  
-  this.wires = [ makeWire(x1,y1,this) ];
-}
-
-// NOT node
-function NOTNode(x1,y1,input1) { 
-  this.x1 = x1;
-  this.y1 = y1;
-  this.child1 = input1;
-  this.isInput = false;     
-  this.isHV = false;
-  this.state = low;
-  var lastEvent = 0;
-  this.eval = function() {
-    // loop protection
-    if( lastEvent != eventCounter ) {
-      lastEvent = eventCounter;
-      this.state = (isHigh(this.child1.eval()) ) ? low : high ;
-    }
-    return this.state; 
-  }
-
-  this.wires = [ makeWire(x1,y1,this) ];
-}    
-  
-// Comparator node
-function ComparatorNode(x1,y1,input1) { 
-  this.x1 = x1;
-  this.y1 = y1;
-  this.child1 = input1;
-  this.compare = low;
-  this.isInput = false;     
-  this.isHV = false;
-  this.state = low;
-  var lastEvent = 0;
-  this.eval = function() {
-    // loop protection
-    if( lastEvent != eventCounter ) {
-      lastEvent = eventCounter;
-      this.state = (this.child1.eval() < this.compare) ? low : high ;
-    }
-    return this.state;
-  }
-  this.wires = [ makeWire(x1,y1,this) ];
-}  
-    
-// Binary node
-function BinaryNode(x1,y1,input1,bin) { 
-  this.x1 = x1;
-  this.y1 = y1;
-  this.child1 = input1;
-  this.isInput = false;     
-  this.isHV = false;
-  this.state = low;
-  var lastEvent = 0;
-  this.eval = function() {
-    // loop protection
-    if( lastEvent != eventCounter ) {
-      lastEvent = eventCounter;
-      var binary = (this.child1.eval() / high ) * 15;
-      var bit = (binary & (1<<bin)) >> bin;
-      this.state = ( bit == 1 ) ? high : low ;
-    }
-    return this.state;
-  }
-  this.wires = [ makeWire(x1,y1,this) ];
-}    
-
-// Binary node with stored counter
-function BinaryNodeS(x1,y1,bin) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.isInput = false;     
-    this.isHV = false;
-    this.counter = 0;
-    this.eval = function() {
-      var binary = this.counter ;
-      var bit = (binary & (1<<bin)) >> bin;
-      return ( bit == 1 ) ? high : low ;
-    }
-    this.wires = [ makeWire(x1,y1,this) ];
-}    
-
-// Relais node 
-function RelaisNode(x1,y1,input) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.child = input;
-    this.isHV = true;
-    this.eval = function() { return this.child.eval(); };      
-    this.isInput = false;
-    this.wires = [ makeWire(x1,y1,this,this.isHV) ];
-}
-
-// Light sensor node
-function LightSensorNode(x1,y1,x2,y2) { 
-    this.x1 = x1;
-    this.y1 = y1;
-    this.xLDR = x2;
-    this.yLDR = y2;
-    this.state = low;
-    this.eval = function() { return this.state; };      
-    this.isInput = false;     
-    this.isHV = false;
-    this.wires = [ makeWire(x1,y1,this) ];
-}    
-
-// output node for sound sensor
-function SoundSensorNode(x1,y1,element) { 
-  this.x1 = x1;
-  this.y1 = y1;
-  this.state = low;
-  this.isInput = false;     
-  this.isHV = false;
-  this.wires = [ makeWire(x1,y1,this) ];
-  this.element = element
-
-  var micStarted = false;
-  var analyser = null, microphone = null, javascriptNode = null;
-  this.eval = function() { 
-    // Initialize the microphone
-    if( audioCtx ) {
-      if( !micStarted ) {      
-        micStarted = true;
-        var _this = this;
-        // Start the audio stream
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then(function(stream) {
-          analyser = audioCtx.createAnalyser();
-          microphone = audioCtx.createMediaStreamSource(stream);
-          javascriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
-          microphone.connect(analyser);
-          analyser.connect(javascriptNode);
-          javascriptNode.connect(audioCtx.destination);
-          javascriptNode.onaudioprocess = function() {
-            var array = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(array);
-            var values = 0;
-            var length = array.length;
-            for (var i = 0; i < length; i++) { values += array[i]; };
-            var soundLevel = values / length;
-            _this.state = Math.min(0.05 * soundLevel, 5.0) ;
-          }
-        })
-        .catch(function(err) {
-          element.textbox.setColor('darkgrey');
-          renderNeeded = true;
-          console.log("The following error occured: " + err.name);
-        });
-      } else if (audioCtx.state == 'suspended') {
-        audioCtx.resume();
-      }
-    } else { // no audioCtx
-      element.textbox.setColor('darkgrey');
-      renderNeeded = true;
-    }
-    return this.state; 
-  }
-}    
-
 
 function drawText(x1,y1,text,fontsize=10){
   // Draw text
   var txt = new fabric.Text(text, {left: x1, top: y1, originX: 'left', originY: 'bottom', 
                                     /*width: 5,*/ fontSize: fontsize, fontFamily: 'Arial', 
                                     selectable: false, evented: false });
-  //canvas.add(txt)
-  //txt.sendToBack();
   return txt;
 }
 
@@ -439,6 +232,193 @@ function drawCircles(x1,y1,nodes,color) {
   return circles;
 }
 
+
+/* ============ NODE SECTION ==================
+   Nodes are the terminals where the wires are 
+   connected. 
+   Two main types: input and output nodes.
+   They have an x,y position.
+   ============================================= */
+
+// Generic input node
+class InputNode {
+  constructor(x1=0,y1=0, isHV=false) { 
+    this.x1 = x1;
+    this.y1 = y1;
+    this.isHV = isHV;
+    this.state = low; // only used by reset button of pulse counter
+    this.isInput = true;
+    this.child = null;
+  }
+  eval() { return (this.child) ? this.child.eval() : false ; };
+}
+
+// Generic output node (base class)
+class OutputNode { 
+  constructor(x1=0,y1=0, isHV=false) {
+    this.x1 = x1;
+    this.y1 = y1;
+    this.isHV = isHV;
+    this.state = low;
+    this.isInput = true;
+    this.isInput = false;     
+    this.wires = [ makeWire(x1,y1,this,isHV) ];
+    this.lastEvent = 0;
+  }
+  evalState() { return this.state; };
+  eval() {
+    // loop protection
+    if( this.lastEvent != eventCounter ) {
+      this.lastEvent = eventCounter;
+      this.state = this.evalState();
+    }
+    return this.state;
+  };
+}
+
+// AND node
+class ANDNode extends OutputNode {
+  constructor(x1,y1,input1,input2) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.child2 = input2;
+  }
+  evalState() {
+    return (isHigh(this.child1.eval()) && isHigh(this.child2.eval()) ) ? high : low;
+  };
+}
+
+// OR node
+class ORNode extends OutputNode {
+  constructor(x1,y1,input1,input2) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.child2 = input2;
+  }
+  evalState() {
+    return (isHigh(this.child1.eval()) || isHigh(this.child2.eval()) ) ? high : low;
+  };
+}
+
+// NOT node
+class NOTNode extends OutputNode {
+  constructor(x1,y1,input1) { 
+    super(x1,y1);
+    this.child1 = input1;
+  }
+  evalState() { return (isHigh(this.child1.eval()) ) ? low : high ; };
+}    
+
+// Comparator node
+class ComparatorNode extends OutputNode {
+  constructor(x1,y1,input1) { 
+    super(x1,y1);
+    this.child1 = input1;
+  }
+  evalState() { return (this.child1.eval() < this.compare) ? low : high ;};
+}
+
+// get bit from a decimal number
+function getBit(number,bin) {
+  var bit = (number & (1<<bin)) >> bin;
+  return ( bit == 1 ) ? high : low ;
+}
+
+// Binary node from ADC
+class BinaryNode extends OutputNode {
+  constructor(x1,y1,input1,bin) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.bin = bin;
+  }
+  evalState() {
+    var binary = (this.child1.eval() / high ) * 15; // convert analog to 16b
+    return getBit(binary,this.bin);
+  }
+}    
+
+// Binary node with stored counter
+class BinaryNodeS extends OutputNode { 
+  constructor(x1,y1,bin) { 
+    super(x1,y1);
+    this.bin = bin;
+    this.counter = 0;
+  }
+  evalState() { return getBit(this.counter,this.bin); };
+}    
+
+// Relais node 
+class RelaisNode extends OutputNode { 
+  constructor(x1,y1,input) {
+    super(x1,y1,true);
+    this.child = input;
+  }
+  evalState() { return this.child.eval(); }; 
+}
+
+// Light sensor node
+class LightSensorNode extends OutputNode { 
+  constructor(x1,y1,x2,y2) {
+    super(x1,y1);
+    this.xLDR = x2;
+    this.yLDR = y2;
+  }
+}    
+
+// output node for sound sensor
+class SoundSensorNode extends OutputNode { 
+  constructor(x1,y1,element) { 
+    super(x1,y1);
+    this.element = element;
+    this.micStarted = false;
+  }
+  eval() { 
+    // Initialize the microphone
+    if( audioCtx ) {
+      if( !this.micStarted ) {      
+        this.micStarted = true;
+        var _this = this;
+        // Start the audio stream
+        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+        .then(function(stream) {
+          var analyser = audioCtx.createAnalyser();
+          var microphone = audioCtx.createMediaStreamSource(stream);
+          var javascriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
+          microphone.connect(analyser);
+          analyser.connect(javascriptNode);
+          javascriptNode.connect(audioCtx.destination);
+          javascriptNode.onaudioprocess = function() {
+            var array = new Uint8Array(analyser.frequencyBinCount);
+            analyser.getByteFrequencyData(array);
+            var values = 0;
+            var length = array.length;
+            for (var i = 0; i < length; i++) { values += array[i]; };
+            var soundLevel = values / length;
+            _this.state = Math.min(0.05 * soundLevel, 5.0) ;
+          }
+        })
+        .catch(function(err) {
+          _this.element.textbox.setColor('darkgrey');
+          renderNeeded = true;
+          console.log("The following error occured: " + err.name);
+        });
+      } else if (audioCtx.state == 'suspended') {
+        audioCtx.resume();
+      }
+    } else { // no audioCtx
+      this.element.textbox.setColor('darkgrey');
+      renderNeeded = true;
+    }
+    return this.state; 
+  };
+}    
+
+
+/* ============ ELEMENT SECTION ==================
+   Elements are the building blocks (components)of 
+   the systemboard.
+   They have an x,y position.
+   ============================================= */
 
 // Draw the board plus text
 function Board(x1,y1) {
