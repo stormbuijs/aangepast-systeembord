@@ -420,6 +420,15 @@ class SoundSensorNode extends OutputNode {
    They have an x,y position.
    ============================================= */
 
+// Create unique element name
+function uniqueElementID(name, id=0) {
+  var i = 0;
+  while( i < elements.length && elements[i].uniqueName != name+id ) ++i;
+  // When element is not unique, try again with higher id
+  if( i != elements.length ) id = uniqueElementID(name,++id);
+  return id;
+}
+
 // Draw the board plus text
 function Board(x1,y1) {
   this.x = x1;
@@ -738,15 +747,11 @@ function Pulse(x1,y1,inputValue="1") {
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
   
   // Create unique element ID
-  var nPulse = 0;
-  elements.forEach((element) => {
-    if( element.constructor.name == "Pulse") ++nPulse;
-  });
-  var elementName = "frequency"+nPulse.toString(); 
+  this.uniqueName = this.constructor.name + uniqueElementID( this.constructor.name );
   
   // Create an input DOM element
   inputValue = (inputValue == "" ) ? "1" : inputValue;
-  this.input = inputDOM(x1+20,y1+10,elementName,inputValue,"0.1","0.1","10");
+  this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0.1","10");
 
   this.pulseStarted = false;
   this.output = function() { return true; };
@@ -792,15 +797,11 @@ function VarVoltage(x1,y1,inputValue="0") {
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
   
   // Create unique element ID
-  var nVarVoltage = 0;
-  elements.forEach((element) => {
-    if( element.constructor.name == "VarVoltage") ++nVarVoltage;
-  });
-  var elementName = "voltage"+nVarVoltage.toString();
+  this.uniqueName = this.constructor.name + uniqueElementID( this.constructor.name );
 
   // Create an input DOM element
   inputValue = (inputValue == "") ? "0" : inputValue;
-  this.input = inputDOM(x1+20,y1+10,elementName,inputValue,"0.1","0","5");
+  this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0","5");
 
   // Create an ouput node and set voltage from the DOM element
   node.state = this.input.value;
@@ -851,16 +852,11 @@ function Comparator(x1,y1,inputValue="2.5") {
   this.nodes.forEach(function (node) { if( !node.isInput ) node.wires[0].bringToFront(); });
 
   // Create unique element ID
-  var nComparator = 0;
-  elements.forEach((element) => {
-    if( element.constructor.name == "Comparator") ++nComparator;
-  });
-  var elementName = "comparator"+nComparator.toString();
-  //console.log(elementName);
+  this.uniqueName = this.constructor.name + uniqueElementID( this.constructor.name );
       
   // Create an input DOM element
   inputValue = (inputValue == "") ? "2.5" : inputValue;
-  this.input = inputDOM(x1+70,y1+60,elementName,inputValue,"0.1","0","5");
+  this.input = inputDOM(x1+70,y1+60,this.uniqueName,inputValue,"0.1","0","5");
     
   // Create the node
   node2.compare = this.input.value; // set compare value
