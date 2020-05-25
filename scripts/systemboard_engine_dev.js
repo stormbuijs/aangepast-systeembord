@@ -975,7 +975,7 @@ function Counter(x1,y1) {
   
   this.output = function() {
     // reset counter (check button or reset node)
-    if( isHigh(node6.state) || isHigh(node6.eval())) { 
+    /*if( isHigh(node6.state) || isHigh(node6.eval())) { 
       if( this.counter != 0 ) {
         this.counter = 0;
         //this.textbox.text = (this.counter).toString();
@@ -997,12 +997,35 @@ function Counter(x1,y1) {
         renderNeeded = true;
       }
       if( isLow(currentState) && isHigh(this.state) ) { this.state = low;}
+    }*/
+    var currentState = node4.eval();
+    var addCounter = false;
+    if( isHigh(currentState) && isLow(this.state) ) {
+      this.state = high;
+      // Only count rising edge when inhibit is off
+      if( !node5.child || isHigh(node5.eval()) ) addCounter = true;
     }
-    // update counters
-    this.nodes[3].counter = this.counter;
-    this.nodes[4].counter = this.counter;
-    this.nodes[5].counter = this.counter;
-    this.nodes[6].counter = this.counter;
+    if( isLow(currentState) && isHigh(this.state) ) { this.state = low;}
+
+    // Reset counter if button is pressed or reset input is high
+    if( isHigh(node6.state) || isHigh(node6.eval())) { 
+      if( this.counter != 0 ) {
+        this.counter = 0;
+        this.textbox.set( {'text' : this.counter.toString() });
+        renderNeeded = true;
+      }
+    } else if( addCounter ) {
+        ++this.counter; 
+        if( this.counter == 16) this.counter = 0; // reset counter
+        this.textbox.set( {'text' : this.counter.toString() });
+        renderNeeded = true;
+    }
+    if( renderNeeded ) { // update counters
+      this.nodes[3].counter = this.counter;
+      this.nodes[4].counter = this.counter;
+      this.nodes[5].counter = this.counter;
+      this.nodes[6].counter = this.counter;
+    }
     return true;
   };
   
