@@ -126,6 +126,29 @@ function stopBuzzer() {
   if( oscillator ) oscillator.stop();
 }
 
+// Connect a volume from the microphone to the external function updateVolume 
+function startMicrophone( updateVolume ) {
+  let tmp = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+    .then(function(stream) {
+      var analyser = audioCtx.createAnalyser();
+      var microphone = audioCtx.createMediaStreamSource(stream);
+      var javascriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
+      microphone.connect(analyser);
+      analyser.connect(javascriptNode);
+      javascriptNode.connect(audioCtx.destination);
+      javascriptNode.onaudioprocess = function() {
+        var array = new Uint8Array(analyser.frequencyBinCount);
+        analyser.getByteFrequencyData(array);
+        var values = 0;
+        var length = array.length;
+        for (var i = 0; i < length; i++) { values += array[i]; };
+        var soundLevel = values / length;
+        updateVolume( Math.min(0.05 * soundLevel, 5.0)) ;
+      }
+    });
+  return tmp;
+}
+
 
 /* ========== DRAWING SECTION ==================
    General functions to draw wires, buttons, etc
@@ -355,6 +378,7 @@ class LightSensorNode extends OutputNode {
   }
 }    
 
+
 // output node for sound sensor
 class SoundSensorNode extends OutputNode { 
   constructor(x1,y1,element) { 
@@ -369,24 +393,7 @@ class SoundSensorNode extends OutputNode {
         this.micStarted = true;
         var _this = this;
         // Start the audio stream
-        navigator.mediaDevices.getUserMedia({ audio: true, video: false })
-        .then(function(stream) {
-          var analyser = audioCtx.createAnalyser();
-          var microphone = audioCtx.createMediaStreamSource(stream);
-          var javascriptNode = audioCtx.createScriptProcessor(2048, 1, 1);
-          microphone.connect(analyser);
-          analyser.connect(javascriptNode);
-          javascriptNode.connect(audioCtx.destination);
-          javascriptNode.onaudioprocess = function() {
-            var array = new Uint8Array(analyser.frequencyBinCount);
-            analyser.getByteFrequencyData(array);
-            var values = 0;
-            var length = array.length;
-            for (var i = 0; i < length; i++) { values += array[i]; };
-            var soundLevel = values / length;
-            _this.state = Math.min(0.05 * soundLevel, 5.0) ;
-          }
-        })
+        startMicrophone( function(vol) { _this.state=vol; } )
         .catch(function(err) {
           _this.element.textbox.setColor('darkgrey');
           renderNeeded = true;
