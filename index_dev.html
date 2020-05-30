@@ -37,8 +37,7 @@
           <span class="menu">Bestand:</span>
           <input id="fileinput" type="file" style="display: none;">
           <button id="stupid_hack" onclick="fileinput.click()">Open bestand...</button>
-          <input id="download_xml" type="button" value="Opslaan als ...">
-          <!--input type="text" id="xml_filename" value="systeembord.xml" size=20--><br>
+          <input id="download_xml" type="button" value="Opslaan als ..."><br>
           <span class="menu">Componenten:</span>
           <select id="addElement" name="type" onchange="addElement(this.value);">
               <option value="">Voeg toe...</option>
@@ -120,53 +119,6 @@
     <script src="scripts/jquery-3.5.0.min.js"></script>
     <!--script src="http://webrtc.github.io/adapter/adapter-latest.js"></script-->
     <script src="scripts/systemboard_engine_dev.js"></script>
-    <script id="main">
-(function() {
-
-// load all code after the document
-$("document").ready(function(){
-  var xmlFile = window.location.hash.substr(1);
-  // If hash is empty read the default file
-  if( xmlFile == "") xmlFile = "systeembord_dev.xml";
-  // Read the xml file
-  readFile("xml/"+xmlFile);
-  
-  // Define the elements of the systemboard
-  /*elements =[ new Board(60,0),
-              new LightSensor(70,25),
-              new TemperatureSensor(70,75),
-              new SoundSensor(70,125),
-              new Switch(70,175),
-              new Switch(70,225),
-              new VarVoltage(70,275),
-              new VarVoltage(70,325),
-              new Pulse(70,375),
-              new ADC(70,425),
-              new Comparator(230,25),
-              new Comparator(380,25),
-              new ANDPort(230,125),
-              new ANDPort(380,125),
-              new Memory(230,225),
-              new ORPort(380,225),
-              new NOTPort(230,325),
-              new NOTPort(380,325),
-              new Counter(230,375),
-              new LED(540,25), 
-              new LED(540,75), 
-              new LED(540,125), 
-              new LED(540,175),
-              new LED(540,225),
-              new LED(540,275),
-              new Buzzer(540,325),
-              new Relais(540,375),
-              new Lightbulb(745,11),
-              new Heater(742,360),          
-              new Voltmeter(5,100),          
-             ];  */
-});
-  
-})();
-</script>
 
 </body>
 </html>
