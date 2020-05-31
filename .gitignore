@@ -3,3 +3,4 @@ scripts/.DS_Store
 *.old
 .DS_Store
 xml/test.xml
+frame.html
