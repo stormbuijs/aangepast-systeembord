@@ -1832,7 +1832,7 @@ function formatXml(xml) {
 $("document").ready(function(){
   var xmlFile = window.location.hash.substr(1);
   // If hash is empty read the default file
-  if( xmlFile == "") xmlFile = "systeembord_dev.xml";
+  if( xmlFile == "") xmlFile = "systeembord.xml";
   // Read the xml file
   readFile("xml/"+xmlFile);  
 });

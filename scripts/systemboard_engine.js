@@ -329,6 +329,55 @@ class NOTNode extends OutputNode {
   evalState() { return (isHigh(this.child1.eval()) ) ? low : high ; };
 }    
 
+// NAND node
+class NANDNode extends OutputNode {
+  constructor(x1,y1,input1,input2) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.child2 = input2;
+  }
+  evalState() {
+    return (isHigh(this.child1.eval()) && isHigh(this.child2.eval()) ) ? low : high;
+  };
+}
+
+// NOR node
+class NORNode extends OutputNode {
+  constructor(x1,y1,input1,input2) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.child2 = input2;
+  }
+  evalState() {
+    return (isHigh(this.child1.eval()) || isHigh(this.child2.eval()) ) ? low : high;
+  };
+}
+
+// XOR node
+class XORNode extends OutputNode {
+  constructor(x1,y1,input1,input2) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.child2 = input2;
+  }
+  evalState() {
+    return (isHigh(this.child1.eval()) === isHigh(this.child2.eval()) ) ? low : high;
+  };
+}
+
+// XNOR node
+class XNORNode extends OutputNode {
+  constructor(x1,y1,input1,input2) { 
+    super(x1,y1);
+    this.child1 = input1;
+    this.child2 = input2;
+  }
+  evalState() {
+    return (isHigh(this.child1.eval()) === isHigh(this.child2.eval()) ) ? high : low;
+  };
+}
+
+
 // Comparator node
 class ComparatorNode extends OutputNode {
   constructor(x1,y1,input1) { 
@@ -505,7 +554,6 @@ class ORPort extends Element {
     let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
-  
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'OF-poort'),
                      drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
                      drawLine([25, 25, 25, 40]),
@@ -525,13 +573,95 @@ class NOTPort extends Element {
     let node1 = new InputNode(x1+25, y1+0.5*boxHeightSmall );
     let node2 = new NOTNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, node1);
     this.nodes = [ node1, node2 ] ;     
-  
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'invertor'),
                      drawLine([25, 0.5*boxHeightSmall, boxWidth-25, 0.5*boxHeightSmall]),
                      drawLine([15+0.5*boxWidth, -5+0.5*boxHeightSmall, 20+0.5*boxWidth, 0.5*boxHeightSmall]),
                      drawBoxWithSymbol(0.5*boxWidth, -7+0.5*boxHeightSmall, "1")]
                      .concat(drawCircles(x1,y1,this.nodes, "blue"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
+  }
+}
+
+// Create NAND port with its nodes
+class NANDPort extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node3 = new NANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
+    this.nodes = [ node1, node2 , node3 ] ;
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'NEN-poort'),
+                     drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                     drawLine([25, 25, 25, 40]),
+                     drawLine([25, 40, 0.5*boxWidth, 40]),
+                     drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                     drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                     drawLine([15+0.5*boxWidth, -5+0.5*boxHeight, 20+0.5*boxWidth, 0.5*boxHeight]),
+                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "&")]
+                     .concat(drawCircles(x1,y1,this.nodes, "blue"));
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
+  }
+}
+
+// Create NOR port with its nodes
+class NORPort extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node3 = new NORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
+    this.nodes = [ node1, node2 , node3 ] ;
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'NOF-poort'),
+                     drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                     drawLine([25, 25, 25, 40]),
+                     drawLine([25, 40, 0.5*boxWidth, 40]),
+                     drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                     drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                     drawLine([15+0.5*boxWidth, -5+0.5*boxHeight, 20+0.5*boxWidth, 0.5*boxHeight]),
+                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "\u22651")]
+                     .concat(drawCircles(x1,y1,this.nodes, "blue"));
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
+  }
+}
+
+// Create XOR port with its nodes
+class XORPort extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node3 = new XORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
+    this.nodes = [ node1, node2 , node3 ] ;
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'XOF-poort'),
+                     drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                     drawLine([25, 25, 25, 40]),
+                     drawLine([25, 40, 0.5*boxWidth, 40]),
+                     drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                     drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "=")]
+                     .concat(drawCircles(x1,y1,this.nodes, "blue"));
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
+  }
+}
+
+// Create XNOR port with its nodes
+class XNORPort extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node3 = new XNORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
+    this.nodes = [ node1, node2 , node3 ] ;
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'XNOF-poort'),
+                     drawLine([0.5*boxWidth, 0.5*boxHeight, boxWidth-25, 0.5*boxHeight]),
+                     drawLine([25, 25, 25, 40]),
+                     drawLine([25, 40, 0.5*boxWidth, 40]),
+                     drawLine([25, boxHeight-25, 25, boxHeight-40]),
+                     drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
+                     drawLine([15+0.5*boxWidth, -5+0.5*boxHeight, 20+0.5*boxWidth, 0.5*boxHeight]),
+                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "=")]
+                     .concat(drawCircles(x1,y1,this.nodes, "blue"));
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
   }
 }
 
@@ -1218,6 +1348,7 @@ function removeElement( element ) {
             wire.connection = null;
             canvas.remove( wire.line1 );
             canvas.remove( wire );
+            node.child.wires.splice(j, 1); // save because there is only one connection
           }
         }
       }
