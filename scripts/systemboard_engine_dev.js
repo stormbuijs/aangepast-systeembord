@@ -1348,6 +1348,7 @@ function removeElement( element ) {
             wire.connection = null;
             canvas.remove( wire.line1 );
             canvas.remove( wire );
+            node.child.wires.splice(j, 1); // save because there is only one connection
           }
         }
       }
