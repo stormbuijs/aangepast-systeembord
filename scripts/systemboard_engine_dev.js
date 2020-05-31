@@ -1826,9 +1826,11 @@ window.addEventListener('resize', resizeCanvas, false);
 function resizeCanvas() {    
   var divCanvas = document.getElementById("canvas1");
   var newWidth = window.innerWidth-20;
-  divCanvas.style.width = newWidth;
-  canvas.setWidth(newWidth);
-  canvas.renderAll();
+  if( newWidth > 900 ) { // minimum size needs to stay at 900px
+    divCanvas.style.width = newWidth;
+    canvas.setWidth(newWidth);
+    canvas.renderAll();
+  }
 }
 
   // resize on init
