@@ -638,7 +638,7 @@ class XORPort extends Element {
                      drawLine([25, 40, 0.5*boxWidth, 40]),
                      drawLine([25, boxHeight-25, 25, boxHeight-40]),
                      drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
-                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "=")]
+                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "=1")]
                      .concat(drawCircles(x1,y1,this.nodes, "blue"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
   }
@@ -659,7 +659,7 @@ class XNORPort extends Element {
                      drawLine([25, boxHeight-25, 25, boxHeight-40]),
                      drawLine([25, boxHeight-40, 0.5*boxWidth, boxHeight-40]),
                      drawLine([15+0.5*boxWidth, -5+0.5*boxHeight, 20+0.5*boxWidth, 0.5*boxHeight]),
-                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "=")]
+                     drawBoxWithSymbol(0.5*boxWidth, 0.5*boxHeight, "=1")]
                      .concat(drawCircles(x1,y1,this.nodes, "blue"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
   }
