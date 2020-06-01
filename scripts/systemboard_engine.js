@@ -1821,6 +1821,22 @@ function formatXml(xml) {
 }
 
 
+// Event listener for resizing the window
+window.addEventListener('resize', resizeCanvas, false);
+function resizeCanvas() {    
+  var divCanvas = document.getElementById("canvas1");
+  var newWidth = window.innerWidth-20;
+  if( newWidth > 900 ) { // minimum size needs to stay at 900px
+    divCanvas.style.width = newWidth;
+    canvas.setWidth(newWidth);
+    canvas.renderAll();
+  }
+}
+
+  // resize on init
+  resizeCanvas();
+
+
 /* ============= MAIN ENGINE ==================
    Evaluate the board (all elements) using
    output() function of each element. The
