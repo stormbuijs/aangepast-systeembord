@@ -40,6 +40,7 @@
           <span class="menu">Componenten:</span>
           <select id="addElement" name="type" onchange="addElement(this.value);">
               <option value="">Voeg toe...</option>
+            <optgroup label="INVOER">
               <option value="Switch">Drukschakelaar</option>
               <option value="VarVoltage">Variabele spanning</option>
               <option value="Pulse">Pulsgenerator</option>
@@ -47,6 +48,8 @@
               <option value="LightSensor">Lichtsensor</option>
               <option value="TemperatureSensor">Temperatuursensor</option>
               <option value="SoundSensor">Geluidsensor</option>
+            </optgroup>
+            <optgroup label="VERWERKING">
               <option value="ANDPort">EN-poort</option>
               <option value="ORPort">OF-poort</option>
               <option value="NOTPort">Invertor</option>
@@ -57,12 +60,15 @@
               <option value="Comparator">Comparator</option>
               <option value="Memory">Geheugencel</option>
               <option value="Counter">Pulsenteller</option>
+            </optgroup>
+            <optgroup label="UITVOER">
               <option value="LED">LED</option>
               <option value="Buzzer">Zoemer</option>
               <option value="Relais">Relais</option>
               <option value="Lightbulb">Lamp</option>
               <option value="Heater">Verwarming</option>
               <option value="Voltmeter">Voltmeter</option>
+            </optgroup>
               <option value="Board">Leeg bord</option>          
           </select>
           <button onclick="toggleMoving();" id="toggleMoving">
