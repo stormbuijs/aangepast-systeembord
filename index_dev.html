@@ -20,11 +20,140 @@
   <link rel="icon" sizes="128x128" href="favicon.icns">
   <link rel="icon" href="favicon.png" type="image/x-icon">
   <link rel="stylesheet" type="text/css" href="style.css" media="screen,projection" />
+  <base target="_blank">
 </head>
   <body>
     <div class="unsupported-browser"></div>
     <div class="main">
-        <h2>Online Systeembord dev</h2>
+        <!--h2>Online Systeembord dev</h2-->
+
+      <div class="navbar">
+        <div class="titlebar">Online Systeembord dev</div>
+        <div class="menubar">
+        <div class="dropdown">
+          <button class="dropbtn">Bestand</button>
+          <div class="dropdown-content">
+            <input id="fileinput" type="file" style="display: none;">
+            <a id="stupid_hack" onclick="fileinput.click()">Open bestand...</a>
+            <a id="download_xml">Opslaan als ... </a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <button class="dropbtn">Componenten</button>
+          <div class="dropdown-content" id="components">
+            <a class="select" id="slct">
+            <select id="addElement" name="type" onchange="addElement(this.value);">
+              <option selected disabled value="0">Voeg toe...</option>
+              <optgroup label="INVOER">
+              <option value="Switch">Drukschakelaar</option>
+              <option value="VarVoltage">Variabele spanning</option>
+              <option value="Pulse">Pulsgenerator</option>
+              <option value="ADC">AD omzetter</option>
+              <option value="LightSensor">Lichtsensor</option>
+              <option value="TemperatureSensor">Temperatuursensor</option>
+              <option value="SoundSensor">Geluidsensor</option>
+              </optgroup>
+              <optgroup label="VERWERKING">
+              <option value="ANDPort">EN-poort</option>
+              <option value="ORPort">OF-poort</option>
+              <option value="NOTPort">Invertor</option>
+              <option value="NANDPort">NEN-poort</option>
+              <option value="NORPort">NOF-poort</option>
+              <option value="XORPort">XOF-poort</option>
+              <option value="XNORPort">XNOF-poort</option>
+              <option value="Comparator">Comparator</option>
+              <option value="Memory">Geheugencel</option>
+              <option value="Counter">Pulsenteller</option>
+              </optgroup>
+              <optgroup label="UITVOER">
+              <option value="LED">LED</option>
+              <option value="Buzzer">Zoemer</option>
+              <option value="Relais">Relais</option>
+              <option value="Lightbulb">Lamp</option>
+              <option value="Heater">Verwarming</option>
+              <option value="Voltmeter">Voltmeter</option>
+              </optgroup>
+              <option value="Board">Leeg bord</option>  
+            </select>
+            </a>
+          <a onclick="toggleMoving();" id="toggleMoving">
+            Verplaatsen&nbsp;&nbsp;&nbsp;&nbsp;</a>
+          <a onclick="toggleDelete();" id="toggleDelete">
+            Verwijderen&nbsp;&nbsp;&nbsp;&nbsp;</a>
+          <a onclick="requestRemoveElements();">Alles verwijderen</a>
+        </div>
+      </div>
+        <div class="dropdown">
+          <button class="dropbtn">Help</button>
+            <div class="dropdown-content">
+              <a onclick="showModal('about')">
+                Over Online Systeembord</a>
+              <a onclick="showModal('shortInfo')">
+                Beknopte instuctie</a>
+           </div>
+        </div>
+        </div>
+    </div>
+
+
+<br/>
+
+      <!-- The Modal -->
+<div id="shortInfo" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h3>Beknopte instructie</h3>
+        <ul> 
+          <li><b>Verbindingssnoeren maken:</b><br/>
+            De snoeren moeten van een uitgang naar ingang worden getrokken. Klik op een
+            uitgang (rode cirkel) en sleep het snoer naar een (grijze) ingang.</li>
+          <li><b>Meerdere verbindingssnoeren:</b><br/>
+            Een uitgang kan met meerdere ingangen worden verbonden.</li>
+          <li><b>Verbindingssnoeren verwijderen:</b><br/>
+            Sleep het snoer weg van de ingang.</li>
+          <li><b>Drukschakelaar:</b><br/>
+            Met een klik-sleep kan de schakelaar worden vastgezet.</li>
+          <li><b>Relais:</b><br/>
+            De relais is al aangesloten op een wisselspanningbron.
+            De zwarte uitgangen kunnen worden verbonden met de lamp of 
+            de elektrische verwarming.</li>
+          <li><b>Sensoren:</b><br/>
+            De geluidsensor is aangesloten op de ingebouwde microfoon van
+            de computer (je moet hiervoor wel toestemming geven).
+            De LDR van de lichtsensor kan worden gesleept. De spanning is 
+            afhankelijk van de afstand tot de lamp, wanneer die aan staat.
+            De temperatuursensor is (draadloos) verbonden met de thermometer
+            bij de verwarming.</li>
+          <li><b>Voltmeter:</b><br/>
+            Met de voltmeter kan de spanning op een uitgang worden gemeten.
+            De andere ingang van de voltmeter is al verbonden met de aarde.</li>
+          <li><b>Compatibiliteit</b><br/>
+            Online Syteembord werkt niet met Internet Explorer.</li>
+          <li><b>Meer informatie:</b><br/>
+            Zie de handleiding van het <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li>  
+        </ul>
+    </div>
+  </div>
+
+<div id="about" class="modal">
+  <div class="modal-content modal-small">
+    <span class="close">&times;</span>
+    <center>
+    <h3>Online Systeembord</h3>
+     <img src="favicon-apple-touch-114.png"/><br clear="all"/><br/>
+    Ontwikkelversie<br/>
+    &copy; 2020 Jeroen van Tilburg, MIT licentie <br/>
+    Feedback naar jvantilburg apestaartje gmail punt com <br/> 
+    Broncode: <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> <br/>
+    Versies: <a href="index_prev.html">Vorige versie</a>, <a href="index.html">Standaardversie</a>, 
+<a href="index_dev.html">Ontwikkelversie</a>.<br/>
+          </center>
+    </div>
+  </div>
+
+      
+      
+      
         <div id="canvas1" 
              style="position:relative;width:900px;height:500px;top:0px; left:0px">
           <canvas id="c" width="900" height="500" style="border:1px solid #ccc">
@@ -33,9 +162,9 @@
         </div>
         <div>
           <br/>
-          <span class="menu">Bestand:</span>
-          <input id="fileinput" type="file" style="display: none;">
-          <button id="stupid_hack" onclick="fileinput.click()">Open bestand...</button>
+          <!--span class="menu">Bestand:</span>
+          <input id="fileinput2" type="file" style="display: none;">
+          <button id="stupid_hack" onclick="fileinput2.click()">Open bestand...</button>
           <input id="download_xml" type="button" value="Opslaan als ..."><br>
           <span class="menu">Componenten:</span>
           <select id="addElement" name="type" onchange="addElement(this.value);">
@@ -110,7 +239,7 @@
           <li><b>Meer informatie:</b><br/>
             Zie de handleiding van het <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li>  
         </ul>
-      </div>
+      </div-->
     </div>
     
     <img width=0 src="img/pic_bulboff.gif" id="lightoff">
@@ -118,10 +247,10 @@
     <img width=0 src="img/ldr.png" id="ldr">
     <img width=0 src="img/radiator.jpg" id="radiator">
 
-    <hr>
+    <!--hr>
     &copy; 2020 Jeroen van Tilburg | Feedback naar jvantilburg apestaartje gmail punt com | 
     <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> |
-    <a href="index.html">Standaardversie</a>
+    <a href="index.html">Standaardversie</a-->
 
     <script src="scripts/fabric.min.js"></script>
     <script src="scripts/jquery-3.5.0.min.js"></script>

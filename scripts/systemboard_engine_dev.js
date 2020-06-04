@@ -1820,6 +1820,12 @@ function formatXml(xml) {
   return formatted;
 }
 
+/* ============= DISPLAY FUNCTIONS =============
+   Functions to:
+   - dynamically resize the canvas width
+   - Showing modal boxes
+   ============================================= */
+
 
 // Event listener for resizing the window
 window.addEventListener('resize', resizeCanvas, false);
@@ -1833,8 +1839,35 @@ function resizeCanvas() {
   }
 }
 
-  // resize on init
-  resizeCanvas();
+// resize on init
+resizeCanvas();
+
+
+/* Define functions for the modal box */
+var currentModal = "";
+
+// Showing modal box
+function showModal(name) {
+  var text = document.getElementById(name);
+  text.style.display = "block";
+  currentModal = name;
+}
+
+// When the user clicks on <span> (x), close the current modal
+var closeButtons = document.getElementsByClassName("close");
+for( var i=0; i < closeButtons.length; ++i) {
+  closeButtons[i].onclick = function() {
+    document.getElementById(currentModal).style.display = "none"; 
+    currentModal = "";
+  }
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == document.getElementById(currentModal) ) {
+    document.getElementById(currentModal).style.display = "none";
+  }
+}
 
 
 /* ============= MAIN ENGINE ==================
