@@ -1877,18 +1877,23 @@ window.onclick = function(event) {
    This is repeated every clockPeriod (default: 50 ms)
    ============================================= */
 
-// load all code after the document
-$("document").ready(function(){
+
+// Read the xml file from the hash of the web address
+function readFileFromHash() {
   var xmlFile = window.location.hash.substr(1);
   // If hash is empty read the default file
   if( xmlFile == "") xmlFile = "systeembord.xml";
   // Read the xml file
   readFile("xml/"+xmlFile);  
-});
+}
+
+// Trigger reload when hash has changed 
+window.addEventListener('hashchange', function() {
+  readFileFromHash();
+}, false);
 
 // Evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
-  //var t0 = performance.now()
   eventCounter++;
   for (var i = 0; i < elements.length; i++) { 
      elements[i].output();
@@ -1897,12 +1902,18 @@ function evaluateBoard() {
     canvas.requestRenderAll();
     renderNeeded = false;
   }
-  //var t1 = performance.now()
-  //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 }
 
-// Make sure that the engine is run every clockPeriod  
-setInterval(evaluateBoard, clockPeriod);
+// load all code after the document
+$("document").ready(function(){
+  // Read the xml file from the hash of the web address
+  readFileFromHash();
+  
+  // Make sure that the engine is run every clockPeriod  
+  setInterval(evaluateBoard, clockPeriod);
+});
+
+
 
 //})();
 

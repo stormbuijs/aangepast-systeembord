@@ -25,7 +25,10 @@ li {text-indent: -1em; }
 .textblock {width:500px;}
 .menu {display: inline-block; width: 100px; }
 
-
+pre {
+  display: inline;
+  margin: 0;
+}
 
 /* https://www.w3schools.com/howto/howto_css_dropdown_navbar.asp */
 /* Navbar container */
