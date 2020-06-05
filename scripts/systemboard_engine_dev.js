@@ -1852,9 +1852,13 @@ var currentModal = "";
 
 // Showing modal box
 function showModal(name) {
+  // Set the feedback tag
+  setFeedback();
+
   var text = document.getElementById(name);
   text.style.display = "block";
   currentModal = name;
+  
 }
 
 // When the user clicks on <span> (x), close the current modal
@@ -1920,8 +1924,21 @@ function evaluateBoard() {
   }
 }
 
+// set the feedback tag
+function setFeedback() {
+  var feedbackElements = document.getElementsByTagName("feedback");
+  var name = "smackjvantilburgsmack";
+  name = name.substr(5,11);
+  for( var i = 0; i < feedbackElements.length; ++i) {
+    feedbackElements[i].innerHTML=name+"@gmail.com";
+  }
+}
+
+
+
 // load all code after the document
 $("document").ready(function(){
+  
   // Read the xml file from the hash of the web address
   readFileFromHash();
   
