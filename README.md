@@ -8,7 +8,7 @@
 
 [Probeer de webapp!](https://jeroenvantilburg.github.io/systeembord)
 
-De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/MacOS/Android/iOS in iedere browser. De code is nog in ontwikkeling. Als er iets niet werkt of voor verbeteringen: geef feedback.
+De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/MacOS/Android/iOS in iedere moderne browser. De code is nog in ontwikkeling. Als er iets niet werkt of voor verbeteringen: geef feedback.
 
 
 ## Beknopte instructie
@@ -17,18 +17,17 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 - Meerdere verbindingssnoeren: Een uitgang kan met meerdere ingangen worden verbonden.
 - Verbindingssnoeren verwijderen: Sleep het snoer weg van de ingang.
 - Drukschakelaar: Met een klik-sleep kan de schakelaar worden vastgezet.
-- Relais: De relais is al aangesloten op een wisselspanningbron. De zwarte uitgangen kunnen worden verbonden met de lamp of 
-de elektrische verwarming. 
-- Sensoren: De geluidsensor is aangesloten op de ingebouwde microfoon van de computer (werkt niet in iOS/Safari of IE).
-De LDR van de lichtsensor kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
+- Relais: De relais is al aangesloten op een wisselspanningbron. De zwarte uitgangen kunnen worden verbonden met de lamp of de elektrische verwarming.
+- Sensoren: De geluidsensor is aangesloten op de ingebouwde microfoon van de computer (je moet hiervoor wel toestemming geven). De LDR van de lichtsensor kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
 - Voltmeter: Met de voltmeter kan de spanning op een uitgang worden gemeten. De andere ingang van de voltmeter is al verbonden met de aarde.
-- Zoemer: Er zit een vertraging in de zoemer van een halve seconde. In iOS/Safari moet je eerst de zoemer handmatig initialiseren door op de play button te drukken (zie deze [discussie](https://stackoverflow.com/questions/12804028/safari-with-audio-tag-not-working)).
+- Compatibiliteit: Online Syteembord werkt niet met Internet Explorer.
 - Meer informatie: Zie de [handleiding](http://www.cma-science.nl/resources/nl/practicum/b0020.pdf) van het systeembord.
 
 ## Wish list
 
+- Componenten: DAC, digitale voltmeter
+- Voorbeeldopstellingen
 - Toevoegen van echte sensoren via USB.
-- Zelf configureren van de componenten door te slepen.
 
 ## License and credits
 
