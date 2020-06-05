@@ -1,5 +1,5 @@
 # Online systeembord
- Deze javascript-applicatie simuleert de werking het het systeembord zoals dat wordt gebruikt in de lessen natuurkunde in de voortgezet onderwijs. Met dit programma kunnen leerlingen thuis en op school oefenen met de werking van het systeembord.
+ Deze javascript-applicatie simuleert de werking het het systeembord zoals dat wordt gebruikt in de lessen natuurkunde in het voortgezet onderwijs. Met dit programma kunnen leerlingen thuis en op school oefenen met de werking van het systeembord.
 
 
 ## Webapp
