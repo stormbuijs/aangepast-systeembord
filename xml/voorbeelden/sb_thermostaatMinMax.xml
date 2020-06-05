@@ -5,14 +5,14 @@
   <element name="SoundSensor" x="70" y="125"/>
   <element name="Switch" x="70" y="175"/>
   <element name="Switch" x="70" y="225"/>
-  <element name="VarVoltage" x="70" y="275"/>
-  <element name="VarVoltage" x="70" y="325"/>
-  <element name="Pulse" x="70" y="375"/>
+  <element name="VarVoltage" x="70" y="275" inputValue="0"/>
+  <element name="VarVoltage" x="70" y="325" inputValue="0"/>
+  <element name="Pulse" x="70" y="375" inputValue="1"/>
   <element name="ADC" x="70" y="425"/>
-  <element name="Comparator" x="230" y="25">
+  <element name="Comparator" x="230" y="25" inputValue="1.5">
     <link id="0" toElement="2" toNode="0"/>
   </element>
-  <element name="Comparator" x="380" y="25">
+  <element name="Comparator" x="380" y="25" inputValue="2">
     <link id="0" toElement="2" toNode="0"/>
   </element>
   <element name="ANDPort" x="230" y="125"/>
@@ -39,8 +39,8 @@
   <element name="Relais" x="540" y="375">
     <link id="0" toElement="14" toNode="2"/>
   </element>
-  <element name="Lightbulb" x="780" y="75"/>
-  <element name="Heater" x="800" y="420">
+  <element name="Lightbulb" x="745" y="11"/>
+  <element name="Heater" x="742" y="360">
     <link id="0" toElement="26" toNode="2"/>
     <link id="1" toElement="26" toNode="1"/>
   </element>

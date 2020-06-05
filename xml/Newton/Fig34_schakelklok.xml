@@ -1,0 +1,25 @@
+<systeembord>
+  <element name="Memory" x="286" y="44">
+    <link id="0" toElement="3" toNode="0"/>
+    <link id="1" toElement="1" toNode="3"/>
+  </element>
+  <element name="Counter" x="286" y="165">
+    <link id="0" toElement="6" toNode="1"/>
+    <link id="2" toElement="2" toNode="0"/>
+  </element>
+  <element name="Pulse" x="64" y="165" inputValue="1"/>
+  <element name="Switch" x="64" y="44"/>
+  <element name="LED" x="817" y="190">
+    <link id="0" toElement="7" toNode="2"/>
+  </element>
+  <element name="Buzzer" x="640" y="69">
+    <link id="0" toElement="1" toNode="4"/>
+  </element>
+  <element name="NOTPort" x="452" y="69">
+    <link id="0" toElement="0" toNode="2"/>
+  </element>
+  <element name="ANDPort" x="640" y="190">
+    <link id="0" toElement="1" toNode="5"/>
+    <link id="1" toElement="1" toNode="4"/>
+  </element>
+</systeembord>

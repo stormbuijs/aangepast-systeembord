@@ -1,0 +1,25 @@
+<systeembord>
+  <element name="Switch" x="17" y="53"/>
+  <element name="VarVoltage" x="17" y="187" inputValue="0"/>
+  <element name="Switch" x="17" y="103"/>
+  <element name="NOTPort" x="194" y="103">
+    <link id="0" toElement="2" toNode="0"/>
+  </element>
+  <element name="ANDPort" x="376" y="153">
+    <link id="0" toElement="5" toNode="2"/>
+    <link id="1" toElement="8" toNode="1"/>
+  </element>
+  <element name="ANDPort" x="376" y="53">
+    <link id="0" toElement="0" toNode="0"/>
+    <link id="1" toElement="3" toNode="1"/>
+  </element>
+  <element name="LED" x="556" y="79">
+    <link id="0" toElement="5" toNode="2"/>
+  </element>
+  <element name="Buzzer" x="556" y="176">
+    <link id="0" toElement="4" toNode="2"/>
+  </element>
+  <element name="Comparator" x="194" y="187" inputValue="1.0">
+    <link id="0" toElement="1" toNode="0"/>
+  </element>
+</systeembord>

@@ -1,0 +1,16 @@
+<systeembord>
+  <element name="Memory" x="286" y="44">
+    <link id="0" toElement="3" toNode="0"/>
+    <link id="1" toElement="4" toNode="0"/>
+  </element>
+  <element name="Counter" x="286" y="165">
+    <link id="1" toElement="0" toNode="2"/>
+    <link id="2" toElement="2" toNode="0"/>
+  </element>
+  <element name="Pulse" x="64" y="165" inputValue="5"/>
+  <element name="Switch" x="64" y="44"/>
+  <element name="Switch" x="64" y="94"/>
+  <element name="LED" x="619" y="165">
+    <link id="0" toElement="1" toNode="6"/>
+  </element>
+</systeembord>

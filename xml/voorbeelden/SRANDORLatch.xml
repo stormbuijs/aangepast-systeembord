@@ -1,0 +1,18 @@
+<systeembord>
+  <element name="ANDPort" x="449" y="129">
+    <link id="0" toElement="1" toNode="2"/>
+    <link id="1" toElement="5" toNode="1"/>
+  </element>
+  <element name="ORPort" x="274" y="60">
+    <link id="0" toElement="2" toNode="0"/>
+    <link id="1" toElement="0" toNode="2"/>
+  </element>
+  <element name="Switch" x="104" y="60"/>
+  <element name="Switch" x="104" y="179"/>
+  <element name="LED" x="625" y="160">
+    <link id="0" toElement="0" toNode="2"/>
+  </element>
+  <element name="NOTPort" x="274" y="179">
+    <link id="0" toElement="3" toNode="0"/>
+  </element>
+</systeembord>

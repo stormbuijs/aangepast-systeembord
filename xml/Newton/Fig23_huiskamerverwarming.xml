@@ -1,0 +1,19 @@
+<systeembord>
+  <element name="Comparator" x="224" y="141" inputValue="1.5">
+    <link id="0" toElement="1" toNode="0"/>
+  </element>
+  <element name="TemperatureSensor" x="28" y="141"/>
+  <element name="NOTPort" x="427" y="141">
+    <link id="0" toElement="0" toNode="1"/>
+  </element>
+  <element name="Heater" x="796" y="136">
+    <link id="0" toElement="4" toNode="2"/>
+    <link id="1" toElement="4" toNode="1"/>
+  </element>
+  <element name="Relais" x="608" y="141">
+    <link id="0" toElement="2" toNode="1"/>
+  </element>
+  <element name="LED" x="608" y="77">
+    <link id="0" toElement="2" toNode="1"/>
+  </element>
+</systeembord>

@@ -1,0 +1,14 @@
+<systeembord>
+  <element name="Relais" x="198" y="69">
+    <link id="0" toElement="4" toNode="0"/>
+  </element>
+  <element name="Buzzer" x="638" y="82">
+    <link id="0" toElement="3" toNode="0"/>
+  </element>
+  <element name="Lightbulb" x="359" y="52">
+    <link id="0" toElement="0" toNode="2"/>
+    <link id="1" toElement="0" toNode="1"/>
+  </element>
+  <element name="LightSensor" x="459" y="82"/>
+  <element name="Switch" x="24" y="69"/>
+</systeembord>
