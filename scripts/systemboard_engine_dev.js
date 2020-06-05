@@ -1643,6 +1643,10 @@ function parseFile(xml) {
     xmlDoc = parser.parseFromString(xml,"text/xml");
   }
   var x = xmlDoc.getElementsByTagName("systeembord");
+  if( x.length == 0 ) { 
+    alert("The input xml-file does not have the proper format.");
+    return;
+  }
   var domElements = x[0].getElementsByTagName("element");
 
   for (i = 0; i < domElements.length; i++) { 
