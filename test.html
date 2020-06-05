@@ -121,6 +121,14 @@ $("document").ready(function(){
         parseFile2( data2 );
       });
     });
+  }
+  else if ( xmlFile.includes("https") ) {
+    $.get(xmlFile, function(data) {
+      console.log("tot hier");
+      console.log(xmlFile);
+      console.log(data);
+      // scrape the html to look for direct link
+    });
   } else {
     xmlFile = "xml/"+xmlFile;
     // Read the default file

@@ -1881,10 +1881,22 @@ window.onclick = function(event) {
 // Read the xml file from the hash of the web address
 function readFileFromHash() {
   var xmlFile = window.location.hash.substr(1);
-  // If hash is empty read the default file
-  if( xmlFile == "") xmlFile = "systeembord.xml";
+  
+  if( xmlFile == "") { // If hash is empty read the default file
+    xmlFile = "xml/systeembord.xml";
+  }
+  else if ( xmlFile.includes("https") ) {
+    $.get(xmlFile, function(data) {
+      console.log("Trying to load external xml file");
+      console.log(xmlFile);
+      console.log(data);
+    });
+  } else {
+    xmlFile = "xml/"+xmlFile;
+  }
+  
   // Read the xml file
-  readFile("xml/"+xmlFile);  
+  readFile( xmlFile );  
 }
 
 // Trigger reload when hash has changed 
