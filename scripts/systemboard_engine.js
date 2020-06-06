@@ -1,3 +1,27 @@
+/*
+MIT License
+
+Copyright (c) 2020 Jeroen van Tilburg
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
 // All code runs in this anonymous function
 // to avoid cluttering the global variables
 //(function() { 
@@ -5,6 +29,10 @@
 /* ========== GLOBAL SECTION =================
    Global variables are defined here
    =========================================== */
+
+// Set the version
+var version     = "2.0";
+var versionType = "standaard"; // prev, standaard, dev
 
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
@@ -1643,6 +1671,10 @@ function parseFile(xml) {
     xmlDoc = parser.parseFromString(xml,"text/xml");
   }
   var x = xmlDoc.getElementsByTagName("systeembord");
+  if( x.length == 0 ) { 
+    alert("The input xml-file does not have the proper format.");
+    return;
+  }
   var domElements = x[0].getElementsByTagName("element");
 
   for (i = 0; i < domElements.length; i++) { 
@@ -1820,6 +1852,12 @@ function formatXml(xml) {
   return formatted;
 }
 
+/* ============= DISPLAY FUNCTIONS =============
+   Functions to:
+   - dynamically resize the canvas width
+   - Showing modal boxes
+   ============================================= */
+
 
 // Event listener for resizing the window
 window.addEventListener('resize', resizeCanvas, false);
@@ -1833,8 +1871,39 @@ function resizeCanvas() {
   }
 }
 
-  // resize on init
-  resizeCanvas();
+// resize on init
+resizeCanvas();
+
+
+/* Define functions for the modal box */
+var currentModal = "";
+
+// Showing modal box
+function showModal(name) {
+  // Set the feedback tag
+  setFeedback();
+
+  var text = document.getElementById(name);
+  text.style.display = "block";
+  currentModal = name;
+  
+}
+
+// When the user clicks on <span> (x), close the current modal
+var closeButtons = document.getElementsByClassName("close");
+for( var i=0; i < closeButtons.length; ++i) {
+  closeButtons[i].onclick = function() {
+    document.getElementById(currentModal).style.display = "none"; 
+    currentModal = "";
+  }
+}
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+  if (event.target == document.getElementById(currentModal) ) {
+    document.getElementById(currentModal).style.display = "none";
+  }
+}
 
 
 /* ============= MAIN ENGINE ==================
@@ -1844,18 +1913,35 @@ function resizeCanvas() {
    This is repeated every clockPeriod (default: 50 ms)
    ============================================= */
 
-// load all code after the document
-$("document").ready(function(){
+
+// Read the xml file from the hash of the web address
+function readFileFromHash() {
   var xmlFile = window.location.hash.substr(1);
-  // If hash is empty read the default file
-  if( xmlFile == "") xmlFile = "systeembord.xml";
+  
+  if( xmlFile == "") { // If hash is empty read the default file
+    xmlFile = "xml/systeembord.xml";
+  }
+  else if ( xmlFile.includes("https") ) {
+    $.get(xmlFile, function(data) {
+      console.log("Trying to load external xml file");
+      console.log(xmlFile);
+      console.log(data);
+    });
+  } else {
+    xmlFile = "xml/"+xmlFile;
+  }
+  
   // Read the xml file
-  readFile("xml/"+xmlFile);  
-});
+  readFile( xmlFile );  
+}
+
+// Trigger reload when hash has changed 
+window.addEventListener('hashchange', function() {
+  readFileFromHash();
+}, false);
 
 // Evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
-  //var t0 = performance.now()
   eventCounter++;
   for (var i = 0; i < elements.length; i++) { 
      elements[i].output();
@@ -1864,12 +1950,36 @@ function evaluateBoard() {
     canvas.requestRenderAll();
     renderNeeded = false;
   }
-  //var t1 = performance.now()
-  //console.log("Call to doSomething took " + (t1 - t0) + " milliseconds.")
 }
 
-// Make sure that the engine is run every clockPeriod  
-setInterval(evaluateBoard, clockPeriod);
+// set the feedback tag
+function setFeedback() {
+  var name = "smackjvantilburgsmack"; // add salt
+  name = name.substr(5,11); // remove salt
+  $("feedback").html(name+"@gmail.com");
+}
+
+// set the version tags
+function setVersion() {
+  if( versionType == "prev" || versionType == "dev" ) 
+    $("versionType").html(versionType);
+  $("version").html(version + " ("+versionType+")");
+}
+
+// load all code after the document
+$("document").ready(function(){
+  
+  // set the version tags
+  setVersion();
+  
+  // Read the xml file from the hash of the web address
+  readFileFromHash();
+  
+  // Make sure that the engine is run every clockPeriod  
+  setInterval(evaluateBoard, clockPeriod);
+});
+
+
 
 //})();
 
