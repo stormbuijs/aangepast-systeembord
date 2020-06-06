@@ -30,6 +30,10 @@ SOFTWARE.
    Global variables are defined here
    =========================================== */
 
+// Set the version
+var version     = "2.x";
+var versionType = "dev"; // prev, standaard, dev
+
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
 function isHigh(x) {return x >= hiThreshold; };
@@ -1950,18 +1954,23 @@ function evaluateBoard() {
 
 // set the feedback tag
 function setFeedback() {
-  var feedbackElements = document.getElementsByTagName("feedback");
-  var name = "smackjvantilburgsmack";
-  name = name.substr(5,11);
-  for( var i = 0; i < feedbackElements.length; ++i) {
-    feedbackElements[i].innerHTML=name+"@gmail.com";
-  }
+  var name = "smackjvantilburgsmack"; // add salt
+  name = name.substr(5,11); // remove salt
+  $("feedback").html(name+"@gmail.com");
 }
 
-
+// set the version tags
+function setVersion() {
+  if( versionType == "prev" || versionType == "dev" ) 
+    $("versionType").html(versionType);
+  $("version").html(version + " ("+versionType+")");
+}
 
 // load all code after the document
 $("document").ready(function(){
+  
+  // set the version tags
+  setVersion();
   
   // Read the xml file from the hash of the web address
   readFileFromHash();

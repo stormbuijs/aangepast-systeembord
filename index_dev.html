@@ -28,7 +28,7 @@
 
     <!-- Top menu bar -->
     <div class="navbar">
-      <div class="titlebar">Online Systeembord dev</div>
+      <div class="titlebar">Online Systeembord <versionType></versionType></div>
       <div class="menubar">
         <div class="dropdown">
           <button class="dropbtn">Bestand</button>
@@ -105,13 +105,13 @@
         <center>
           <h3>Online Systeembord</h3>
           <img src="favicon-apple-touch-114.png"/><br clear="all"/><br/>
-          Ontwikkelversie<br/>
+          Versie <version></version><br/>
           &copy; 2020 Jeroen van Tilburg, MIT licentie <br/>
           Feedback naar <feedback></feedback> <br/> 
           Broncode: <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> <br/>
-          Versies: <a href="index_prev.html">Vorige versie</a>, 
-                   <a href="index.html">Standaardversie</a>, 
-                   <a href="index_dev.html">Ontwikkelversie</a>.<br/>
+          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (1.0)<br/> 
+                   <a href="index.html">Standaardversie</a> (2.0) <br/>
+                   <a href="index_dev.html">Ontwikkelversie</a> (2.x)<br/>
         </center>
       </div>
     </div>
@@ -219,10 +219,15 @@
         De broncode van deze website is vrij beschikbaar op 
         <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> onder de 
         <a href="https://nl.wikipedia.org/wiki/MIT-licentie">MIT licentie</a>. De broncode
-        mag vrij worden gekopieerd en gehost op iedere webserver. Suggesties voor
-        verbeteringen van de code zijn welkom.
-        <br/>
-        Versies...
+        mag vrij worden gekopieerd en gehost op iedere webserver. Zorg er dan wel
+        voor dat de code up-to-date blijft omdat er regelmatig updates en bugfixes zijn. De
+        huidige versie is <version></version>. Om nieuwe ontwikkelingen te kunnen testen
+        en om bugs te traceren worden drie versies van de software beschikbaar gesteld op
+        deze website: een       
+        <a href="index_prev.html">vorige versie</a>, de
+        <a href="index.html">standaardversie</a> en een 
+        <a href="index_dev.html">ontwikkelversie</a>.
+        Suggesties voor verbeteringen van de code zijn welkom.
         <br/><br/>
 
         <b>Feedback</b><br/>
@@ -241,7 +246,7 @@
             Systeembord L. Kruise</a></li>
           <li><a href="https://rutgerkok.nl/tools/systeembord/">Systeembord Rutger Kok</a></li>
           <li><a href="https://logic.ly/demo">Logic.ly</a></li>
-          <li><a href="https://tomsoft.nl/0030">Systeembord Tomsoft (alleen Windows)</a></li>
+          <li><a href="https://tomsoft.nl/0030">Systeembord Tomsoft</a> (alleen Windows)</li>
         </ul>
       </div>
     </div>    
@@ -267,6 +272,8 @@
     <script src="scripts/fabric.min.js"></script>
     <script src="scripts/jquery-3.5.0.min.js"></script>
     <script src="scripts/systemboard_engine_dev.js"></script>
+    <!--script data-goatcounter="https://onlinesysteembord.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script-->
     <noscript>Your browser does not support JavaScript!</noscript>
 
 </body>
