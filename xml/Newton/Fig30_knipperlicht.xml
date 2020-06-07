@@ -13,4 +13,6 @@
   <element name="LED" x="619" y="165">
     <link id="0" toElement="1" toNode="6"/>
   </element>
+  <element name="TextElement" x="462" y="2" text="Knipperlicht" scaleX="1.61" scaleY="1.61" width="110"/>
+  <element name="TextElement" x="473" y="40" text="Newton Fig. 30" scaleX="1.00" scaleY="1.00" width="150"/>
 </systeembord>

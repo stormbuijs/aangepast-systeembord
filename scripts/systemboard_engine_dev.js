@@ -298,7 +298,7 @@ class InputNode {
     this.isInput = true;
     this.child = null;
   }
-  eval() { return (this.child) ? this.child.eval() : false ; };
+  eval() { return (this.child) ? this.child.eval() : low ; };
 }
 
 // Generic output node (base class)
@@ -429,7 +429,7 @@ class BinaryNode extends OutputNode {
     this.bin = bin;
   }
   evalState() {
-    var binary = (this.child1.eval() / high ) * 15; // convert analog to 16b
+    var binary = (this.child1.eval() / (high+0.01) ) * 16; // convert analog to 4b
     return getBit(binary,this.bin);
   }
 }    
@@ -443,6 +443,24 @@ class BinaryNodeS extends OutputNode {
   }
   evalState() { return getBit(this.counter,this.bin); };
 }    
+
+// DAC node 
+class DACNode extends OutputNode { 
+  constructor(x1,y1,input0,input1,input2,input3) {
+    super(x1,y1);
+    this.child0 = input0;
+    this.child1 = input1;
+    this.child2 = input2;
+    this.child3 = input3;
+  }
+  evalState() {
+    var state = (isHigh(this.child0.eval()) ? 1 : 0) +
+                (isHigh(this.child1.eval()) ? 2 : 0) +
+                (isHigh(this.child2.eval()) ? 4 : 0) +
+                (isHigh(this.child3.eval()) ? 8 : 0);
+    return state*0.3125; 
+  }; 
+}
 
 // Relais node 
 class RelaisNode extends OutputNode { 
@@ -523,6 +541,7 @@ class Element {
   }
   output() { };
   remove() { };
+  getXMLAttributes() { };
   
   drawGroup(x,y,groupList){
     this.group = new fabric.Group( groupList,
@@ -826,12 +845,12 @@ function inputDOM(x1,y1,name,value,step,min,max){
 
 // Create a pulse generator
 class Pulse extends Element {
-  constructor(x1,y1,inputValue="1") {
+  constructor(x1,y1,params) {
     super(x1,y1);
     this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ; 
     
     // Create an input DOM element
-    inputValue = (inputValue == "" ) ? "1" : inputValue;
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "1.0";
     this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0.1","10");
 
     // Start the pulsgenerator
@@ -856,16 +875,20 @@ class Pulse extends Element {
     clearTimeout(this.timer);   // Stop the pulse generator
     this.input.remove();        // Remove the DOM element
   }
+  
+  // Store additional XML attributes: the frequency
+  getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
+
 }
 
 // Variable voltage power
 class VarVoltage extends Element {
-  constructor(x1,y1,inputValue="0") {
+  constructor(x1,y1,params) {
     super(x1,y1);
     this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ; 
     
     // Create an input DOM element
-    inputValue = (inputValue == "") ? "0" : inputValue;
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "0.0";
     this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0","5");
 
     // set voltage from the DOM element
@@ -878,23 +901,27 @@ class VarVoltage extends Element {
   }
   
   // Update voltage from the DOM element
-  output() { this.nodes[0].state = this.input.value; };
+  output() { this.nodes[0].state = parseFloat(this.input.value); };
   
   // Delete the dom element 
   remove() { this.input.remove(); }
+  
+  // Store additional XML attributes: the output voltage
+  getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
+
 }
 
 
 // Comparator
 class Comparator extends Element {
-  constructor(x1,y1,inputValue="0") {
+  constructor(x1,y1,params) {
     super(x1,y1);
     let node1 = new InputNode(x1+25, y1+25 );
     let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
     this.nodes = [ node1, node2 ] ;     
 
     // Create an input DOM element
-    inputValue = (inputValue == "") ? "2.5" : inputValue;
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "2.5";
     this.input = inputDOM(x1+70,y1+60,this.uniqueName,inputValue,"0.1","0","5");
 
     // set reference voltage from the DOM element
@@ -920,6 +947,10 @@ class Comparator extends Element {
 
   // Delete the dom element 
   remove() { this.input.remove(); }
+  
+  // Store additional XML attributes: the reference voltage
+  getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
+
 }
 
 
@@ -948,6 +979,32 @@ class ADC extends Element {
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
   }
 }
+
+class DAC extends Element {
+  constructor(x1,y1){
+    super(x1,y1);
+    let node3 = new InputNode( x1+25, y1+17 );
+    let node2 = new InputNode( x1+45, y1+17 );
+    let node1 = new InputNode( x1+65, y1+17 );
+    let node0 = new InputNode( x1+85, y1+17 );
+    let node4 = new DACNode(x1+boxWidth-25, y1+17, node0,node1,node2,node3 );
+    this.nodes = [ node0,node1,node2,node3,node4 ] ;
+    
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'AD omzetter'),
+                     drawLine([18, 30, 46, 30]),
+                     drawLine([62, 30, 92, 30]),
+                     drawText(boxWidth-30,36,"uit"),
+                     drawText(50,36,"in"),
+                     drawText(22,12,"8"),
+                     drawText(42,12,"4"),
+                     drawText(62,12,"2"),
+                     drawText(82,12,"1")]
+                     .concat(drawCircles(x1,y1,this.nodes.slice(0,4), "white"),
+                             drawCircles(x1,y1,[this.nodes[4]], "yellow"));
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
+  }
+}
+
 
 // Create Counter
 class Counter extends Element {
@@ -1250,7 +1307,7 @@ class SoundSensor extends Element {
   }  
 }
 
-// Voltmeter
+// Voltmeter (analog)
 class Voltmeter extends Element {
   constructor(x1,y1) {
     super(x1,y1);
@@ -1274,7 +1331,7 @@ class Voltmeter extends Element {
   // Set voltage 
   output() { 
     var newState = this.nodes[0].eval();
-    if( Math.abs(newState-this.lastState) < 0.1) return true; 
+    if( Math.abs(newState-this.lastState) < 0.1) return; 
     var angle = Math.PI*(0.25+0.5*(newState/5.0));
     var x2 = -18*Math.cos(angle);
     var y2 = -8 - 18*Math.sin(angle);
@@ -1284,8 +1341,69 @@ class Voltmeter extends Element {
   }
 }    
 
+// Digital voltmeter
+class DigitalVoltmeter extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    this.allowSnap = false;
+    this.nodes = [ new InputNode(x1+35, y1+35 ) ] ;   
+    this.lastState = 0.0;
 
-/* === USER INTWERACTION AND EVENT LISTENERS ===
+    // Draw the display and the rest
+    this.display = new fabric.Textbox(this.lastState.toFixed(2)+" V", {
+          left: 22, top: 12, width: 37, fontSize: 12, textAlign: 'right',
+          fill: 'red', backgroundColor: '#330000' });
+    var groupList = [ drawBoxAndText(0,0,44,60,'meter'), 
+                      drawText(1,45,"volt-",12),
+                      this.display ]
+                      .concat(drawCircles(x1,y1,this.nodes, "white"));
+    this.drawGroup(x1+22, y1+30, groupList);
+  }
+  // Set voltage 
+  output() { 
+    var newState = this.nodes[0].eval();
+    if( Math.abs(newState-this.lastState) < 0.05) return; 
+    this.display.set({ text : newState.toFixed(2)+" V"});
+    this.lastState = newState;
+    renderNeeded = true;
+  }
+}    
+
+// Text element
+class TextElement extends Element {
+  constructor(x1,y1, params ) {
+    super(x1,y1);
+    this.allowSnap = false;
+    var text   = params.hasOwnProperty("text")   ? params.text : "Nieuwe tekst";
+    var scaleX = params.hasOwnProperty("scaleX") ? parseFloat(params.scaleX) : 1.0;
+    var scaleY = params.hasOwnProperty("scaleY") ? parseFloat(params.scaleY) : 1.0;
+    var width  = params.hasOwnProperty("width")  ? parseInt(params.width)    : 150;
+
+    // Draw the text
+    this.group = new fabric.Textbox(text, {left: x1, top: y1, fontSize: 20, width: width,
+                                           scaleX: scaleX, scaleY: scaleY, originX: 'left', originY: 'top',
+                                           selectable: moveComponents, 
+                                           evented: (moveComponents||deleteComponents) });
+    this.group.name = "element";
+    this.group.element = this;
+    this.group.hasControls = true;
+    this.group.hasBorders = true;
+    this.group.lockRotation = true; 
+    canvas.add(this.group);
+  }
+  
+  getXMLAttributes() {
+    return { text   : this.group.text,
+             scaleX : this.group.scaleX.toFixed(2).toString(),
+             scaleY : this.group.scaleY.toFixed(2).toString(), 
+             width  : Math.round(this.group.width).toString() } ;
+  }
+
+
+}    
+
+
+/* === USER INTERACTION AND EVENT LISTENERS ===
    - Save/load file
    - Add move, remove elements
    ============================================= */
@@ -1457,6 +1575,21 @@ canvas.on('object:moving', function(e) {
   if( p.name == "element" ) moveElement(p);
 });
 
+
+// Event listener: Scaling text (only text can scale)
+canvas.on('object:scaling', function(e) {
+  var p = e.target;
+  if( p.name == "element" ) {
+    var element = p.element;
+    if( element.constructor.name == "TextElement" ) { // Only the text can scale
+      element.x = p.left;
+      element.y = p.top;
+    }
+  }
+});
+
+
+
 // Update LDR (voltage to light sensor) when moving
 function updateLDR(node){
   // Find all lightbulbs and calculate distance
@@ -1551,8 +1684,12 @@ function moveElement(p){
 
   var newX = p.left-0.5*p.width+0.5;
   var newY = p.top-0.5*p.height+0.5;
+  if( p.originX == "left" && p.originY == "top" ) {
+    newX = p.left;
+    newY = p.top;
+  }
   var diffX = newX - element.x;
-  var diffY = newY - element.y;
+  var diffY = newY - element.y;  
   element.x = newX;
   element.y = newY;
   for (i = 0; i < nodes.length; i++) {
@@ -1682,14 +1819,12 @@ function parseFile(xml) {
      
     var x = parseInt( domElements[i].getAttribute('x')); 
     var y = parseInt( domElements[i].getAttribute('y'));
-    var inputValue = "";
-    if( className == "Comparator" || 
-        className == "VarVoltage" ||
-        className == "Pulse" ) {
-      inputValue = domElements[i].getAttribute('inputValue');
-      if( !inputValue ) inputValue = "";
+    var params = {};
+    var attrs = domElements[i].attributes;
+    for( var j=0; j< attrs.length; ++j ) {
+      params[ attrs[j].name ] = attrs[j].value;
     }
-    addElement(className,x,y,inputValue); 
+    addElement(className,x,y,params); 
   }    
   
   // Second loop to add the links
@@ -1721,11 +1856,10 @@ function parseFile(xml) {
   
 }
 
-function addElement(className,x1=0,y1=0,inputValue=""){
-  // Dirty trick. Maybe use a Map (dictionary) instead.
+function addElement(className,x1=0,y1=0,params={}){
+  // Dirty trick (eval). Maybe use a Map (dictionary) instead.
   var myElement = eval(className);
-  elements.push(new myElement(x1,y1,inputValue));
-  //elements.push(new window[className](x1,y1,inputValue));
+  elements.push(new myElement(x1,y1,params));
   document.getElementById('addElement').selectedIndex = 0;
 }
 
@@ -1767,15 +1901,14 @@ function createXmlFile(){
     attPosY.nodeValue = Math.round(elements[i].y).toString();
     newElement.setAttributeNode(attPosY);
     
-    //console.log("Node name="+attName.nodeValue);
-    if( attName.nodeValue == "Comparator" || 
-        attName.nodeValue == "VarVoltage" ||
-        attName.nodeValue == "Pulse" ) {
-      var attInput = xmlDoc.createAttribute("inputValue");
-      attInput.nodeValue = elements[i].input.value.toString();
-      newElement.setAttributeNode(attInput);
+    // Store the additional XML attributes
+    var attrs = elements[i].getXMLAttributes();
+    for( var key in attrs ) {
+      var attribute = xmlDoc.createAttribute( key );
+      attribute.nodeValue = attrs[key];
+      newElement.setAttributeNode(attribute);
     }
-
+    
     x.appendChild(newElement);
     for (var j = 0; j < elements[i].nodes.length; j++) {
 

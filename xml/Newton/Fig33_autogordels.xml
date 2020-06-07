@@ -22,4 +22,11 @@
   <element name="Comparator" x="194" y="187" inputValue="1.0">
     <link id="0" toElement="1" toNode="0"/>
   </element>
+  <element name="TextElement" x="63" y="67" text="Stoel" scaleX="0.77" scaleY="0.77" width="50"/>
+  <element name="TextElement" x="60" y="117" text="Gordel" scaleX="0.74" scaleY="0.74" width="63"/>
+  <element name="TextElement" x="63" y="184" text="snelheidssensor" scaleX="0.70" scaleY="0.70" width="150"/>
+  <element name="TextElement" x="589" y="76" text="controlelampje" scaleX="0.83" scaleY="0.83" width="150"/>
+  <element name="TextElement" x="607" y="184" text="alarm" scaleX="0.89" scaleY="0.89" width="51"/>
+  <element name="TextElement" x="196" y="7" text="Autogordels " scaleX="1.45" scaleY="1.45" width="122"/>
+  <element name="TextElement" x="202" y="38" text="Newton Fig. 33" scaleX="0.85" scaleY="0.85" width="150"/>
 </systeembord>

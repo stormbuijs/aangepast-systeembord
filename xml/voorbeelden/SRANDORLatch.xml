@@ -15,4 +15,7 @@
   <element name="NOTPort" x="274" y="179">
     <link id="0" toElement="3" toNode="0"/>
   </element>
+  <element name="TextElement" x="336" y="15" text="SR AND-OR latch" scaleX="1.49" scaleY="1.49" width="166"/>
+  <element name="TextElement" x="69" y="72" text="set" scaleX="1.00" scaleY="1.00" width="27"/>
+  <element name="TextElement" x="51" y="191" text="reset" scaleX="1.00" scaleY="1.00" width="46"/>
 </systeembord>

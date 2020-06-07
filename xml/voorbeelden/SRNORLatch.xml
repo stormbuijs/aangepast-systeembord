@@ -15,4 +15,9 @@
   <element name="LED" x="416" y="255">
     <link id="0" toElement="3" toNode="2"/>
   </element>
+  <element name="TextElement" x="235" y="28" text="SR NOR latch" scaleX="1.68" scaleY="1.68" width="130"/>
+  <element name="TextElement" x="54" y="286" text="set" scaleX="1.00" scaleY="1.00" width="28"/>
+  <element name="TextElement" x="37" y="96" text="reset" scaleX="1.00" scaleY="1.00" width="45"/>
+  <element name="TextElement" x="575" y="123" text="Q" scaleX="1.00" scaleY="1.00" width="25"/>
+  <element name="TextElement" x="573" y="265" text="Q inverted" scaleX="1.00" scaleY="1.00" width="115"/>
 </systeembord>

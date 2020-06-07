@@ -16,4 +16,6 @@
   <element name="LED" x="608" y="77">
     <link id="0" toElement="2" toNode="1"/>
   </element>
+  <element name="TextElement" x="231" y="15" text="Huiskamerverwarming" scaleX="1.47" scaleY="1.47" width="199"/>
+  <element name="TextElement" x="298" y="50" text="Newton Fig. 23" scaleX="1.00" scaleY="1.00" width="150"/>
 </systeembord>

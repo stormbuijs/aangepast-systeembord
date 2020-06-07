@@ -1,0 +1,38 @@
+<systeembord>
+  <element name="Comparator" x="340" y="122" inputValue="2.5">
+    <link id="0" toElement="1" toNode="0"/>
+  </element>
+  <element name="VarVoltage" x="19" y="122" inputValue="0"/>
+  <element name="Voltmeter" x="859" y="162">
+    <link id="0" toElement="0" toNode="1"/>
+  </element>
+  <element name="DigitalVoltmeter" x="859" y="100">
+    <link id="0" toElement="0" toNode="1"/>
+  </element>
+  <element name="ADC" x="340" y="280">
+    <link id="0" toElement="8" toNode="0"/>
+  </element>
+  <element name="DAC" x="594" y="347">
+    <link id="0" toElement="4" toNode="4"/>
+    <link id="1" toElement="4" toNode="3"/>
+    <link id="2" toElement="4" toNode="2"/>
+    <link id="3" toElement="4" toNode="1"/>
+  </element>
+  <element name="Voltmeter" x="951" y="359">
+    <link id="0" toElement="5" toNode="4"/>
+  </element>
+  <element name="DigitalVoltmeter" x="952" y="296">
+    <link id="0" toElement="5" toNode="4"/>
+  </element>
+  <element name="VarVoltage" x="19" y="280" inputValue="0"/>
+  <element name="TextElement" x="188" y="249" text="Analoog signaal (continu)" scaleX="1.00" scaleY="1.00" width="149"/>
+  <element name="TextElement" x="184" y="97" text="Analoog signaal (continu)" scaleX="1.00" scaleY="1.00" width="163"/>
+  <element name="TextElement" x="581" y="88" text="Digitaal signaal
+(binair, 1 bit)" scaleX="1.00" scaleY="1.00" width="150"/>
+  <element name="TextElement" x="513" y="264" text="Digitaal signaal
+(4 bits)" scaleX="1.00" scaleY="1.00" width="150"/>
+  <element name="TextElement" x="767" y="291" text="Analoog signaal
+(discreet)" scaleX="1.00" scaleY="1.00" width="150"/>
+  <element name="TextElement" x="264" y="9" text="Analoge en digitale signalen" scaleX="1.80" scaleY="1.80" width="260"/>
+  <element name="TextElement" x="262" y="52" text="Verander de variabele spanningen en kijk wat de voltmeters aangeven." scaleX="0.76" scaleY="0.76" width="681"/>
+</systeembord>
