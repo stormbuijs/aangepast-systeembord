@@ -1,0 +1,17 @@
+<systeembord>
+  <element name="WebcamSensor" x="24" y="119"/>
+  <element name="Comparator" x="186" y="119" inputValue="1">
+    <link id="0" toElement="0" toNode="0"/>
+  </element>
+  <element name="NOTPort" x="347" y="119">
+    <link id="0" toElement="1" toNode="1"/>
+  </element>
+  <element name="Counter" x="513" y="119">
+    <link id="2" toElement="2" toNode="1"/>
+  </element>
+  <element name="DigitalVoltmeter" x="76" y="53">
+    <link id="0" toElement="0" toNode="0"/>
+  </element>
+  <element name="TextElement" x="210" y="14" text="Lichtsluis met teller" scaleX="1.29" scaleY="1.29" width="175"/>
+  <element name="TextElement" x="212" y="48" text="Beweeg je hand langs de webcam. De pulsenteller telt het aantal keer dat er een voorwerp langs de camera is geweest." scaleX="0.73" scaleY="0.73" width="400"/>
+</systeembord>

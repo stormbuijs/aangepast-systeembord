@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Webcam Light Sensor</title>
+	</head>
+<body>
+
+<!--div style="display:none;"-->
+<video autoplay width="0.1"></video> <!-- hope that 0.1 will work on all browsers-->
+<!--video autoplay></video-->
+  <!--/div-->
+<!--img src=""-->
+<!--canvas id="c" style="border:1px solid #ccc"></canvas-->
+    <p><button class="capture-button">Capture video</button>
+  <!--p><button id="screenshot-button" disabled>Take screenshot</button></p-->
+
+  <!--p><button id="button_brightness">Brightness</button></p-->
+  <p id="value_brightness"></p>
+
+
+  
+    <script src="scripts/jquery-3.5.0.min.js"></script>
+	<script>
+$(document).ready(function() {
+
+function hasGetUserMedia() {
+  return !!(navigator.mediaDevices &&
+    navigator.mediaDevices.getUserMedia);
+}
+
+if (hasGetUserMedia()) {
+  // Good to go!
+} else {
+  alert('getUserMedia() is not supported by your browser');
+}
+
+/*const constraints = {
+  video: true
+};*/
+
+/*const video = document.querySelector('video');
+
+navigator.mediaDevices.getUserMedia(constraints).
+  then((stream) => {video.srcObject = stream});
+*/
+const captureVideoButton = document.querySelector('.capture-button');
+//const screenshotButton = document.querySelector('#screenshot-button');
+//const img = document.querySelector('img');
+const video = document.querySelector('video');
+//const video = document.createElement('video');
+//video.autoplay = true;
+//video.height = 10;
+//video.width = 0.1;
+//document.body.appendChild(video); 
+ 
+//  console.log("video width = " + video.width);
+
+const canvas = document.createElement('canvas');
+
+  //const canvas = document.getElementById('c');
+  
+  //console.log(navigator.mediaDevices.getSupportedConstraints());
+  //console.log(navigator.mediaDevices.getCurrentSettings ) ;
+
+        
+captureVideoButton.onclick = function() {
+  navigator.mediaDevices.getUserMedia( { video: true } ).
+    then(handleSuccess).then( getBrightness ).catch(handleError)
+     ;
+};
+
+/*screenshotButton.onclick = video.onclick = function() {
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+  // Other browsers will fall back to image/png
+  img.src = canvas.toDataURL('image/webp');
+};*/
+
+
+function getBrightness() {
+  
+
+  //console.log();
+  //video.load();
+  //navigator.mediaDevices.getUserMedia(constraints).
+  //  then(handleSuccess).catch(handleError);
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  var ctx = canvas.getContext('2d');
+
+  ctx.drawImage(video, 0, 0);
+  
+  //console.log(ctx);
+  
+  //ctx.onload = function() {
+
+  var colorSum = 0;
+  //var rSum = 0;
+  //var gSum = 0;
+  //var bSum = 0;
+                
+  // get image data from top left to bottom right
+                
+  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  var data = imageData.data;
+  //console.log(data);
+  
+                
+  //var r, g, b, avg;
+  // read rgb values         
+  for (var i = 0, len = data.length; i < len; i += 4) {
+    // give R, G and B different weights due to human eye sensitivity
+    colorSum += Math.floor((3*data[i] + 10*data[i+1] + data[i+3]));
+    /*r = data[i];               
+    g = data[i + 1];
+    b = data[i + 2];
+                
+    // round of the number to avoid decimal values
+    avg = Math.floor((3*r + 10*g + b));
+    colorSum += avg;
+
+    rSum += r;
+    gSum += g;
+    bSum += b;*/
+  }
+
+  // calculating an average
+  //var n = canvas.width * canvas.height;              
+  var brightness = Math.floor(colorSum / (18*canvas.width * canvas.height));
+  //var rValue = [brightness, Math.floor(rSum/n), Math.floor(gSum/n), Math.floor(bSum/n), len,canvas.width,canvas.height];
+    $("#value_brightness").html("The brightness is " + brightness );
+  //}
+  setTimeout( getBrightness , 500);
+}
+  
+/*$("#button_brightness").click(function(){
+  getBrightness();
+   // $("#value_brightness").html("The brightness is " + getBrightness() );
+});*/
+
+/*video.onload = function() {
+  getBrightness();
+}*/
+  
+  
+function handleSuccess(stream) {
+  //screenshotButton.disabled = false;
+  video.srcObject = stream;
+  //const track = stream.getVideoTracks()[0];
+  //let imageCapture = new ImageCapture(track);
+  //let bla = imageCapture.takePhoto();
+  return new Promise(resolve => video.onloadedmetadata = resolve);
+  //getBrightness();
+}
+
+function handleError(error) {
+  console.error('Error: ', error);
+}
+
+  
+  
+	});
+	</script>
+
+</body>
+</html>

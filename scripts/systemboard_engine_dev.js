@@ -161,7 +161,7 @@ function stopBuzzer() {
   if( oscillator ) oscillator.stop();
 }
 
-// Connect a volume from the microphone to the external function updateVolume 
+// Connect volume from the microphone to the external function updateVolume 
 function startMicrophone( updateVolume ) {
   let tmp = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(function(stream) {
@@ -182,6 +182,47 @@ function startMicrophone( updateVolume ) {
       }
     });
   return tmp;
+}
+
+
+/* ========== VIDEO SECTION ====================
+   Start the webcam
+   ============================================= */
+
+const canvas2 = document.createElement('canvas');
+const video = document.querySelector('video');
+
+function startVideo() {
+  let tmp = navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+    .then(function(stream) {
+      video.srcObject = stream;
+      return new Promise(resolve => video.onloadedmetadata = resolve);
+    });
+  return tmp;
+}
+
+//function calculateBrightness( updateBrightness ) {
+function calculateBrightness() {
+
+  canvas2.width = video.videoWidth;
+  canvas2.height = video.videoHeight;
+  var ctx = canvas2.getContext('2d');
+
+  ctx.drawImage(video, 0, 0);
+  var colorSum = 0;
+  
+  // get image data from top left to bottom right                
+  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  var data = imageData.data;
+
+  // read rgb values         
+  for (var i = 0, len = data.length; i < len; i += 4) {
+    // give R, G and B different weights due to human eye sensitivity
+    colorSum += Math.floor((3*data[i] + 10*data[i+1] + data[i+3]));
+  }
+  // Divide by number of pixels and set between 0 and 5V
+  var brightness = colorSum * 5.0 / (18*canvas2.width * canvas2.height*255);
+  return brightness;
 }
 
 
@@ -507,6 +548,34 @@ class SoundSensorNode extends OutputNode {
     } else { // no audioCtx
       this.element.textbox.setColor('darkgrey');
       renderNeeded = true;
+    }
+    return this.state; 
+  };
+}    
+
+
+// output node for webcam sensor
+class WebcamNode extends OutputNode { 
+  constructor(x1,y1,element) { 
+    super(x1,y1);
+    this.element = element;
+    this.videoStarted = false;
+    this.videoReady   = false;
+  }
+  eval() { 
+    // Video is ready: calculate the brightness 
+    if( this.videoReady ) {
+      this.state = calculateBrightness();
+    } else if( !this.videoStarted ) { // Initialize the video
+      this.videoStarted = true;
+      var _this = this;
+      // Start the video stream
+      startVideo().then(function(){ _this.videoReady = true; })      
+      .catch(function(err) {
+        _this.element.textbox.setColor('darkgrey');
+        renderNeeded = true;
+        console.log("The following error occured: " + err.name);
+      });
     }
     return this.state; 
   };
@@ -1307,6 +1376,25 @@ class SoundSensor extends Element {
   }  
 }
 
+// Sound sensor
+class WebcamSensor extends Element { 
+  constructor(x1,y1) {
+    super(x1,y1);
+    this.nodes = [ new WebcamNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, this ) ] ;
+  
+    // Draw circle for input hole microphone
+    var circ = new fabric.Circle({left: 25, top: 0.5*boxHeightSmall, radius: 2, fill: "black" });
+
+    var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'webcamsensor'), circ]
+                    .concat(drawCircles(x1,y1,this.nodes, "yellow"));
+    this.drawGroup( x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList );
+    
+    // Add a member for the textbox such that is can be greyed out when needed
+    this.textbox = this.group.item(0).item(1);
+  }  
+}
+
+
 // Voltmeter (analog)
 class Voltmeter extends Element {
   constructor(x1,y1) {
@@ -1403,7 +1491,7 @@ class TextElement extends Element {
 }    
 
 
-/* === USER INTERACTION AND EVENT LISTENERS ===
+/* === USER INTWERACTION AND EVENT LISTENERS ===
    - Save/load file
    - Add move, remove elements
    ============================================= */
