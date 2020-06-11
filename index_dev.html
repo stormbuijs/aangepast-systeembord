@@ -36,6 +36,27 @@
             <input id="fileinput" type="file" style="display: none;">
             <a id="stupid_hack" onclick="fileinput.click()">Open bestand...</a>
             <a id="download_xml">Opslaan als ... </a>
+            <a class="select" id="slct">
+              <select id="addElement" name="type" onchange="location=this.value;">
+                <option selected disabled value="0">Kies opstelling...</option>
+                <option value="">Systeembord (standaard)</option>
+                <optgroup label="Voorbeelden">
+                  <option value="#voorbeelden/analoogDigitaal.xml">Analoog/Digitaal</option>
+                  <option value="#voorbeelden/lichtsluisTeller.xml">Lichtsluis teller</option>
+                  <option value="#voorbeelden/sb_thermostaat.xml">Thermostaat</option>
+                  <option value="#voorbeelden/sb_thermostaatMinMax.xml">Thermostaat min/max</option>
+                  <option value="#voorbeelden/geheugencel.xml">Geheugencel</option>
+                  <option value="#voorbeelden/SRANDORLatch.xml">Flipflop (SR AND-OR)</option>
+                  <option value="#voorbeelden/SRNORLatch.xml">Flipflop (SR NOR)</option>
+                </optgroup>
+                <optgroup label="Newton (lesmethode)">
+                  <option value="#Newton/Fig23_huiskamerverwarming.xml">Huiskamerverwarming (Fig. 23)</option>
+                  <option value="#Newton/Fig30_knipperlicht.xml">Knipperlicht (Fig. 30)</option>
+                  <option value="#Newton/Fig33_autogordels.xml">Autogordels (Fig. 33)</option>
+                  <option value="#Newton/Fig34_schakelklok.xml">Schakelklok (Fig. 34)</option>
+                </optgroup>
+              </select>
+            </a>
           </div>
         </div>
         <div class="dropdown">
