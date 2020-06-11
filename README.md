@@ -18,14 +18,15 @@ De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/
 - Verbindingssnoeren verwijderen: Sleep het snoer weg van de ingang.
 - Drukschakelaar: Met een klik-sleep kan de schakelaar worden vastgezet.
 - Relais: De relais is al aangesloten op een wisselspanningbron. De zwarte uitgangen kunnen worden verbonden met de lamp of de elektrische verwarming.
-- Sensoren: De geluidsensor is aangesloten op de ingebouwde microfoon van de computer (je moet hiervoor wel toestemming geven). De LDR van de lichtsensor kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
+- Virtuele sensoren: De LDR van de lichtsensor kan worden gesleept. De spanning is afhankelijk van de afstand tot de lamp, wanneer die aan staat. De temperatuursensor is (draadloos) verbonden met de thermometer bij de verwarming.
+- Echte sensoren: De geluidsensor is aangesloten op de microfoon van de computer (je moet hiervoor wel toestemming geven).
+De webcamsensor is aangesloten op de webcam van de computer (je moet hiervoor wel toestemming geven). De uitgangsspanning wordt bepaald door de helderheid van het opgenomen beeld van de webcam. Doordat de webcam automatisch de helderheid van het beeld aanpast aan de hoeveel licht komt de uitgangsspanning niet overeen met de lichtintensiteit van de omgeving.
 - Voltmeter: Met de voltmeter kan de spanning op een uitgang worden gemeten. De andere ingang van de voltmeter is al verbonden met de aarde.
 - Compatibiliteit: Online Syteembord werkt niet met Internet Explorer.
 - Meer informatie: Zie de [handleiding](http://www.cma-science.nl/resources/nl/practicum/b0020.pdf) van het systeembord.
 
 ## Wish list
 
-- Componenten: DAC, digitale voltmeter
 - Voorbeeldopstellingen
 - Toevoegen van echte sensoren via USB.
 
