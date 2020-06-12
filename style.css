@@ -28,6 +28,7 @@ li {text-indent: -1em; }
 pre {
   display: inline;
   margin: 0;
+  font-family: "Courier New",Courier,Arial,Verdana;
 }
 
 /* https://www.w3schools.com/howto/howto_css_dropdown_navbar.asp */

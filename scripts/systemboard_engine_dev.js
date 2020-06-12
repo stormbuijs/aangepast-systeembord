@@ -1929,8 +1929,13 @@ function addElement(className,x1=0,y1=0,params={}){
   // Dirty trick (eval). Maybe use a Map (dictionary) instead.
   var myElement = eval(className);
   elements.push(new myElement(x1,y1,params));
-  document.getElementById('addElement').selectedIndex = 0;
 }
+
+// Event listener for setting back the index after select
+$("select").change( function(){
+  $("select").val(0);
+});
+
 
 // Event listener for download button
 document.getElementById("download_xml").addEventListener("click", function(){
