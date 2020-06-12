@@ -6,7 +6,7 @@
 	</head>
 <body>
 
-    <div class="unsupported-browser"></div>
+   <div class="unsupported-browser"></div>
 
   <pre>bla</pre>
   
@@ -26,19 +26,24 @@
   
     <script src="scripts/jquery-3.5.0.min.js"></script>
 	<script>
-$(document).ready(function() {
-
-  
-  // Set a warning messsage when using Internet Explorer
+    
+    
+      // Set a warning messsage when using Internet Explorer
 function isIE() {
   // IE 10 and IE 11
   return /Trident\/|MSIE/.test(window.navigator.userAgent);
 }
 
 let showBrowserAlert = (function () {
+  console.log("tot hier");
     if (document.querySelector('.unsupported-browser')) {
         let d = document.getElementsByClassName('unsupported-browser');
 
+      
+      d[0].innerHTML = window.navigator.userAgent;
+            d[0].style.display = 'block';
+      
+      
         if( isIE() ) {
             d[0].innerHTML = '<b>Deze browser wordt niet ondersteund!</b></br>Deze webapplicatie werkt niet in Internet Explorer.</br>Gebruik een moderne browser zoals Chrome, Edge, Firefox of Safari.';
             d[0].style.display = 'block';
@@ -46,8 +51,13 @@ let showBrowserAlert = (function () {
     }
 });
 
-document.addEventListener('DOMContentLoaded', showBrowserAlert);
+    document.addEventListener("DOMContentLoaded", showBrowserAlert);
+//window.addEventListener('load', showBrowserAlert);
 
+
+$(document).ready(function() {
+
+  
 
   
 function hasGetUserMedia() {
@@ -188,7 +198,9 @@ function handleError(error) {
   
   
 	});
-	</script>
+
+
+  </script>
 
 </body>
 </html>
