@@ -27,8 +27,9 @@ De webcamsensor is aangesloten op de webcam van de computer (je moet hiervoor we
 
 ## Wish list
 
-- Voorbeeldopstellingen
-- Toevoegen van echte sensoren via USB.
+- Meer voorbeeldopstellingen
+- History met undo/redo
+- Instructie voor leerlingen
 
 ## License and credits
 
