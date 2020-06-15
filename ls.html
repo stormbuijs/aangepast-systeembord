@@ -8,7 +8,7 @@
 
    <div class="unsupported-browser"></div>
 
-  <pre>bla 3</pre>
+  <pre>Nog een keer</pre>
   
 <!--div style="display:none;"-->
 <video autoplay playsinline width="0.1"></video> <!-- hope that 0.1 will work on all browsers-->
@@ -105,10 +105,10 @@ const canvas = document.createElement('canvas');
 
         
 captureVideoButton.onclick = function() {
-  //navigator.mediaDevices.getUserMedia( { video: true } ).
-  //  then(handleSuccess).then( getBrightness ).catch(handleError)
-  //   ;
-  doStuff();
+  navigator.mediaDevices.getUserMedia( { video: true } ).
+    then(handleSuccess).then( getBrightness ).catch(handleError)
+     ;
+  //doStuff();
   
 };
 
