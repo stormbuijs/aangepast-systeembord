@@ -8,7 +8,7 @@
 
    <div class="unsupported-browser"></div>
 
-  <pre>blabla 1</pre>
+  <pre>blablabla 2</pre>
   
 <!--div style="display:none;"-->
 <video autoplay playsinline width="0.1"></video> <!-- hope that 0.1 will work on all browsers-->
@@ -105,11 +105,70 @@ const canvas = document.createElement('canvas');
 
         
 captureVideoButton.onclick = function() {
-  navigator.mediaDevices.getUserMedia( { video: true } ).
-    then(handleSuccess).then( getBrightness ).catch(handleError)
-     ;
+  //navigator.mediaDevices.getUserMedia( { video: true } ).
+  //  then(handleSuccess).then( getBrightness ).catch(handleError)
+  //   ;
+  doStuff();
+  
 };
 
+videoReady = false;
+videoStarted = false;
+
+function doStuff() {
+
+  if( videoReady ) {
+    $("#value_brightness").html("The brightness is " + calculateBrightness() );
+  } else if( !videoStarted ) { // Initialize the video
+    videoStarted = true;
+    // Start the video stream
+    startVideo().then(function(){ videoReady = true; })      
+    .catch(function(err) {
+      console.log("The following error occured: " + err.name);
+    });
+  }     
+  setTimeout( doStuff , 500);
+  
+}
+  
+function startVideo() {
+  let tmp = navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+    .then(function(stream) {
+      window.stream = stream; // make variable available to browser console
+      video.srcObject = stream;
+      return new Promise(resolve => video.onloadedmetadata = resolve);
+    });
+  return tmp;
+}
+
+function calculateBrightness() {
+
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  var ctx = canvas.getContext('2d');
+
+  ctx.drawImage(video, 0, 0);
+  var colorSum = 0;
+  
+  // get image data from top left to bottom right                
+  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  var data = imageData.data;
+  
+  // read rgb values         
+  for (var i = 0, len = data.length; i < len; i += 4) {
+    // give R, G and B different weights due to human eye sensitivity
+    colorSum += Math.floor((3*data[i] + 10*data[i+1] + data[i+3]));
+  }
+  // Divide by number of pixels and set between 0 and 5V
+  var brightness = colorSum * 5.0 / (18*canvas.width * canvas.height*255);
+  return brightness;
+}
+
+  
+  
+  
+  
+  
 /*screenshotButton.onclick = video.onclick = function() {
   canvas.width = video.videoWidth;
   canvas.height = video.videoHeight;
