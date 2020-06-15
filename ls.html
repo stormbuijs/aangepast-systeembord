@@ -8,10 +8,10 @@
 
    <div class="unsupported-browser"></div>
 
-  <pre>bla4</pre>
+  <pre>bla 5</pre>
   
 <!--div style="display:none;"-->
-<video autoplay playsinline controls="true" width="100"></video> <!-- hope that 0.1 will work on all browsers-->
+<video autoplay playsinline width="100"></video> <!-- hope that 0.1 will work on all browsers-->
 <!--video autoplay></video-->
   <!--/div-->
 <!--img src=""-->
@@ -187,6 +187,14 @@ function getBrightness() {
   
 function handleSuccess(stream) {
   //screenshotButton.disabled = false;
+
+  //const video = document.querySelector('video');
+  const videoTracks = stream.getVideoTracks();
+  //console.log('Got stream with constraints:', constraints);
+  console.log(`Using video device: ${videoTracks[0].label}`);
+  window.stream = stream; // make variable available to browser console
+  
+  
   video.srcObject = stream;
   //const track = stream.getVideoTracks()[0];
   //let imageCapture = new ImageCapture(track);
