@@ -195,8 +195,6 @@ function calculateBrightness() {
   var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   var data = imageData.data;
   
-  console.log("data = " + data.length );
-
   // read rgb values         
   for (var i = 0, len = data.length; i < len; i += 4) {
     // give R, G and B different weights due to human eye sensitivity
@@ -545,6 +543,11 @@ class WebcamNode extends OutputNode {
     this.videoReady   = false;
   }
   eval() { 
+    
+    console.log("webcam started= " + this.videoStarted + "  ready = " + this.videoReady );
+
+
+
     // Video is ready: calculate the brightness 
     if( this.videoReady ) {
       this.state = calculateBrightness();
