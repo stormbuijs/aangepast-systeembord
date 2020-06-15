@@ -8,7 +8,7 @@
 
    <div class="unsupported-browser"></div>
 
-  <pre>Allerlaatste keer?</pre>
+  <pre>Allerlaatste keer?????????????</pre>
   
 <!--div style="display:none;"-->
 <video autoplay playsinline muted controls="true" width="0.1"></video> <!-- hope that 0.1 will work on all browsers-->
@@ -105,10 +105,10 @@ const canvas = document.createElement('canvas');
 
         
 captureVideoButton.onclick = function() {
-  navigator.mediaDevices.getUserMedia( { video: true } ).
-    then(handleSuccess).then( getBrightness ).catch(handleError)
-     ;
-  //doStuff();
+  //navigator.mediaDevices.getUserMedia( { video: true } ).
+  //  then(handleSuccess).then( getBrightness ).catch(handleError)
+  //   ;
+  doStuff();
   
 };
 
@@ -134,11 +134,11 @@ function doStuff() {
 function startVideo() {
   let tmp = navigator.mediaDevices.getUserMedia({ audio: false, video: true })
     .then(function(stream) {
-      const video = document.querySelector('video');
-      const videoTracks = stream.getVideoTracks();
+      //const video = document.querySelector('video');
+      //const videoTracks = stream.getVideoTracks();
       //console.log('Got stream with constraints:', constraints);
-      console.log(`Using video device: ${videoTracks[0].label}`);
-      window.stream = stream; // make variable available to browser console
+      //console.log(`Using video device: ${videoTracks[0].label}`);
+      //window.stream = stream; // make variable available to browser console
       video.srcObject = stream;
       return new Promise(resolve => video.onloadedmetadata = resolve);
     });
