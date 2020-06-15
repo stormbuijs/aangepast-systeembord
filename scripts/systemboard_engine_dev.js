@@ -182,7 +182,6 @@ function startVideo() {
   return tmp;
 }
 
-//function calculateBrightness( updateBrightness ) {
 function calculateBrightness() {
 
   canvas2.width = video.videoWidth;
@@ -195,6 +194,8 @@ function calculateBrightness() {
   // get image data from top left to bottom right                
   var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
   var data = imageData.data;
+  
+  console.log("data = " + data.length );
 
   // read rgb values         
   for (var i = 0, len = data.length; i < len; i += 4) {
