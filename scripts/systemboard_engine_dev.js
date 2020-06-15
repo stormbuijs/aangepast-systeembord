@@ -176,6 +176,7 @@ const video = document.querySelector('video');
 function startVideo() {
   let tmp = navigator.mediaDevices.getUserMedia({ audio: false, video: true })
     .then(function(stream) {
+      window.stream = stream; // make variable available to browser console
       video.srcObject = stream;
       return new Promise(resolve => video.onloadedmetadata = resolve);
     });
