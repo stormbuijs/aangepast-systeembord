@@ -543,11 +543,6 @@ class WebcamNode extends OutputNode {
     this.videoReady   = false;
   }
   eval() { 
-    
-    console.log("webcam started= " + this.videoStarted + "  ready = " + this.videoReady );
-
-
-
     // Video is ready: calculate the brightness 
     if( this.videoReady ) {
       this.state = calculateBrightness();
