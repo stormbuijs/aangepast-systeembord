@@ -8,16 +8,23 @@
 
    <div class="unsupported-browser"></div>
 
-  <pre>Allerlaatste keer?????????????</pre>
+  <pre>Vandaag opnieuw</pre>
   
 <!--div style="display:none;"-->
-<video autoplay playsinline muted controls="true" width="0.1"></video> <!-- hope that 0.1 will work on all browsers-->
+<video autoplay playsinline muted style="display:none" width="0.1"></video> <!-- hope that 0.1 will work on all browsers-->
 <!--video autoplay></video-->
   <!--/div-->
 <!--img src=""-->
 <!--canvas id="c" style="border:1px solid #ccc"></canvas-->
-    <p><button class="capture-button">Capture video</button>
-  <!--p><button id="screenshot-button" disabled>Take screenshot</button></p-->
+    <p><button class="capture-button">Capture video</button><br/>
+
+            <canvas id="c" width="900" height="900" style="border:1px solid #ccc">
+        Your browser does not support HTML5 Canvas.
+      </canvas>
+
+
+      
+      <!--p><button id="screenshot-button" disabled>Take screenshot</button></p-->
 
   <!--p><button id="button_brightness">Brightness</button></p-->
   <p id="value_brightness"></p>
@@ -118,6 +125,7 @@ videoStarted = false;
 function doStuff() {
 
   if( videoReady ) {
+    video.play();
     $("#value_brightness").html("The brightness is " + calculateBrightness() );
   } else if( !videoStarted ) { // Initialize the video
     videoStarted = true;
