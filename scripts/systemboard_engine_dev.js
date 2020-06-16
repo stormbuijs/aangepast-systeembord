@@ -176,7 +176,6 @@ const video = document.querySelector('video');
 function startVideo() {
   let tmp = navigator.mediaDevices.getUserMedia({ audio: false, video: true })
     .then(function(stream) {
-      window.stream = stream; // make variable available to browser console
       video.srcObject = stream;
       return new Promise(resolve => video.onloadedmetadata = resolve);
     });
@@ -185,6 +184,9 @@ function startVideo() {
 
 function calculateBrightness() {
 
+  // Start the video (needed by Safari when video not visible on screen)
+  video.play();
+  
   canvas2.width = video.videoWidth;
   canvas2.height = video.videoHeight;
   var ctx = canvas2.getContext('2d');
