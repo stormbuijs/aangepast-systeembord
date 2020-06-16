@@ -1581,13 +1581,12 @@ function removeElement( element ) {
           wire.connection.child = null;
         }
         wire.connection = null; 
-        wire.node = null; // better to remove wire object itself ....
+        wire.node = null;
       }
     }
   }
     
-  // remove element object itself
-  // ...
+  // remove any other stuff from element
   element.remove();
 }
 
@@ -1621,6 +1620,9 @@ canvas.on('mouse:up', function(e) {
     // Delete the element from the list of elements
     var index = elements.indexOf(p.element);
     if (index > -1) elements.splice(index, 1);
+  
+    // Set element to null
+    //p.element = null;
   }
   // Change button color and state of OutputNode to low when mouse is up
   if( p && p.name == "button") {
@@ -1929,7 +1931,7 @@ function parseFile(xml) {
 }
 
 function addElement(className,x1=0,y1=0,params={}){
-  // Dirty trick (eval). Maybe use a Map (dictionary) instead.
+  // Convert string to class name
   var myElement = eval(className);
   elements.push(new myElement(x1,y1,params));
 }
