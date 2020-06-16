@@ -1565,7 +1565,7 @@ function removeElement( element ) {
             wire.connection = null;
             canvas.remove( wire.line1 );
             canvas.remove( wire );
-            node.child.wires.splice(j, 1); // save because there is only one connection
+            node.child.wires.splice(j, 1); // safe because there is only one connection
           }
         }
       }
@@ -1823,7 +1823,8 @@ canvas.on('object:moved', function(e) {
       for (j = 0; j < elements[i].nodes.length; j++) {
         var node1 = p.node;
         var node2 = elements[i].nodes[j];
-        if( p.left == node2.x1 && p.top == node2.y1 ) { // Not such a good check for floats ...
+        // Check if wire-end is on same position as the node
+        if( Math.abs(p.left - node2.x1)<1.0 && Math.abs(p.top - node2.y1)<1.0 ) { 
           if( node2.isInput && !(node1.isInput) && !(node2.child) ) {
             node2.child = node1;
             p.connection = node2;
