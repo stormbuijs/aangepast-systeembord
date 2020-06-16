@@ -35,7 +35,28 @@
           <div class="dropdown-content">
             <input id="fileinput" type="file" style="display: none;">
             <a id="stupid_hack" onclick="fileinput.click()">Open bestand...</a>
-            <a id="download_xml">Opslaan als ... </a>
+            <a id="download_xml">Opslaan als... </a>
+            <a class="select" id="slct">
+              <select id="setups" name="type" onchange="location=this.value;">
+                <option selected disabled value="0">Kies opstelling...</option>
+                <option value="">Systeembord (standaard)</option>
+                <optgroup label="Voorbeelden">
+                  <option value="#voorbeelden/analoogDigitaal.xml">Analoog/Digitaal</option>
+                  <option value="#voorbeelden/lichtsluisTeller.xml">Lichtsluis teller</option>
+                  <option value="#voorbeelden/sb_thermostaat.xml">Thermostaat</option>
+                  <option value="#voorbeelden/sb_thermostaatMinMax.xml">Thermostaat min/max</option>
+                  <option value="#voorbeelden/geheugencel.xml">Geheugencel</option>
+                  <option value="#voorbeelden/SRANDORLatch.xml">Flipflop (SR AND-OR)</option>
+                  <option value="#voorbeelden/SRNORLatch.xml">Flipflop (SR NOR)</option>
+                </optgroup>
+                <optgroup label="Newton (lesmethode)">
+                  <option value="#Newton/Fig23_huiskamerverwarming.xml">Huiskamerverwarming (Fig. 23)</option>
+                  <option value="#Newton/Fig30_knipperlicht.xml">Knipperlicht (Fig. 30)</option>
+                  <option value="#Newton/Fig33_autogordels.xml">Autogordels (Fig. 33)</option>
+                  <option value="#Newton/Fig34_schakelklok.xml">Schakelklok (Fig. 34)</option>
+                </optgroup>
+              </select>
+            </a>
           </div>
         </div>
         <div class="dropdown">
@@ -52,6 +73,7 @@
                   <option value="LightSensor">Lichtsensor</option>
                   <option value="TemperatureSensor">Temperatuursensor</option>
                   <option value="SoundSensor">Geluidsensor</option>
+                  <option value="WebcamSensor">Webcamsensor</option>
                 </optgroup>
                 <optgroup label="VERWERKING">
                   <option value="ANDPort">EN-poort</option>
@@ -112,9 +134,9 @@
           &copy; 2020 Jeroen van Tilburg, MIT licentie <br/>
           Feedback naar <feedback></feedback> <br/> 
           Broncode: <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> <br/>
-          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (1.0)<br/> 
-                   <a href="index.html">Standaardversie</a> (2.0) <br/>
-                   <a href="index_dev.html">Ontwikkelversie</a> (2.x)<br/>
+          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.0)<br/> 
+                   <a href="index.html">Standaardversie</a> (2.1) <br/>
+                   <a href="index_dev.html">Ontwikkelversie</a> (2.2)<br/>
         </center>
       </div>
     </div>
@@ -136,18 +158,27 @@
             De relais is al aangesloten op een wisselspanningbron.
             De zwarte uitgangen kunnen worden verbonden met de lamp of 
             de elektrische verwarming.</li>
-          <li><b>Sensoren:</b><br/>
-            De geluidsensor is aangesloten op de ingebouwde microfoon van
-            de computer (je moet hiervoor wel toestemming geven).
+          <li><b>Virtuele sensoren:</b><br/>
             De LDR van de lichtsensor kan worden gesleept. De spanning is 
-            afhankelijk van de afstand tot de lamp, wanneer die aan staat.
+            afhankelijk van de afstand tot de lamp, wanneer die aan staat.<br/>
             De temperatuursensor is (draadloos) verbonden met de thermometer
             bij de verwarming.</li>
+          <li><b>Echte sensoren:</b><br/>
+            De geluidsensor is aangesloten op de microfoon van
+            de computer (je moet hiervoor wel toestemming geven).<br/>
+            De webcamsensor is aangesloten op de webcam van
+            de computer (je moet hiervoor wel toestemming geven).
+            De uitgangsspanning wordt bepaald door de helderheid van het
+            opgenomen beeld van de webcam. Doordat de webcam automatisch de helderheid van het beeld
+            aanpast aan de hoeveel licht komt de uitgangsspanning niet overeen met de 
+            lichtintensiteit van de omgeving.<br/>
+          </li>
           <li><b>Voltmeter:</b><br/>
             Met de voltmeter kan de spanning op een uitgang worden gemeten.
             De andere ingang van de voltmeter is al verbonden met de aarde.</li>
           <li><b>Compatibiliteit:</b><br/>
-            Online Syteembord werkt niet met Internet Explorer.</li>
+            Online Syteembord werkt niet met Internet Explorer. Stap over op een moderne browser als
+            Chrome, Edge, Firefox of Safari.</li>
           <li><b>Meer informatie:</b><br/>
             Zie de handleiding van het 
             <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li> 
@@ -241,7 +272,8 @@
         <br/><br> 
         
         <b>Overige webapplicaties</b><br/>
-        Er zijn verschillende programma's en webapplicaties waarin het systeembord wordt gesimuleerd 
+        Er zijn verschillende programma's en webapplicaties gemaakt door derden 
+        waarin het systeembord wordt gesimuleerd 
         en waarin logische schakelingen kunnen worden gebouwd. Kies de software die voldoet aan jouw eisen.
         <ul>
           <li><a href="https://metenenregelen.nl">metenenregelen.nl</a></li>
@@ -265,15 +297,17 @@
       </canvas>
     </div>
     
-    <!-- Load images. Required by systemboard_engine.js -->
+    <!-- Load images and video. Required by systemboard_engine.js -->
     <img width=0 src="img/pic_bulboff.gif" id="lightoff">
     <img width=0 src="img/pic_bulbon.gif" id="lighton">
     <img width=0 src="img/ldr.png" id="ldr">
     <img width=0 src="img/radiator.jpg" id="radiator">
+    <video autoplay playsinline muted style="display:none" width="0.1"></video>
 
     <!-- Load js -->
     <script src="scripts/fabric.min.js"></script>
     <script src="scripts/jquery-3.5.0.min.js"></script>
+    <script src="scripts/warningIE.js"></script>
     <script src="scripts/systemboard_engine.js"></script>
     <script data-goatcounter="https://onlinesysteembord.goatcounter.com/count"
             async src="//gc.zgo.at/count.js"></script>
