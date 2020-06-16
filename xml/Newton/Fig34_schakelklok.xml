@@ -1,29 +1,29 @@
 <systeembord>
-  <element name="Memory" x="286" y="44">
+  <element name="Memory" x="187" y="44">
     <link id="0" toElement="3" toNode="0"/>
     <link id="1" toElement="1" toNode="3"/>
   </element>
-  <element name="Counter" x="286" y="165">
+  <element name="Counter" x="187" y="165">
     <link id="0" toElement="5" toNode="1"/>
     <link id="2" toElement="2" toNode="0"/>
   </element>
-  <element name="Pulse" x="112" y="165" inputValue="1"/>
-  <element name="Switch" x="112" y="44"/>
-  <element name="LED" x="817" y="190">
+  <element name="Pulse" x="18" y="165" inputValue="1"/>
+  <element name="Switch" x="18" y="44"/>
+  <element name="LED" x="667" y="190">
     <link id="0" toElement="6" toNode="2"/>
   </element>
-  <element name="NOTPort" x="452" y="69">
+  <element name="NOTPort" x="353" y="69">
     <link id="0" toElement="0" toNode="2"/>
   </element>
-  <element name="ANDPort" x="640" y="190">
+  <element name="ANDPort" x="503" y="190">
     <link id="0" toElement="1" toNode="5"/>
     <link id="1" toElement="1" toNode="4"/>
   </element>
-  <element name="LED" x="817" y="69">
+  <element name="LED" x="667" y="69">
     <link id="0" toElement="1" toNode="4"/>
   </element>
-  <element name="TextElement" x="864" y="52" text="rood licht auto's" scaleX="0.79" scaleY="0.79" width="112"/>
-  <element name="TextElement" x="857" y="171" text="groen licht voetgangers" scaleX="0.73" scaleY="0.73" width="112"/>
-  <element name="TextElement" x="609" y="2" text="Schakelklok" scaleX="1.71" scaleY="1.71" width="117"/>
-  <element name="TextElement" x="635" y="39" text="Newton Fig. 34" scaleX="0.85" scaleY="0.85" width="150"/>
+  <element name="TextElement" x="712" y="48" text="rood licht auto's" scaleX="0.79" scaleY="0.79" width="112"/>
+  <element name="TextElement" x="702" y="174" text="groen licht voetgangers" scaleX="0.73" scaleY="0.73" width="112"/>
+  <element name="TextElement" x="464" y="2" text="Schakelklok" scaleX="1.71" scaleY="1.71" width="117"/>
+  <element name="TextElement" x="496" y="39" text="Newton Fig. 34" scaleX="0.85" scaleY="0.85" width="150"/>
 </systeembord>

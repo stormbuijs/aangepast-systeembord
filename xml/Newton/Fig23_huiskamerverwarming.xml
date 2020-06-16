@@ -1,19 +1,19 @@
 <systeembord>
-  <element name="Comparator" x="224" y="141" inputValue="1.5">
+  <element name="Comparator" x="191" y="141" inputValue="1.5">
     <link id="0" toElement="1" toNode="0"/>
   </element>
   <element name="TemperatureSensor" x="28" y="141"/>
-  <element name="NOTPort" x="427" y="141">
+  <element name="NOTPort" x="352" y="141">
     <link id="0" toElement="0" toNode="1"/>
   </element>
-  <element name="Heater" x="796" y="136">
+  <element name="Heater" x="692" y="156">
     <link id="0" toElement="4" toNode="2"/>
     <link id="1" toElement="4" toNode="1"/>
   </element>
-  <element name="Relais" x="608" y="141">
+  <element name="Relais" x="518" y="141">
     <link id="0" toElement="2" toNode="1"/>
   </element>
-  <element name="LED" x="608" y="77">
+  <element name="LED" x="518" y="70">
     <link id="0" toElement="2" toNode="1"/>
   </element>
   <element name="TextElement" x="231" y="15" text="Huiskamerverwarming" scaleX="1.47" scaleY="1.47" width="199"/>
