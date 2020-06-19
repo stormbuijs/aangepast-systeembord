@@ -32,7 +32,7 @@ SOFTWARE.
 
 // Set the version
 var version     = "2.2";
-var versionType = "develop"; // prev, standaard, dev
+var versionType = "dev"; // prev, standaard, dev
 
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
@@ -943,15 +943,45 @@ class Pulse extends Element {
     });
 
     g.on('mousedown', function(e) {
-      var p = e.target;
+      //var p = e.target;
       //if(p && p.name && p.name == "input" ) {
-        alert("mousedown");
+        //alert("mousedown");
         p.input.style.visibility = "visible";
         p.input.focus();
 
         //$("#Pulse0").show();     
       //}
     });
+
+    g.on('mouseover', function(e) {
+      //var p = e.target;
+      //if(p && p.name && p.name == "input" ) {
+        //console.log("mouse over");
+        this.input.style.visibility = "visible";
+        this.input.focus();
+        //$("#Pulse0").show();     
+      //}
+    });
+
+
+    g.on('drop', function(e) {
+      alert("drop");
+      this.input.style.visibility = "visible";
+      this.input.focus();
+    });
+
+    g.on('dragover', function(e) {
+      alert("dragover");
+      this.input.style.visibility = "visible";
+      this.input.focus();
+    });
+
+     g.on('dragenter', function(e) {
+      alert("dragover");
+      this.input.style.visibility = "visible";
+      this.input.focus();
+    });
+
 
 
 
@@ -978,7 +1008,7 @@ class Pulse extends Element {
 }
 
 
-    canvas.on('mouse:over', function(e) {
+/*    canvas.on('mouse:over', function(e) {
       var p = e.target;
       if(p && p.name && p.name == "input" ) {
         //console.log("mouse over");
@@ -988,6 +1018,7 @@ class Pulse extends Element {
       }
     });
 
+*/
 
     canvas.on('touch:drag', function(e) {
       var p = e.target;
