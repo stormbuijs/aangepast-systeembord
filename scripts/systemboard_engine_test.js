@@ -32,7 +32,7 @@ SOFTWARE.
 
 // Set the version
 var version     = "2.2";
-var versionType = "prev"; // prev, standaard, dev
+var versionType = "dev"; // prev, standaard, dev
 
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
@@ -946,8 +946,8 @@ class Pulse extends Element {
       //var p = e.target;
       //if(p && p.name && p.name == "input" ) {
         //alert("mousedown");
-        p.input.style.visibility = "visible";
-        p.input.focus();
+        this.input.style.visibility = "visible";
+        this.input.focus();
 
         //$("#Pulse0").show();     
       //}
