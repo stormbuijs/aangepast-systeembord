@@ -32,7 +32,7 @@ SOFTWARE.
 
 // Set the version
 var version     = "2.2";
-var versionType = "dev"; // prev, standaard, dev
+var versionType = "develop"; // prev, standaard, dev
 
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
@@ -942,6 +942,18 @@ class Pulse extends Element {
       renderNeeded = true;
     });
 
+    g.on('mousedown', function(e) {
+      var p = e.target;
+      //if(p && p.name && p.name == "input" ) {
+        alert("mousedown");
+        p.input.style.visibility = "visible";
+        p.input.focus();
+
+        //$("#Pulse0").show();     
+      //}
+    });
+
+
 
     
     //console.log(this.uniqueName);    
@@ -971,6 +983,7 @@ class Pulse extends Element {
       if(p && p.name && p.name == "input" ) {
         //console.log("mouse over");
         p.input.style.visibility = "visible";
+        //p.input.focus();
         //$("#Pulse0").show();     
       }
     });
@@ -979,11 +992,26 @@ class Pulse extends Element {
     canvas.on('touch:drag', function(e) {
       var p = e.target;
       if(p && p.name && p.name == "input" ) {
-        //console.log("mouse over");
+        alert("touch drag");
         p.input.style.visibility = "visible";
+        p.input.focus();
+
         //$("#Pulse0").show();     
       }
     });
+
+    canvas.on('touch:gesture', function(e) {
+      var p = e.target;
+      if(p && p.name && p.name == "input" ) {
+        alert("touch gesture");
+        p.input.style.visibility = "visible";
+        p.input.focus();
+
+        //$("#Pulse0").show();     
+      }
+    });
+
+
 
 
 
