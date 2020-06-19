@@ -976,6 +976,17 @@ class Pulse extends Element {
     });
 
 
+    canvas.on('touch:drag', function(e) {
+      var p = e.target;
+      if(p && p.name && p.name == "input" ) {
+        //console.log("mouse over");
+        p.input.style.visibility = "visible";
+        //$("#Pulse0").show();     
+      }
+    });
+
+
+
 
 /*    canvas.on('mouse:out', function(e) {
       console.log("mouse out");
