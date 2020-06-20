@@ -251,6 +251,23 @@ function drawButton(left, top, node){
   c.setGradient('stroke', gradientButtonUp );
   c.name = "button";
   c.node = node;
+  
+  // Event listener: Change button color and state of OutputNode when pushed
+  c.on('mousedown', function() {
+    c.node.state = invert(c.node.state);
+    c.node.state = high;
+    c.set({ fill: '#333333', strokeWidth: 3, radius: 10});
+    c.setGradient('stroke', gradientButtonDw );
+  });
+  
+  // Event listener: Change button color and state of OutputNode to low when mouse is up
+  c.on('mouseup', function() {
+    // a mouse-click can be too short for the engine to evaluate itself
+    setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
+    c.set({ fill: '#222222', strokeWidth: 3, radius: 10});
+    c.setGradient('stroke', gradientButtonUp );
+  });
+  
   return c;
 }    
 
@@ -1644,38 +1661,14 @@ function removeElements() {
   elements = [];  
 }
 
-
-// Event listener: Change button color and state of OutputNode when pushed
-canvas.on({'mouse:down':mouseClick});
-function mouseClick(e) {
-  var p = e.target;
-  if( p && p.name == "button") {
-    p.node.state = invert(p.node.state);
-    p.node.state = high;
-    p.set({ fill: '#333333', strokeWidth: 3, radius: 10});
-    p.setGradient('stroke', gradientButtonDw );
-  }
-}
-    
-// Event listener: either remove the element of update button
+// Event listener: remove the element
 canvas.on('mouse:up', function(e) {
   var p = e.target;
   if( deleteComponents && p && p.name == "element") {
     removeElement(p.element);
     // Delete the element from the list of elements
     var index = elements.indexOf(p.element);
-    if (index > -1) elements.splice(index, 1);
-  
-    // Set element to null
-    //p.element = null;
-  }
-  // Change button color and state of OutputNode to low when mouse is up
-  if( p && p.name == "button") {
-    // a mouse-click can be too short for the engine to evaluate itself
-    timeOutButton = setTimeout(function(){ p.node.state = low; renderNeeded = true}, 
-                               clockPeriod+5); // add small delay
-    p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
-    p.setGradient('stroke', gradientButtonUp );
+    if (index > -1) elements.splice(index, 1);  
   }
 });
 
