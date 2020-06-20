@@ -1306,8 +1306,15 @@ function makeLDR(left, top, node){
   var domLDR = document.getElementById('ldr');
   var imgLDR = new fabric.Image(domLDR, { left: left, top: top });
   imgLDR.scale(0.15);
-  imgLDR.name = "LDR";
-  imgLDR.node = node;
+  
+  // Event listener: Moving ldr
+  imgLDR.on('moving', function() {
+    canvas.bringToFront(imgLDR);
+    node.xLDR = imgLDR.left;
+    node.yLDR = imgLDR.top;
+    updateLDR(node);
+  });
+
   return imgLDR;
 }
 
@@ -1522,7 +1529,15 @@ class TextElement extends Element {
     this.group.hasControls = true;
     this.group.hasBorders = true;
     this.group.lockRotation = true; 
-    canvas.add(this.group);
+    canvas.add(this.group);    
+    
+    // Event listener for scaling the group
+    var that = this;
+    this.group.on('scaling', function() {
+      that.x = this.left;
+      that.y = this.top;
+    });
+    
   }
   
   getXMLAttributes() {
@@ -1536,8 +1551,7 @@ class TextElement extends Element {
 }    
 
 
-/* === USER INTWERACTION AND EVENT LISTENERS ===
-   - Save/load file
+/* === USER INTERACTION AND EVENT LISTENERS ===
    - Add move, remove elements
    ============================================= */
 
@@ -1677,28 +1691,8 @@ canvas.on('mouse:up', function(e) {
 canvas.on('object:moving', function(e) {
   var p = e.target;
   if( p.name == "wire" ) moveWire(p);
-  if( p.name == "LDR" ) {
-    canvas.bringToFront(p);
-    p.node.xLDR = p.left;
-    p.node.yLDR = p.top;
-    updateLDR(p.node);
-  }
   if( p.name == "element" ) moveElement(p);
 });
-
-
-// Event listener: Scaling text (only text can scale)
-canvas.on('object:scaling', function(e) {
-  var p = e.target;
-  if( p.name == "element" ) {
-    var element = p.element;
-    if( element.constructor.name == "TextElement" ) { // Only the text can scale
-      element.x = p.left;
-      element.y = p.top;
-    }
-  }
-});
-
 
 
 // Update LDR (voltage to light sensor) when moving
@@ -1751,7 +1745,6 @@ function moveElement(p){
   // Bring the component in front of rest (except empty board)
   var element = p.element;
   if( element.constructor.name != "Board" ) canvas.bringToFront(p);
-  if( element.button ) canvas.bringToFront(element.button);
   if( element.ldr ) canvas.bringToFront(element.ldr);
 
   if( element.allowSnap ) {
@@ -1811,6 +1804,7 @@ function moveElement(p){
     var button = element.button;
     button.set({ 'left': button.left+diffX, 'top': button.top+diffY }) ;
     button.setCoords();
+    canvas.bringToFront(button);
   }
   if( element.input ) {
     var input = element.input;
@@ -1896,6 +1890,10 @@ canvas.on('object:moved', function(e) {
     } 
   
 });
+
+/* === USER INTERACTION AND EVENT LISTENERS ===
+   - Save/load file
+   ============================================= */
 
 // Event listener for uploading files
 var control = document.getElementById("fileinput");
