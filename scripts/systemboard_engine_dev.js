@@ -1411,9 +1411,9 @@ class WebcamSensor extends Element {
     this.nodes = [ new WebcamNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, this ) ] ;
   
     // Draw circle for input hole microphone
-    var circ = new fabric.Circle({left: 25, top: 0.5*boxHeightSmall, radius: 2, fill: "black" });
-
-    var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'webcamsensor'), circ]
+    var rect = new fabric.Rect({left: 25, top: 0.5*boxHeightSmall, 
+                                width: 6, height: 5, /*stroke: "black",*/ fill: "#f9f9f9" });
+    var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'webcamsensor'), rect]
                     .concat(drawCircles(x1,y1,this.nodes, "yellow"));
     this.drawGroup( x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList );
     
