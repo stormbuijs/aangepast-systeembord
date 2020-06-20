@@ -1904,14 +1904,13 @@ function screenshot(htmlElement) {
 
 
 // Event listener for uploading files
-var control = document.getElementById("fileinput");
-control.addEventListener("change", function(event) {
-  let files = control.files;
-  //Use createObjectURL, this should address any CORS issues.
+$("#fileinput").change(function() {
+  let files = this.files;
+  // Use createObjectURL, this should address any CORS issues.
   let filePath = URL.createObjectURL(files[0]);
   readFile(filePath);
   // Reset the file input such that it triggers next change
-  control.value = '';
+  this.value = '';
 });
 
 function readFile(url) {
@@ -1991,22 +1990,22 @@ $("select").change( function(){
 
 
 // Event listener for download button
-document.getElementById("download_xml").addEventListener("click", function(){
+$("#download_xml").click( function(){
   var filename = prompt("Sla op als...", "systeembord.xml");
   if (filename != null && filename != "") {
     download( filename, createXmlFile());
   }  
-}, false);
+});
 
 // Create an invisible download element
 function download(filename, text) {
-    var element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+  element.style.display = 'none';
+  document.body.appendChild(element);
+  element.click();
+  document.body.removeChild(element);
 }
 
 // Write the xml file
@@ -2120,7 +2119,8 @@ function formatXml(xml) {
 
 
 // Event listener for resizing the window
-window.addEventListener('resize', resizeCanvas, false);
+//window.addEventListener('resize', resizeCanvas, false);
+$(window).resize( resizeCanvas );
 function resizeCanvas() {    
   var divCanvas = document.getElementById("canvas1");
   var newWidth = window.innerWidth-20;
@@ -2130,10 +2130,6 @@ function resizeCanvas() {
     canvas.renderAll();
   }
 }
-
-// resize on init
-resizeCanvas();
-
 
 /* Define functions for the modal box */
 var currentModal = "";
@@ -2229,6 +2225,9 @@ function setVersion() {
 // load all code after the document
 $("document").ready(function(){
   
+  // resize on init
+  resizeCanvas();
+
   // set the version tags
   setVersion();
   
