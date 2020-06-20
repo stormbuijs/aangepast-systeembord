@@ -1895,6 +1895,14 @@ canvas.on('object:moved', function(e) {
    - Save/load file
    ============================================= */
 
+// Make a screenshot
+function screenshot(htmlElement) {
+  var image = canvas.toDataURL({format: 'png', multiplier: 2});  
+  htmlElement.setAttribute("download","screenshot.png");
+  htmlElement.setAttribute("href", image);
+}
+
+
 // Event listener for uploading files
 var control = document.getElementById("fileinput");
 control.addEventListener("change", function(event) {
