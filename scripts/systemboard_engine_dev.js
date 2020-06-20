@@ -94,7 +94,8 @@ var audioCtx = null, oscillator = null, gainNode = null;
 // audioContext starts always in suspended mode in iOS/Safari. 
 // Requires user interaction (event) to resume.
 function unlockAudioContext(context) {
-  if (context.state !== "suspended") return;
+  //console.log("AudioContext. State="+context.state);
+  if (context.state !== "running") return;
   const b = document.body;
   const events = ["touchstart", "touchend", "mousedown", "keydown"];
   events.forEach(e => b.addEventListener(e, unlock, false));
@@ -1667,11 +1668,14 @@ function removeElement( element ) {
 }
 
 function requestRemoveElements() {
-  if ( confirm("Weet je zeker dat je alles wilt verwijderen?") ) removeElements();
+  if ( confirm("Weet je zeker dat je alles wilt verwijderen?") ) {
+    removeElements();
+    unlockAudioContext( audioCtx );
+  }
 }
 
 function removeElements() {
-  elements.forEach(function(element) { removeElement(element);});
+  elements.forEach(function(element) { removeElement(element);});  
   elements = [];  
 }
 
