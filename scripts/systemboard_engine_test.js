@@ -881,17 +881,63 @@ class Switch extends Element {
 
 // Create an number-input DOM element
 function inputDOM(x1,y1,name,value,step,min,max){
-    var input = document.createElement("input"); input.type = "number"; 
-    input.id = name; 
-    input.name = name;
-    input.value = value; input.step = step; input.min= min; input.max= max;
-    input.style = "position:absolute;width:40px";
-    input.style.left = (x1).toString()+"px";
-    input.style.top = (y1).toString()+"px";
-    input.className = "css-class-name"; // set the CSS class
-    body = document.getElementById("canvas1");
-    body.appendChild(input); // put it into the DOM
-    return input ;
+  var input = document.createElement("input"); input.type = "number"; 
+  input.id = name; 
+  input.name = name;
+  input.value = value; input.step = step; input.min= min; input.max= max;
+  input.style = "position:absolute;width:40px";
+  input.style.left = (x1).toString()+"px";
+  input.style.top = (y1).toString()+"px";
+  input.className = "css-class-name"; // set the CSS class
+  body = document.getElementById("canvas1");
+  body.appendChild(input); // put it into the DOM  
+  return input ;
+}
+
+// Create a placeholder for the input DOM element
+function inputPlaceholder(x1,y1,input){
+
+  // Draw the placeholder
+  var rect = new fabric.Rect({left: 0, top: 0, height:18, width: 45, fill: 'white', 
+                             originX: 'left', originY: 'top' });    
+  var text = new fabric.Text(input.value, {left: 2, top: 4, fontSize: 11, 
+                             originX: 'left', originY: 'top', fontFamily: 'system-ui, Arial' });    
+  var placeholder = new fabric.Group([rect,text], {left: x1-1, top: y1+0.5, padding: -3, 
+                             originX: 'left', originY: 'top', selectable: false, evented: true  });
+  canvas.add(placeholder);
+  
+  // Show the placeholder on mouse click (touchscreen) or hover (mouse)
+  placeholder.on({'mousedown':setInputVisible, 'mouseover':setInputVisible});
+  function setInputVisible() {
+    input.style.visibility = "visible";
+    input.focus();      
+  }
+
+  // Hide the input DOM when not hovering (mouse) or after focus (touchscreen)
+  input.style.visibility = "hidden";
+  input.addEventListener("mouseleave", setInputHidden);
+  input.addEventListener("focusout", setInputHidden); // after pressing enter
+  function setInputHidden() {
+    input.style.visibility = "hidden";
+    input.value = Math.max(input.min,Math.min(input.value, input.max)).toFixed(1);
+    text.set( {'text' : input.value.replace('.',',') });
+    renderNeeded = true;
+  }
+
+  // Make sure that input value is in the range with one decimal
+  /*input.addEventListener("change", function(){
+    input.value = Math.max(input.min,Math.min(input.value, input.max)).toFixed(1);
+    text.set( {'text' : input.value.replace('.',',') });
+    renderNeeded = true;
+  });*/
+
+  // Update placeholder text when changing the input DOM 
+  /*input.addEventListener("input", function(){
+    text.set( {'text' : input.value.replace('.',',') });
+    renderNeeded = true;
+  });*/
+
+  return placeholder;
 }
 
 
@@ -900,100 +946,21 @@ class Pulse extends Element {
   constructor(x1,y1,params) {
     super(x1,y1);
     this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ; 
-    
-    // Create an input DOM element
-    var min = 0.1, max = 10, step = 0.1;
-    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "1.0";
-    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,step,min,max);
-    
-    // Start the pulsgenerator
-    this.timer = null;
-    this.startPulse();
-    
+        
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'pulsgenerator'), 
                      drawText(70,30,"Hz",12) ]
                      .concat(drawCircles(x1,y1,this.nodes, "yellow"));   
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
-
     
-    //$("#"+this.uniqueName).hide();
-    var c = new fabric.Rect({left: 0, top: 0, height:18, width: 45, fill: 'white', 
-                             /*backgroundColor: 'white',*/ 
-                             originX: 'left', originY: 'top', /*selectable: false, evented: false*/  });    
-    this.text = new fabric.Text(params.inputValue, {left: 2, top: 4, fontSize: 11, /*width:30, fill: 'black',*/
-                             originX: 'left', originY: 'top', fontFamily: 'system-ui' /*selectable: false, evented: false*/  });    
+    // Create an input DOM element and placeholder
+    var min = 0.1, max = 10, step = 0.1;
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "1.0";
+    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,step,min,max);
+    this.placeholder = inputPlaceholder(x1+20,y1+10,this.input);
     
-    var g = new fabric.Group([c,this.text], {left: x1+19, top: y1+10.5, padding: -3, /*strokeWidth: 0,*/
-                             originX: 'left', originY: 'top', selectable: false, evented: true  });
-    g.name = "input";
-    g.input = this.input;
-    canvas.add(g);
-
-    this.input.style.visibility = "hidden";
-    var that = this;
-    $("#"+this.uniqueName).mouseleave(function(){
-      //console.log("mouse leave");
-      that.input.style.visibility = "hidden";
-    });
-    $("#"+this.uniqueName).focusout(function(){
-      //console.log("mouse leave");
-      that.input.style.visibility = "hidden";
-    });
-
-
-    
-    $("#"+this.uniqueName).change(function(){
-      // Make sure that input value is in the range with one decimal
-      that.input.value = Math.max(min,Math.min(that.input.value, max)).toFixed(1);
-      that.text.set( {'text' : that.input.value.replace('.',',') });
-      renderNeeded = true;
-    });
-
-    g.on('mousedown', function(e) {
-      //var p = e.target;
-      //if(p && p.name && p.name == "input" ) {
-        //alert("mousedown");
-        this.input.style.visibility = "visible";
-        this.input.focus();
-
-        //$("#Pulse0").show();     
-      //}
-    });
-
-    g.on('mouseover', function(e) {
-      //var p = e.target;
-      //if(p && p.name && p.name == "input" ) {
-        //console.log("mouse over");
-        this.input.style.visibility = "visible";
-        this.input.focus();
-        //$("#Pulse0").show();     
-      //}
-    });
-
-
-    /*g.on('drop', function(e) {
-      alert("drop");
-      this.input.style.visibility = "visible";
-      this.input.focus();
-    });
-
-    g.on('dragover', function(e) {
-      alert("dragover");
-      this.input.style.visibility = "visible";
-      this.input.focus();
-    });
-
-     g.on('dragenter', function(e) {
-      alert("dragover");
-      this.input.style.visibility = "visible";
-      this.input.focus();
-    });
-*/
-
-
-
-    
-    //console.log(this.uniqueName);    
+    // Start the pulsgenerator
+    this.timer = null;
+    this.startPulse();  
   }
            
   // Start the pulse generator
@@ -1005,8 +972,9 @@ class Pulse extends Element {
   
   // Delete the dom element and stop the pulsing
   remove() {
-    clearTimeout(this.timer);   // Stop the pulse generator
-    this.input.remove();        // Remove the DOM element
+    clearTimeout(this.timer);        // Stop the pulse generator
+    this.input.remove();             // Remove the DOM element
+    canvas.remove(this.placeholder); // Remove the placeholder
   }
   
   // Store additional XML attributes: the frequency
@@ -1015,81 +983,33 @@ class Pulse extends Element {
 }
 
 
-/*    canvas.on('mouse:over', function(e) {
-      var p = e.target;
-      if(p && p.name && p.name == "input" ) {
-        //console.log("mouse over");
-        p.input.style.visibility = "visible";
-        //p.input.focus();
-        //$("#Pulse0").show();     
-      }
-    });
-
-*/
-
-/*    canvas.on('touch:drag', function(e) {
-      var p = e.target;
-      if(p && p.name && p.name == "input" ) {
-        alert("touch drag");
-        p.input.style.visibility = "visible";
-        p.input.focus();
-
-        //$("#Pulse0").show();     
-      }
-    });
-
-    canvas.on('touch:gesture', function(e) {
-      var p = e.target;
-      if(p && p.name && p.name == "input" ) {
-        alert("touch gesture");
-        p.input.style.visibility = "visible";
-        p.input.focus();
-
-        //$("#Pulse0").show();     
-      }
-    });
-*/
-
-
-
-
-
-/*    canvas.on('mouse:out', function(e) {
-      console.log("mouse out");
-      var p = e.target;
-      if(p && p.name && p.name == "input" ) {
-        p.input.style.visibility = "hidden";
-        //$("#Pulse0").hide();     
-      }
-    });
-*/
-
-
-
 // Variable voltage power
 class VarVoltage extends Element {
   constructor(x1,y1,params) {
     super(x1,y1);
     this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ; 
-    
-    // Create an input DOM element
-    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "0.0";
-    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0","5");
-
-    // set voltage from the DOM element
-    this.nodes[0].state = this.input.value;
-    
+        
     var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'variabele spanning'), 
                       drawText(70,30,"V",12) ]
                      .concat(drawCircles(x1,y1,this.nodes, "yellow")); 
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
+
+    // Create an input DOM element and placeholder
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "0.0";
+    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0","5");
+    this.placeholder = inputPlaceholder(x1+20,y1+10,this.input);
+
+    // set voltage from the DOM element
+    this.nodes[0].state = this.input.value;
   }
   
   // Update voltage from the DOM element
   output() { this.nodes[0].state = parseFloat(this.input.value); };
   
-  // Delete the dom element 
-  remove() { this.input.remove(); }
+  remove() { 
+    this.input.remove();             // Delete the dom element 
+    canvas.remove(this.placeholder); // Remove the placeholder
+  }
   
   // Store additional XML attributes: the output voltage
   getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
@@ -1104,13 +1024,6 @@ class Comparator extends Element {
     let node1 = new InputNode(x1+25, y1+25 );
     let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
     this.nodes = [ node1, node2 ] ;     
-
-    // Create an input DOM element
-    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "2.5";
-    this.input = inputDOM(x1+70,y1+60,this.uniqueName,inputValue,"0.1","0","5");
-
-    // set reference voltage from the DOM element
-    this.nodes[1].state = this.input.value;
     
     var r = new fabric.Triangle({left: 0.5*boxWidth, top: 35, height: 40, width: 40, 
                                  fill: 'lightgrey', angle:90, stroke: 'black', strokeWidth: 1 });
@@ -1125,13 +1038,23 @@ class Comparator extends Element {
                       drawText(57, 53,"\u2212") ]
                       .concat(drawCircles(x1,y1,this.nodes, "blue"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
+    
+    // Create an input DOM element and placeholder
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "2.5";
+    this.input = inputDOM(x1+70,y1+60,this.uniqueName,inputValue,"0.1","0","5");
+    this.placeholder = inputPlaceholder(x1+70,y1+60,this.input);
+
+    // set reference voltage from the DOM element
+    this.nodes[1].state = this.input.value;
   }
   
   // Update reference voltage from the DOM element
   output() { this.nodes[1].compare = this.input.value; };
 
-  // Delete the dom element 
-  remove() { this.input.remove(); }
+  remove() { 
+    this.input.remove();             // Delete the dom element 
+    canvas.remove(this.placeholder); // Remove the placeholder
+  }
   
   // Store additional XML attributes: the reference voltage
   getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
@@ -1911,6 +1834,10 @@ function moveElement(p){
     var input = element.input;
     input.style.left = (parseFloat(input.style.left.slice(0,-2)) + diffX) + 'px';
     input.style.top = (parseFloat(input.style.top.slice(0,-2)) + diffY) + 'px';
+    var placeholder = element.placeholder;
+    placeholder.set({ 'left': placeholder.left+diffX, 'top': placeholder.top+diffY }) ;
+    placeholder.setCoords();
+    canvas.bringToFront(placeholder);
   }
   
   // Update the wire
