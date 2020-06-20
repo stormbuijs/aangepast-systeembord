@@ -919,7 +919,9 @@ function inputPlaceholder(x1,y1,input){
   input.addEventListener("focusout", setInputHidden); // after pressing enter
   function setInputHidden() {
     input.style.visibility = "hidden";
+    // Make sure that input value is in the range with one decimal
     input.value = Math.max(input.min,Math.min(input.value, input.max)).toFixed(1);
+    // Update placeholder text when changing the input DOM 
     text.set( {'text' : input.value.replace('.',',') });
     renderNeeded = true;
   }
