@@ -2200,6 +2200,17 @@ window.addEventListener('hashchange', function() {
   readFileFromHash();
 }, false);
 
+// Call function from select menu
+function loadHash( hash ) {
+  // Force a reload when hash did not change
+  if( hash == window.location.hash ) {
+    readFileFromHash();
+  } else { // Hash will change: will trigger a reload
+    window.location = hash;
+  }
+}
+
+
 // Evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
   eventCounter++;
