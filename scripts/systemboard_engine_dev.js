@@ -1998,7 +1998,8 @@ $("#download_xml").click( function(){
   var filename = prompt("Sla op als...", "systeembord.xml");
   if (filename != null && filename != "") {
     download( filename, createXmlFile());
-  }  
+  }
+  unlockAudioContext( audioCtx );
 });
 
 // Create an invisible download element
