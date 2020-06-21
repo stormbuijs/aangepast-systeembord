@@ -1950,7 +1950,12 @@ function parseFile(xml) {
     for( var j=0; j< attrs.length; ++j ) {
       params[ attrs[j].name ] = attrs[j].value;
     }
-    addElement(className,x,y,params); 
+    addElement(className,x,y,params);
+    
+    // Update the uniqueName if exists
+    if( domElements[i].hasAttribute('id') ) {
+      elements[elements.length-1].uniqueName = domElements[i].getAttribute('id');
+    }
   }    
   
   // Second loop to add the links
@@ -2048,6 +2053,10 @@ function createXmlFile(){
     var attName = xmlDoc.createAttribute("name");
     attName.nodeValue = elements[i].constructor.name;
     newElement.setAttributeNode(attName);
+
+    var attID = xmlDoc.createAttribute("id");
+    attID.nodeValue = elements[i].uniqueName;
+    newElement.setAttributeNode(attID);
 
     var attPosX = xmlDoc.createAttribute("x");
     attPosX.nodeValue = Math.round(elements[i].x).toString();
