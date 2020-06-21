@@ -332,28 +332,29 @@ function drawCircles(x1,y1,nodes,color) {
 
 // Generic input node
 class InputNode {
-  constructor(x1=0,y1=0, isHV=false) { 
+  constructor(x1=0,y1=0, name="input", isHV=false) { 
     this.x1 = x1;
     this.y1 = y1;
     this.isHV = isHV;
     this.state = low; // only used by reset button of pulse counter
     this.isInput = true;
     this.child = null;
+    this.uniqueName = name;
   }
   eval() { return (this.child) ? this.child.eval() : low ; };
 }
 
 // Generic output node (base class)
 class OutputNode { 
-  constructor(x1=0,y1=0, isHV=false) {
+  constructor(x1=0,y1=0, name="output", isHV=false) {
     this.x1 = x1;
     this.y1 = y1;
     this.isHV = isHV;
     this.state = low;
-    this.isInput = true;
     this.isInput = false;     
     this.wires = [ makeWire(x1,y1,this,isHV) ];
     this.lastEvent = 0;
+    this.uniqueName = name;
   }
   evalState() { return this.state; };
   eval() {
@@ -465,8 +466,8 @@ function getBit(number,bin) {
 
 // Binary node from ADC
 class BinaryNode extends OutputNode {
-  constructor(x1,y1,input1,bin) { 
-    super(x1,y1);
+  constructor(x1,y1,input1,bin) {
+    super(x1,y1,"output"+Math.pow(2,bin));
     this.child1 = input1;
     this.bin = bin;
   }
@@ -479,7 +480,7 @@ class BinaryNode extends OutputNode {
 // Binary node with stored counter
 class BinaryNodeS extends OutputNode { 
   constructor(x1,y1,bin) { 
-    super(x1,y1);
+    super(x1,y1, "output"+Math.pow(2,bin));
     this.bin = bin;
     this.counter = 0;
   }
@@ -506,8 +507,8 @@ class DACNode extends OutputNode {
 
 // Relais node 
 class RelaisNode extends OutputNode { 
-  constructor(x1,y1,input) {
-    super(x1,y1,true);
+  constructor(x1,y1,input,name) {
+    super(x1,y1,name,true);
     this.child = input;
   }
   evalState() { return this.child.eval(); }; 
@@ -647,8 +648,8 @@ class Board extends Element {
 class ANDPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "input1" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
     let node3 = new ANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'EN-poort'),
@@ -667,8 +668,8 @@ class ANDPort extends Element {
 class ORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "input1" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
     let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'OF-poort'),
@@ -703,8 +704,8 @@ class NOTPort extends Element {
 class NANDPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "input1" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
     let node3 = new NANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'NEN-poort'),
@@ -724,8 +725,8 @@ class NANDPort extends Element {
 class NORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "input1" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
     let node3 = new NORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'NOF-poort'),
@@ -745,8 +746,8 @@ class NORPort extends Element {
 class XORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "input1" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
     let node3 = new XORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'XOF-poort'),
@@ -765,8 +766,8 @@ class XORPort extends Element {
 class XNORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "input1" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
     let node3 = new XNORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'XNOF-poort'),
@@ -786,8 +787,8 @@ class XNORPort extends Element {
 class Memory extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
+    let node1 = new InputNode(x1+25, y1+25, "set" );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25, "reset" );
     let node3 = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeight);
     this.nodes = [ node1, node2, node3 ] ;     
   
@@ -1098,10 +1099,10 @@ class ADC extends Element {
 class DAC extends Element {
   constructor(x1,y1){
     super(x1,y1);
-    let node3 = new InputNode( x1+25, y1+17 );
-    let node2 = new InputNode( x1+45, y1+17 );
-    let node1 = new InputNode( x1+65, y1+17 );
-    let node0 = new InputNode( x1+85, y1+17 );
+    let node3 = new InputNode( x1+25, y1+17, "input8" );
+    let node2 = new InputNode( x1+45, y1+17, "input4" );
+    let node1 = new InputNode( x1+65, y1+17, "input2" );
+    let node0 = new InputNode( x1+85, y1+17, "input1" );
     let node4 = new DACNode(x1+boxWidth-25, y1+17, node0,node1,node2,node3 );
     this.nodes = [ node0,node1,node2,node3,node4 ] ;
     
@@ -1129,9 +1130,9 @@ class Counter extends Element {
     this.state = low;
 
     // Create the nodes
-    this.nodes = [ new InputNode( x1+25, y1+80 ), // reset
-                   new InputNode( x1+25, y1+50 ), // inhibit 
-                   new InputNode( x1+25, y1+20 ), // count pulses
+    this.nodes = [ new InputNode( x1+25, y1+80, "reset" ), // reset
+                   new InputNode( x1+25, y1+50, "inhibit" ), // inhibit 
+                   new InputNode( x1+25, y1+20, "count" ), // count pulses
                    new BinaryNodeS(x1+2*boxWidth-100, y1+20, 3 ),
                    new BinaryNodeS(x1+2*boxWidth-75, y1+20, 2 ),
                    new BinaryNodeS(x1+2*boxWidth-50, y1+20, 1 ),
@@ -1215,8 +1216,8 @@ class Relais extends Element {
     super(x1,y1);
 
     let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
-    let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
+    let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1, "output1");
+    let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1, "output2");
     this.nodes = [ node1, node2, node3 ] ;
 
     // Draw symbols and wires
@@ -1251,8 +1252,8 @@ class Lightbulb extends Element {
     this.allowSnap = false;
     this.state = false;
     var isHV = true;
-    this.nodes = [ new InputNode(x1+18, y1+96, isHV ), 
-                   new InputNode(x1+35, y1+129, isHV ) ] ;
+    this.nodes = [ new InputNode(x1+18, y1+96, "input1", isHV ), 
+                   new InputNode(x1+35, y1+129, "input2", isHV ) ] ;
     
     // Get the images of the lightbulb from the document
     var imgElementOn = document.getElementById('lighton');
@@ -1346,8 +1347,8 @@ class Heater extends Element {
     this.oldTemperature = temperatureInside;
 
     var isHV = true;
-    this.nodes = [ new InputNode(x1+10, y1+85, isHV ), 
-                   new InputNode(x1+10, y1+110, isHV ) ] ;
+    this.nodes = [ new InputNode(x1+10, y1+85, "input1", isHV ), 
+                   new InputNode(x1+10, y1+110, "input2", isHV ) ] ;
 
     // Temperature display
     this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
@@ -1956,13 +1957,37 @@ function parseFile(xml) {
   for (i = 0; i < domElements.length; i++) { 
     var domLinks = domElements[i].getElementsByTagName("link");
     for (j = 0; j < domLinks.length; j++) { 
-      var iNode = parseInt( domLinks[j].getAttribute('id')); 
-      var iToElement = parseInt( domLinks[j].getAttribute('toElement')); 
-      var iToNode = parseInt( domLinks[j].getAttribute('toNode')); 
+      
+      var node = null;
+      var toNode = null;
+      // old format: uses indices to express the links
+      if( /^\d+$/.test(domLinks[j].getAttribute('toElement')) ) {
+        var iNode = parseInt( domLinks[j].getAttribute('id')); 
+        var iToElement = parseInt( domLinks[j].getAttribute('toElement')); 
+        var iToNode = parseInt( domLinks[j].getAttribute('toNode')); 
+        node = elements[i].nodes[iNode];
+        toNode = elements[iToElement].nodes[iToNode];
+      } else { // new format with uniqueNames
+        var nodeID = domLinks[j].getAttribute('id');
+        var toElementID = domLinks[j].getAttribute('toElement'); 
+        var toNodeID = domLinks[j].getAttribute('toNode'); 
+        for(var l=0; l<elements[i].nodes.length; ++l ){
+          if( elements[i].nodes[l].uniqueName == nodeID ) {
+            node = elements[i].nodes[l];
+          }
+        }
+        for(var k=0; k<elements.length; ++k ) {
+          if( elements[k].uniqueName == toElementID ) {
+            for( var m=0; m<elements[k].nodes.length; ++m ) {
+              if( elements[k].nodes[m].uniqueName == toNodeID ) {
+                toNode = elements[k].nodes[m];
+              }
+            }
+          }
+        }
+      }
       
       // Update drawing of wire
-      var node = elements[i].nodes[iNode];
-      var toNode = elements[iToElement].nodes[iToNode];
       var wire = toNode.wires[toNode.wires.length-1]; // last wire
       wire.connection = node;
       wire.set({ 'left': node.x1, 'top' : node.y1 } );
@@ -2048,18 +2073,18 @@ function createXmlFile(){
         var newLink = xmlDoc.createElement("link");
 
         var attLinkID = xmlDoc.createAttribute("id");
-        attLinkID.nodeValue = j.toString();
+        attLinkID.nodeValue = thisNode.uniqueName ;//j.toString();
         newLink.setAttributeNode(attLinkID);
 
         // find to which link this node points
         var toElementNode = findLink( thisNode.child );
         
         var attToElement = xmlDoc.createAttribute("toElement");
-        attToElement.nodeValue = toElementNode[0].toString();
+        attToElement.nodeValue = toElementNode[0];//.toString();
         newLink.setAttributeNode(attToElement);
 
         var attToElement = xmlDoc.createAttribute("toNode");
-        attToElement.nodeValue = toElementNode[1].toString();
+        attToElement.nodeValue = toElementNode[1];//.toString();
         newLink.setAttributeNode(attToElement);
 
         newElement.appendChild(newLink);
@@ -2078,10 +2103,13 @@ function createXmlFile(){
 function findLink(thisNode) {
   for (var i = 0; i < elements.length; i++) { 
     for (var j = 0; j < elements[i].nodes.length; j++) {
-      if( thisNode == elements[i].nodes[j] ) return [i,j];
+      if( thisNode == elements[i].nodes[j] ) {
+        return [elements[i].uniqueName, elements[i].nodes[j].uniqueName]; //return [i,j];
+      }
     }
   }
-  return [-1,-1];
+  //return [-1,-1];
+  return ["",""];
 }
 
 // Make the xml pretty
