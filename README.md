@@ -28,14 +28,12 @@ De webcamsensor is aangesloten op de webcam van de computer (je moet hiervoor we
 ## Wish list
 
 - Meer voorbeeldopstellingen
-- History met undo/redo
-- Instructie voor leerlingen
 
 ## License and credits
 
 Deze webapp simuleert het systeembord zoals dat wordt aangeboden door [CMA Science](http://cma-science.nl/).
 
-Deze webapp gebruikt veelvuldig gebruik van de [Fabric.js](http://fabricjs.com) library.
+Deze webapp maakt veelvuldig gebruik van de [Fabric.js](http://fabricjs.com) library.
 
 ### MIT License
 
