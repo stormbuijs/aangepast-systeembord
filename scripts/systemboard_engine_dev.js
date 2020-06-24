@@ -95,7 +95,7 @@ var audioCtx = null, oscillator = null, gainNode = null;
 // Requires user interaction (event) to resume.
 function unlockAudioContext(context) {
   //console.log("AudioContext. State="+context.state);
-  if (context.state !== "running") return;
+  if (context.state === "running") return;
   const b = document.body;
   const events = ["touchstart", "touchend", "mousedown", "keydown"];
   events.forEach(e => b.addEventListener(e, unlock, false));
