@@ -31,8 +31,8 @@ SOFTWARE.
    =========================================== */
 
 // Set the version
-var version     = "2.2";
-var versionType = "standaard"; // prev, standaard, dev
+var version     = "2.0";
+var versionType = "prev"; // prev, standaard, dev
 
 // Mixed analog / digital
 var low = 0.0, high = 5.0, loThreshold = 0.8, hiThreshold = 1.4; // from Systeembord manual
@@ -70,7 +70,7 @@ var deleteComponents = false;
 var elements = [];  
 
 // Create canvas
-var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, backgroundColor: 'white',
+var canvas = this.__canvas = new fabric.Canvas('c', { selection: false,
                                                       preserveObjectStacking: true });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 fabric.Object.prototype.hasControls = false;
@@ -83,6 +83,25 @@ fabric.Text.prototype.fontFamily = "Arial";
    
    =========================================== */
 
+// Set a warning messsage when using Internet Explorer
+function isIE() {
+  // IE 10 and IE 11
+  return /Trident\/|MSIE/.test(window.navigator.userAgent);
+}
+
+let showBrowserAlert = (function () {
+    if (document.querySelector('.unsupported-browser')) {
+        let d = document.getElementsByClassName('unsupported-browser');
+
+        if( isIE() ) {
+            d[0].innerHTML = '<b>Deze browser wordt niet ondersteund!</b></br>Deze webapplicatie werkt niet in Internet Explorer.</br>Gebruik een moderne browser zoals Chrome, Edge, Firefox of Safari.';
+            d[0].style.display = 'block';
+        }
+    }
+});
+
+document.addEventListener('DOMContentLoaded', showBrowserAlert);
+
 
 /* ========== AUDIO SECTION ====================
    Start the audioContext and set the microphone
@@ -94,8 +113,7 @@ var audioCtx = null, oscillator = null, gainNode = null;
 // audioContext starts always in suspended mode in iOS/Safari. 
 // Requires user interaction (event) to resume.
 function unlockAudioContext(context) {
-  //console.log("AudioContext. State="+context.state);
-  if (context.state === "running") return;
+  if (context.state !== "suspended") return;
   const b = document.body;
   const events = ["touchstart", "touchend", "mousedown", "keydown"];
   events.forEach(e => b.addEventListener(e, unlock, false));
@@ -143,7 +161,7 @@ function stopBuzzer() {
   if( oscillator ) oscillator.stop();
 }
 
-// Connect volume from the microphone to the external function updateVolume 
+// Connect a volume from the microphone to the external function updateVolume 
 function startMicrophone( updateVolume ) {
   let tmp = navigator.mediaDevices.getUserMedia({ audio: true, video: false })
     .then(function(stream) {
@@ -164,49 +182,6 @@ function startMicrophone( updateVolume ) {
       }
     });
   return tmp;
-}
-
-
-/* ========== VIDEO SECTION ====================
-   Start the webcam
-   ============================================= */
-
-const canvas2 = document.createElement('canvas');
-const video = document.querySelector('video');
-
-function startVideo() {
-  let tmp = navigator.mediaDevices.getUserMedia({ audio: false, video: true })
-    .then(function(stream) {
-      video.srcObject = stream;
-      return new Promise(resolve => video.onloadedmetadata = resolve);
-    });
-  return tmp;
-}
-
-function calculateBrightness() {
-
-  // Start the video (needed by Safari when video not visible on screen)
-  video.play();
-  
-  canvas2.width = video.videoWidth;
-  canvas2.height = video.videoHeight;
-  var ctx = canvas2.getContext('2d');
-
-  ctx.drawImage(video, 0, 0);
-  var colorSum = 0;
-  
-  // get image data from top left to bottom right                
-  var imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-  var data = imageData.data;
-  
-  // read rgb values         
-  for (var i = 0, len = data.length; i < len; i += 4) {
-    // give R, G and B different weights due to human eye sensitivity
-    colorSum += Math.floor((3*data[i] + 10*data[i+1] + data[i+3]));
-  }
-  // Divide by number of pixels and set between 0 and 5V
-  var brightness = colorSum * 5.0 / (18*canvas2.width * canvas2.height*255);
-  return brightness;
 }
 
 
@@ -252,23 +227,6 @@ function drawButton(left, top, node){
   c.setGradient('stroke', gradientButtonUp );
   c.name = "button";
   c.node = node;
-  
-  // Event listener: Change button color and state of OutputNode when pushed
-  c.on('mousedown', function() {
-    c.node.state = invert(c.node.state);
-    c.node.state = high;
-    c.set({ fill: '#333333', strokeWidth: 3, radius: 10});
-    c.setGradient('stroke', gradientButtonDw );
-  });
-  
-  // Event listener: Change button color and state of OutputNode to low when mouse is up
-  c.on('mouseup', function() {
-    // a mouse-click can be too short for the engine to evaluate itself
-    setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
-    c.set({ fill: '#222222', strokeWidth: 3, radius: 10});
-    c.setGradient('stroke', gradientButtonUp );
-  });
-  
   return c;
 }    
 
@@ -332,29 +290,28 @@ function drawCircles(x1,y1,nodes,color) {
 
 // Generic input node
 class InputNode {
-  constructor(x1=0,y1=0, name="input", isHV=false) { 
+  constructor(x1=0,y1=0, isHV=false) { 
     this.x1 = x1;
     this.y1 = y1;
     this.isHV = isHV;
     this.state = low; // only used by reset button of pulse counter
     this.isInput = true;
     this.child = null;
-    this.uniqueName = name;
   }
   eval() { return (this.child) ? this.child.eval() : low ; };
 }
 
 // Generic output node (base class)
 class OutputNode { 
-  constructor(x1=0,y1=0, name="output", isHV=false) {
+  constructor(x1=0,y1=0, isHV=false) {
     this.x1 = x1;
     this.y1 = y1;
     this.isHV = isHV;
     this.state = low;
+    this.isInput = true;
     this.isInput = false;     
     this.wires = [ makeWire(x1,y1,this,isHV) ];
     this.lastEvent = 0;
-    this.uniqueName = name;
   }
   evalState() { return this.state; };
   eval() {
@@ -466,8 +423,8 @@ function getBit(number,bin) {
 
 // Binary node from ADC
 class BinaryNode extends OutputNode {
-  constructor(x1,y1,input1,bin) {
-    super(x1,y1,"output"+Math.pow(2,bin));
+  constructor(x1,y1,input1,bin) { 
+    super(x1,y1);
     this.child1 = input1;
     this.bin = bin;
   }
@@ -480,7 +437,7 @@ class BinaryNode extends OutputNode {
 // Binary node with stored counter
 class BinaryNodeS extends OutputNode { 
   constructor(x1,y1,bin) { 
-    super(x1,y1, "output"+Math.pow(2,bin));
+    super(x1,y1);
     this.bin = bin;
     this.counter = 0;
   }
@@ -507,8 +464,8 @@ class DACNode extends OutputNode {
 
 // Relais node 
 class RelaisNode extends OutputNode { 
-  constructor(x1,y1,input,name) {
-    super(x1,y1,name,true);
+  constructor(x1,y1,input) {
+    super(x1,y1,true);
     this.child = input;
   }
   evalState() { return this.child.eval(); }; 
@@ -550,34 +507,6 @@ class SoundSensorNode extends OutputNode {
     } else { // no audioCtx
       this.element.textbox.setColor('darkgrey');
       renderNeeded = true;
-    }
-    return this.state; 
-  };
-}    
-
-
-// output node for webcam sensor
-class WebcamNode extends OutputNode { 
-  constructor(x1,y1,element) { 
-    super(x1,y1);
-    this.element = element;
-    this.videoStarted = false;
-    this.videoReady   = false;
-  }
-  eval() { 
-    // Video is ready: calculate the brightness 
-    if( this.videoReady ) {
-      this.state = calculateBrightness();
-    } else if( !this.videoStarted ) { // Initialize the video
-      this.videoStarted = true;
-      var _this = this;
-      // Start the video stream
-      startVideo().then(function(){ _this.videoReady = true; })      
-      .catch(function(err) {
-        _this.element.textbox.setColor('darkgrey');
-        renderNeeded = true;
-        console.log("The following error occured: " + err.name);
-      });
     }
     return this.state; 
   };
@@ -648,8 +577,8 @@ class Board extends Element {
 class ANDPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "input1" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new ANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'EN-poort'),
@@ -668,8 +597,8 @@ class ANDPort extends Element {
 class ORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "input1" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new ORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'OF-poort'),
@@ -704,8 +633,8 @@ class NOTPort extends Element {
 class NANDPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "input1" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new NANDNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'NEN-poort'),
@@ -725,8 +654,8 @@ class NANDPort extends Element {
 class NORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "input1" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new NORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'NOF-poort'),
@@ -746,8 +675,8 @@ class NORPort extends Element {
 class XORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "input1" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new XORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'XOF-poort'),
@@ -766,8 +695,8 @@ class XORPort extends Element {
 class XNORPort extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "input1" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "input2" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new XNORNode(x1+boxWidth-25, y1+0.5*boxHeight, node1, node2);
     this.nodes = [ node1, node2 , node3 ] ;
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'XNOF-poort'),
@@ -787,8 +716,8 @@ class XNORPort extends Element {
 class Memory extends Element {
   constructor(x1,y1) {
     super(x1,y1);
-    let node1 = new InputNode(x1+25, y1+25, "set" );
-    let node2 = new InputNode(x1+25, y1+boxHeight-25, "reset" );
+    let node1 = new InputNode(x1+25, y1+25 );
+    let node2 = new InputNode(x1+25, y1+boxHeight-25 );
     let node3 = new OutputNode(x1+boxWidth-25, y1+0.5*boxHeight);
     this.nodes = [ node1, node2, node3 ] ;     
   
@@ -900,52 +829,17 @@ class Switch extends Element {
 
 // Create an number-input DOM element
 function inputDOM(x1,y1,name,value,step,min,max){
-  var input = document.createElement("input"); input.type = "number"; 
-  input.id = name; 
-  input.name = name;
-  input.value = value; input.step = step; input.min= min; input.max= max;
-  input.style = "position:absolute;width:40px";
-  input.style.left = (x1).toString()+"px";
-  input.style.top = (y1).toString()+"px";
-  input.className = "css-class-name"; // set the CSS class
-  body = document.getElementById("canvas1");
-  body.appendChild(input); // put it into the DOM  
-  return input ;
-}
-
-// Create a placeholder for the input DOM element
-function inputPlaceholder(x1,y1,input){
-
-  // Draw the placeholder
-  var rect = new fabric.Rect({left: 0, top: 0, height:18, width: 45, fill: 'white', 
-                             originX: 'left', originY: 'top' });    
-  var text = new fabric.Text(input.value, {left: 2, top: 4, fontSize: 11, 
-                             originX: 'left', originY: 'top', fontFamily: 'system-ui, Arial' });    
-  var placeholder = new fabric.Group([rect,text], {left: x1-1, top: y1+0.5, padding: -3, 
-                             originX: 'left', originY: 'top', selectable: false, evented: true  });
-  canvas.add(placeholder);
-  
-  // Show the placeholder on mouse click (touchscreen) or hover (mouse)
-  placeholder.on({'mousedown':setInputVisible, 'mouseover':setInputVisible});
-  function setInputVisible() {
-    input.style.visibility = "visible";
-    input.focus();      
-  }
-
-  // Hide the input DOM when not hovering (mouse) or after focus (touchscreen)
-  input.style.visibility = "hidden";
-  input.addEventListener("mouseleave", setInputHidden);
-  input.addEventListener("focusout", setInputHidden); // after pressing enter
-  function setInputHidden() {
-    input.style.visibility = "hidden";
-    // Make sure that input value is in the range with one decimal
-    input.value = Math.max(input.min,Math.min(input.value, input.max)).toFixed(1);
-    // Update placeholder text when changing the input DOM 
-    text.set( {'text' : input.value.replace('.',',') });
-    renderNeeded = true;
-  }
-
-  return placeholder;
+    var input = document.createElement("input"); input.type = "number"; 
+    input.id = name; 
+    input.name = name;
+    input.value = value; input.step = step; input.min= min; input.max= max;
+    input.style = "position:absolute;width:40px";
+    input.style.left = (x1).toString()+"px";
+    input.style.top = (y1).toString()+"px";
+    input.className = "css-class-name"; // set the CSS class
+    body = document.getElementById("canvas1");
+    body.appendChild(input); // put it into the DOM
+    return input ;
 }
 
 
@@ -954,21 +848,19 @@ class Pulse extends Element {
   constructor(x1,y1,params) {
     super(x1,y1);
     this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ; 
-        
+    
+    // Create an input DOM element
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "1.0";
+    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0.1","10");
+
+    // Start the pulsgenerator
+    this.timer = null;
+    this.startPulse();
+    
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'pulsgenerator'), 
                      drawText(70,30,"Hz",12) ]
                      .concat(drawCircles(x1,y1,this.nodes, "yellow"));   
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
-    
-    // Create an input DOM element and placeholder
-    var min = 0.1, max = 10, step = 0.1;
-    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "1.0";
-    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,step,min,max);
-    this.placeholder = inputPlaceholder(x1+20,y1+10,this.input);
-    
-    // Start the pulsgenerator
-    this.timer = null;
-    this.startPulse();  
   }
            
   // Start the pulse generator
@@ -980,9 +872,8 @@ class Pulse extends Element {
   
   // Delete the dom element and stop the pulsing
   remove() {
-    clearTimeout(this.timer);        // Stop the pulse generator
-    this.input.remove();             // Remove the DOM element
-    canvas.remove(this.placeholder); // Remove the placeholder
+    clearTimeout(this.timer);   // Stop the pulse generator
+    this.input.remove();        // Remove the DOM element
   }
   
   // Store additional XML attributes: the frequency
@@ -990,34 +881,30 @@ class Pulse extends Element {
 
 }
 
-
 // Variable voltage power
 class VarVoltage extends Element {
   constructor(x1,y1,params) {
     super(x1,y1);
     this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ; 
-        
+    
+    // Create an input DOM element
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "0.0";
+    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0","5");
+
+    // set voltage from the DOM element
+    this.nodes[0].state = this.input.value;
+    
     var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'variabele spanning'), 
                       drawText(70,30,"V",12) ]
                      .concat(drawCircles(x1,y1,this.nodes, "yellow")); 
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
-
-    // Create an input DOM element and placeholder
-    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "0.0";
-    this.input = inputDOM(x1+20,y1+10,this.uniqueName,inputValue,"0.1","0","5");
-    this.placeholder = inputPlaceholder(x1+20,y1+10,this.input);
-
-    // set voltage from the DOM element
-    this.nodes[0].state = this.input.value;
   }
   
   // Update voltage from the DOM element
   output() { this.nodes[0].state = parseFloat(this.input.value); };
   
-  remove() { 
-    this.input.remove();             // Delete the dom element 
-    canvas.remove(this.placeholder); // Remove the placeholder
-  }
+  // Delete the dom element 
+  remove() { this.input.remove(); }
   
   // Store additional XML attributes: the output voltage
   getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
@@ -1032,6 +919,13 @@ class Comparator extends Element {
     let node1 = new InputNode(x1+25, y1+25 );
     let node2 = new ComparatorNode(x1+boxWidth-25, y1+35, node1);
     this.nodes = [ node1, node2 ] ;     
+
+    // Create an input DOM element
+    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "2.5";
+    this.input = inputDOM(x1+70,y1+60,this.uniqueName,inputValue,"0.1","0","5");
+
+    // set reference voltage from the DOM element
+    this.nodes[1].state = this.input.value;
     
     var r = new fabric.Triangle({left: 0.5*boxWidth, top: 35, height: 40, width: 40, 
                                  fill: 'lightgrey', angle:90, stroke: 'black', strokeWidth: 1 });
@@ -1046,23 +940,13 @@ class Comparator extends Element {
                       drawText(57, 53,"\u2212") ]
                       .concat(drawCircles(x1,y1,this.nodes, "blue"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
-    
-    // Create an input DOM element and placeholder
-    var inputValue = params.hasOwnProperty("inputValue") ? params.inputValue : "2.5";
-    this.input = inputDOM(x1+70,y1+60,this.uniqueName,inputValue,"0.1","0","5");
-    this.placeholder = inputPlaceholder(x1+70,y1+60,this.input);
-
-    // set reference voltage from the DOM element
-    this.nodes[1].state = this.input.value;
   }
   
   // Update reference voltage from the DOM element
   output() { this.nodes[1].compare = this.input.value; };
 
-  remove() { 
-    this.input.remove();             // Delete the dom element 
-    canvas.remove(this.placeholder); // Remove the placeholder
-  }
+  // Delete the dom element 
+  remove() { this.input.remove(); }
   
   // Store additional XML attributes: the reference voltage
   getXMLAttributes() { return { inputValue : this.input.value.toString() }; }
@@ -1099,10 +983,10 @@ class ADC extends Element {
 class DAC extends Element {
   constructor(x1,y1){
     super(x1,y1);
-    let node3 = new InputNode( x1+25, y1+17, "input8" );
-    let node2 = new InputNode( x1+45, y1+17, "input4" );
-    let node1 = new InputNode( x1+65, y1+17, "input2" );
-    let node0 = new InputNode( x1+85, y1+17, "input1" );
+    let node3 = new InputNode( x1+25, y1+17 );
+    let node2 = new InputNode( x1+45, y1+17 );
+    let node1 = new InputNode( x1+65, y1+17 );
+    let node0 = new InputNode( x1+85, y1+17 );
     let node4 = new DACNode(x1+boxWidth-25, y1+17, node0,node1,node2,node3 );
     this.nodes = [ node0,node1,node2,node3,node4 ] ;
     
@@ -1130,9 +1014,9 @@ class Counter extends Element {
     this.state = low;
 
     // Create the nodes
-    this.nodes = [ new InputNode( x1+25, y1+80, "reset" ), // reset
-                   new InputNode( x1+25, y1+50, "inhibit" ), // inhibit 
-                   new InputNode( x1+25, y1+20, "count" ), // count pulses
+    this.nodes = [ new InputNode( x1+25, y1+80 ), // reset
+                   new InputNode( x1+25, y1+50 ), // inhibit 
+                   new InputNode( x1+25, y1+20 ), // count pulses
                    new BinaryNodeS(x1+2*boxWidth-100, y1+20, 3 ),
                    new BinaryNodeS(x1+2*boxWidth-75, y1+20, 2 ),
                    new BinaryNodeS(x1+2*boxWidth-50, y1+20, 1 ),
@@ -1216,8 +1100,8 @@ class Relais extends Element {
     super(x1,y1);
 
     let node1 = new InputNode(x1+25, y1+25 );
-    let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1, "output1");
-    let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1, "output2");
+    let node2 = new RelaisNode(x1+boxWidth-75, y1+boxHeight-25, node1);
+    let node3 = new RelaisNode(x1+boxWidth-25, y1+boxHeight-25, node1);
     this.nodes = [ node1, node2, node3 ] ;
 
     // Draw symbols and wires
@@ -1252,8 +1136,8 @@ class Lightbulb extends Element {
     this.allowSnap = false;
     this.state = false;
     var isHV = true;
-    this.nodes = [ new InputNode(x1+18, y1+96, "input1", isHV ), 
-                   new InputNode(x1+35, y1+129, "input2", isHV ) ] ;
+    this.nodes = [ new InputNode(x1+18, y1+96, isHV ), 
+                   new InputNode(x1+35, y1+129, isHV ) ] ;
     
     // Get the images of the lightbulb from the document
     var imgElementOn = document.getElementById('lighton');
@@ -1308,15 +1192,8 @@ function makeLDR(left, top, node){
   var domLDR = document.getElementById('ldr');
   var imgLDR = new fabric.Image(domLDR, { left: left, top: top });
   imgLDR.scale(0.15);
-  
-  // Event listener: Moving ldr
-  imgLDR.on('moving', function() {
-    canvas.bringToFront(imgLDR);
-    node.xLDR = imgLDR.left;
-    node.yLDR = imgLDR.top;
-    updateLDR(node);
-  });
-
+  imgLDR.name = "LDR";
+  imgLDR.node = node;
   return imgLDR;
 }
 
@@ -1347,8 +1224,8 @@ class Heater extends Element {
     this.oldTemperature = temperatureInside;
 
     var isHV = true;
-    this.nodes = [ new InputNode(x1+10, y1+85, "input1", isHV ), 
-                   new InputNode(x1+10, y1+110, "input2", isHV ) ] ;
+    this.nodes = [ new InputNode(x1+10, y1+85, isHV ), 
+                   new InputNode(x1+10, y1+110, isHV ) ] ;
 
     // Temperature display
     this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
@@ -1429,25 +1306,6 @@ class SoundSensor extends Element {
     this.textbox = this.group.item(0).item(1);
   }  
 }
-
-// Sound sensor
-class WebcamSensor extends Element { 
-  constructor(x1,y1) {
-    super(x1,y1);
-    this.nodes = [ new WebcamNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, this ) ] ;
-  
-    // Draw circle for input hole microphone
-    var rect = new fabric.Rect({left: 25, top: 0.5*boxHeightSmall, 
-                                width: 6, height: 5, /*stroke: "black",*/ fill: "#f9f9f9" });
-    var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'webcamsensor'), rect]
-                    .concat(drawCircles(x1,y1,this.nodes, "yellow"));
-    this.drawGroup( x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList );
-    
-    // Add a member for the textbox such that is can be greyed out when needed
-    this.textbox = this.group.item(0).item(1);
-  }  
-}
-
 
 // Voltmeter (analog)
 class Voltmeter extends Element {
@@ -1531,15 +1389,7 @@ class TextElement extends Element {
     this.group.hasControls = true;
     this.group.hasBorders = true;
     this.group.lockRotation = true; 
-    canvas.add(this.group);    
-    
-    // Event listener for scaling the group
-    var that = this;
-    this.group.on('scaling', function() {
-      that.x = this.left;
-      that.y = this.top;
-    });
-    
+    canvas.add(this.group);
   }
   
   getXMLAttributes() {
@@ -1554,6 +1404,7 @@ class TextElement extends Element {
 
 
 /* === USER INTERACTION AND EVENT LISTENERS ===
+   - Save/load file
    - Add move, remove elements
    ============================================= */
 
@@ -1643,7 +1494,7 @@ function removeElement( element ) {
             wire.connection = null;
             canvas.remove( wire.line1 );
             canvas.remove( wire );
-            node.child.wires.splice(j, 1); // safe because there is only one connection
+            node.child.wires.splice(j, 1); // save because there is only one connection
           }
         }
       }
@@ -1659,35 +1510,54 @@ function removeElement( element ) {
           wire.connection.child = null;
         }
         wire.connection = null; 
-        wire.node = null;
+        wire.node = null; // better to remove wire object itself ....
       }
     }
   }
     
-  // remove any other stuff from element
+  // remove element object itself
+  // ...
   element.remove();
 }
 
 function requestRemoveElements() {
-  if ( confirm("Weet je zeker dat je alles wilt verwijderen?") ) {
-    removeElements();
-    unlockAudioContext( audioCtx );
-  }
+  if ( confirm("Weet je zeker dat je alles wilt verwijderen?") ) removeElements();
 }
 
 function removeElements() {
-  elements.forEach(function(element) { removeElement(element);});  
+  elements.forEach(function(element) { removeElement(element);});
   elements = [];  
 }
 
-// Event listener: remove the element
+
+// Event listener: Change button color and state of OutputNode when pushed
+canvas.on({'mouse:down':mouseClick});
+function mouseClick(e) {
+  var p = e.target;
+  if( p && p.name == "button") {
+    p.node.state = invert(p.node.state);
+    p.node.state = high;
+    p.set({ fill: '#333333', strokeWidth: 3, radius: 10});
+    p.setGradient('stroke', gradientButtonDw );
+  }
+}
+    
+// Event listener: either remove the element of update button
 canvas.on('mouse:up', function(e) {
   var p = e.target;
   if( deleteComponents && p && p.name == "element") {
     removeElement(p.element);
     // Delete the element from the list of elements
     var index = elements.indexOf(p.element);
-    if (index > -1) elements.splice(index, 1);  
+    if (index > -1) elements.splice(index, 1);
+  }
+  // Change button color and state of OutputNode to low when mouse is up
+  if( p && p.name == "button") {
+    // a mouse-click can be too short for the engine to evaluate itself
+    timeOutButton = setTimeout(function(){ p.node.state = low; renderNeeded = true}, 
+                               clockPeriod+5); // add small delay
+    p.set({ fill: '#222222', strokeWidth: 3, radius: 10});
+    p.setGradient('stroke', gradientButtonUp );
   }
 });
 
@@ -1696,8 +1566,28 @@ canvas.on('mouse:up', function(e) {
 canvas.on('object:moving', function(e) {
   var p = e.target;
   if( p.name == "wire" ) moveWire(p);
+  if( p.name == "LDR" ) {
+    canvas.bringToFront(p);
+    p.node.xLDR = p.left;
+    p.node.yLDR = p.top;
+    updateLDR(p.node);
+  }
   if( p.name == "element" ) moveElement(p);
 });
+
+
+// Event listener: Scaling text (only text can scale)
+canvas.on('object:scaling', function(e) {
+  var p = e.target;
+  if( p.name == "element" ) {
+    var element = p.element;
+    if( element.constructor.name == "TextElement" ) { // Only the text can scale
+      element.x = p.left;
+      element.y = p.top;
+    }
+  }
+});
+
 
 
 // Update LDR (voltage to light sensor) when moving
@@ -1750,6 +1640,7 @@ function moveElement(p){
   // Bring the component in front of rest (except empty board)
   var element = p.element;
   if( element.constructor.name != "Board" ) canvas.bringToFront(p);
+  if( element.button ) canvas.bringToFront(element.button);
   if( element.ldr ) canvas.bringToFront(element.ldr);
 
   if( element.allowSnap ) {
@@ -1809,16 +1700,11 @@ function moveElement(p){
     var button = element.button;
     button.set({ 'left': button.left+diffX, 'top': button.top+diffY }) ;
     button.setCoords();
-    canvas.bringToFront(button);
   }
   if( element.input ) {
     var input = element.input;
     input.style.left = (parseFloat(input.style.left.slice(0,-2)) + diffX) + 'px';
     input.style.top = (parseFloat(input.style.top.slice(0,-2)) + diffY) + 'px';
-    var placeholder = element.placeholder;
-    placeholder.set({ 'left': placeholder.left+diffX, 'top': placeholder.top+diffY }) ;
-    placeholder.setCoords();
-    canvas.bringToFront(placeholder);
   }
   
   // Update the wire
@@ -1866,8 +1752,7 @@ canvas.on('object:moved', function(e) {
       for (j = 0; j < elements[i].nodes.length; j++) {
         var node1 = p.node;
         var node2 = elements[i].nodes[j];
-        // Check if wire-end is on same position as the node
-        if( Math.abs(p.left - node2.x1)<1.0 && Math.abs(p.top - node2.y1)<1.0 ) { 
+        if( p.left == node2.x1 && p.top == node2.y1 ) { // Not such a good check for floats ...
           if( node2.isInput && !(node1.isInput) && !(node2.child) ) {
             node2.child = node1;
             p.connection = node2;
@@ -1896,26 +1781,15 @@ canvas.on('object:moved', function(e) {
   
 });
 
-/* === USER INTERACTION AND EVENT LISTENERS ===
-   - Save/load file
-   ============================================= */
-
-// Make a screenshot
-function screenshot(htmlElement) {
-  var image = canvas.toDataURL({format: 'png', multiplier: 2});  
-  htmlElement.setAttribute("download","screenshot.png");
-  htmlElement.setAttribute("href", image);
-}
-
-
 // Event listener for uploading files
-$("#fileinput").change(function() {
-  let files = this.files;
-  // Use createObjectURL, this should address any CORS issues.
+var control = document.getElementById("fileinput");
+control.addEventListener("change", function(event) {
+  let files = control.files;
+  //Use createObjectURL, this should address any CORS issues.
   let filePath = URL.createObjectURL(files[0]);
   readFile(filePath);
   // Reset the file input such that it triggers next change
-  this.value = '';
+  control.value = '';
 });
 
 function readFile(url) {
@@ -1950,49 +1824,20 @@ function parseFile(xml) {
     for( var j=0; j< attrs.length; ++j ) {
       params[ attrs[j].name ] = attrs[j].value;
     }
-    addElement(className,x,y,params);
-    
-    // Update the uniqueName if exists
-    if( domElements[i].hasAttribute('id') ) {
-      elements[elements.length-1].uniqueName = domElements[i].getAttribute('id');
-    }
+    addElement(className,x,y,params); 
   }    
   
   // Second loop to add the links
   for (i = 0; i < domElements.length; i++) { 
     var domLinks = domElements[i].getElementsByTagName("link");
     for (j = 0; j < domLinks.length; j++) { 
-      
-      var node = null;
-      var toNode = null;
-      // old format: uses indices to express the links
-      if( /^\d+$/.test(domLinks[j].getAttribute('toElement')) ) {
-        var iNode = parseInt( domLinks[j].getAttribute('id')); 
-        var iToElement = parseInt( domLinks[j].getAttribute('toElement')); 
-        var iToNode = parseInt( domLinks[j].getAttribute('toNode')); 
-        node = elements[i].nodes[iNode];
-        toNode = elements[iToElement].nodes[iToNode];
-      } else { // new format with uniqueNames
-        var nodeID = domLinks[j].getAttribute('id');
-        var toElementID = domLinks[j].getAttribute('toElement'); 
-        var toNodeID = domLinks[j].getAttribute('toNode'); 
-        for(var l=0; l<elements[i].nodes.length; ++l ){
-          if( elements[i].nodes[l].uniqueName == nodeID ) {
-            node = elements[i].nodes[l];
-          }
-        }
-        for(var k=0; k<elements.length; ++k ) {
-          if( elements[k].uniqueName == toElementID ) {
-            for( var m=0; m<elements[k].nodes.length; ++m ) {
-              if( elements[k].nodes[m].uniqueName == toNodeID ) {
-                toNode = elements[k].nodes[m];
-              }
-            }
-          }
-        }
-      }
+      var iNode = parseInt( domLinks[j].getAttribute('id')); 
+      var iToElement = parseInt( domLinks[j].getAttribute('toElement')); 
+      var iToNode = parseInt( domLinks[j].getAttribute('toNode')); 
       
       // Update drawing of wire
+      var node = elements[i].nodes[iNode];
+      var toNode = elements[iToElement].nodes[iToNode];
       var wire = toNode.wires[toNode.wires.length-1]; // last wire
       wire.connection = node;
       wire.set({ 'left': node.x1, 'top' : node.y1 } );
@@ -2012,35 +1857,29 @@ function parseFile(xml) {
 }
 
 function addElement(className,x1=0,y1=0,params={}){
-  // Convert string to class name
+  // Dirty trick (eval). Maybe use a Map (dictionary) instead.
   var myElement = eval(className);
   elements.push(new myElement(x1,y1,params));
+  document.getElementById('addElement').selectedIndex = 0;
 }
 
-// Event listener for setting back the index after select
-$("select").change( function(){
-  $("select").val(0);
-});
-
-
 // Event listener for download button
-$("#download_xml").click( function(){
+document.getElementById("download_xml").addEventListener("click", function(){
   var filename = prompt("Sla op als...", "systeembord.xml");
   if (filename != null && filename != "") {
     download( filename, createXmlFile());
-  }
-  unlockAudioContext( audioCtx );
-});
+  }  
+}, false);
 
 // Create an invisible download element
 function download(filename, text) {
-  var element = document.createElement('a');
-  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
-  element.setAttribute('download', filename);
-  element.style.display = 'none';
-  document.body.appendChild(element);
-  element.click();
-  document.body.removeChild(element);
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
+    element.style.display = 'none';
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
 }
 
 // Write the xml file
@@ -2053,10 +1892,6 @@ function createXmlFile(){
     var attName = xmlDoc.createAttribute("name");
     attName.nodeValue = elements[i].constructor.name;
     newElement.setAttributeNode(attName);
-
-    var attID = xmlDoc.createAttribute("id");
-    attID.nodeValue = elements[i].uniqueName;
-    newElement.setAttributeNode(attID);
 
     var attPosX = xmlDoc.createAttribute("x");
     attPosX.nodeValue = Math.round(elements[i].x).toString();
@@ -2082,18 +1917,18 @@ function createXmlFile(){
         var newLink = xmlDoc.createElement("link");
 
         var attLinkID = xmlDoc.createAttribute("id");
-        attLinkID.nodeValue = thisNode.uniqueName ;//j.toString();
+        attLinkID.nodeValue = j.toString();
         newLink.setAttributeNode(attLinkID);
 
         // find to which link this node points
         var toElementNode = findLink( thisNode.child );
         
         var attToElement = xmlDoc.createAttribute("toElement");
-        attToElement.nodeValue = toElementNode[0];//.toString();
+        attToElement.nodeValue = toElementNode[0].toString();
         newLink.setAttributeNode(attToElement);
 
         var attToElement = xmlDoc.createAttribute("toNode");
-        attToElement.nodeValue = toElementNode[1];//.toString();
+        attToElement.nodeValue = toElementNode[1].toString();
         newLink.setAttributeNode(attToElement);
 
         newElement.appendChild(newLink);
@@ -2112,13 +1947,10 @@ function createXmlFile(){
 function findLink(thisNode) {
   for (var i = 0; i < elements.length; i++) { 
     for (var j = 0; j < elements[i].nodes.length; j++) {
-      if( thisNode == elements[i].nodes[j] ) {
-        return [elements[i].uniqueName, elements[i].nodes[j].uniqueName]; //return [i,j];
-      }
+      if( thisNode == elements[i].nodes[j] ) return [i,j];
     }
   }
-  //return [-1,-1];
-  return ["",""];
+  return [-1,-1];
 }
 
 // Make the xml pretty
@@ -2161,8 +1993,7 @@ function formatXml(xml) {
 
 
 // Event listener for resizing the window
-//window.addEventListener('resize', resizeCanvas, false);
-$(window).resize( resizeCanvas );
+window.addEventListener('resize', resizeCanvas, false);
 function resizeCanvas() {    
   var divCanvas = document.getElementById("canvas1");
   var newWidth = window.innerWidth-20;
@@ -2172,6 +2003,10 @@ function resizeCanvas() {
     canvas.renderAll();
   }
 }
+
+// resize on init
+resizeCanvas();
+
 
 /* Define functions for the modal box */
 var currentModal = "";
@@ -2238,17 +2073,6 @@ window.addEventListener('hashchange', function() {
   readFileFromHash();
 }, false);
 
-// Call function from select menu
-function loadHash( hash ) {
-  // Force a reload when hash did not change
-  if( hash == window.location.hash ) {
-    readFileFromHash();
-  } else { // Hash will change: will trigger a reload
-    window.location = hash;
-  }
-}
-
-
 // Evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
   eventCounter++;
@@ -2278,9 +2102,6 @@ function setVersion() {
 // load all code after the document
 $("document").ready(function(){
   
-  // resize on init
-  resizeCanvas();
-
   // set the version tags
   setVersion();
   
