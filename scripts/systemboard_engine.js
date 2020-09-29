@@ -1106,7 +1106,7 @@ class DAC extends Element {
     let node4 = new DACNode(x1+boxWidth-25, y1+17, node0,node1,node2,node3 );
     this.nodes = [ node0,node1,node2,node3,node4 ] ;
     
-    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'AD omzetter'),
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'DA omzetter'),
                      drawLine([18, 30, 46, 30]),
                      drawLine([62, 30, 92, 30]),
                      drawText(boxWidth-30,36,"uit"),
