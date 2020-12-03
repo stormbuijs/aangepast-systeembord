@@ -820,7 +820,7 @@ class LED extends Element {
     
     // Draw LED
     this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 5, 
-                                  fill: 'darkred', stroke: 'black', strokeWidth: 2   });
+                                  fill: '#600000', stroke: 'black', strokeWidth: 2   });
     this.led.setGradient('stroke', gradientButtonDw );
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led]
                     .concat(drawCircles(x1,y1,this.nodes, "white"));
@@ -835,7 +835,7 @@ class LED extends Element {
       this.led.set({fill : 'red'});
       renderNeeded = true;
     } else if( !isHigh(result) && isHigh(this.lastResult) ) {
-      this.led.set({fill : 'darkred'});            
+      this.led.set({fill : '#600000'});            
       renderNeeded = true;
     }
     this.lastResult = result;
