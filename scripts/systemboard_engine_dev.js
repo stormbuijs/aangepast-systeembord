@@ -819,8 +819,8 @@ class LED extends Element {
     this.lastResult = 0.0;
     
     // Draw LED
-    this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 5, 
-                                  fill: 'darkred', stroke: 'black', strokeWidth: 2   });
+    this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 6, 
+                                  fill: '#600000', stroke: 'black', strokeWidth: 2   });
     this.led.setGradient('stroke', gradientButtonDw );
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led]
                     .concat(drawCircles(x1,y1,this.nodes, "white"));
@@ -835,7 +835,7 @@ class LED extends Element {
       this.led.set({fill : 'red'});
       renderNeeded = true;
     } else if( !isHigh(result) && isHigh(this.lastResult) ) {
-      this.led.set({fill : 'darkred'});            
+      this.led.set({fill : '#600000'});            
       renderNeeded = true;
     }
     this.lastResult = result;
@@ -1322,9 +1322,11 @@ function makeLDR(left, top, node){
 
 // Create a light sensor
 class LightSensor extends Element {
-  constructor(x1,y1) {
+  constructor(x1,y1,params) {
     super(x1,y1);
-    this.nodes = [ new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1+25, y1+25 ) ] ; 
+    var xLDR = params.hasOwnProperty("xLDR") ? parseFloat(params.xLDR) : x1+25;
+    var yLDR = params.hasOwnProperty("yLDR") ? parseFloat(params.yLDR) : y1+25;
+    this.nodes = [ new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, xLDR, yLDR ) ] ; 
   
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'lichtsensor')]
                     .concat(drawCircles(x1,y1,this.nodes, "yellow"));
@@ -1334,8 +1336,12 @@ class LightSensor extends Element {
     this.ldr = makeLDR(this.nodes[0].xLDR, this.nodes[0].yLDR, this.nodes[0]);
     canvas.add(this.ldr);
   }
- 
+  
   remove() { canvas.remove( this.ldr ); };
+
+  // Store additional XML attributes: the reference voltage
+  getXMLAttributes() { return { xLDR : this.nodes[0].xLDR.toString(),
+                                yLDR : this.nodes[0].yLDR.toString()}; } 
 }    
 
 
