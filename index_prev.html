@@ -37,7 +37,7 @@
             <a id="stupid_hack" onclick="fileinput.click()">Open bestand...</a>
             <a id="download_xml">Opslaan als... </a>
             <a class="select" id="slct">
-              <select id="setups" name="type" onchange="location=this.value;">
+              <select id="setups" name="type" onchange="loadHash(this.value)">
                 <option selected disabled value="0">Kies opstelling...</option>
                 <option value="">Systeembord (standaard)</option>
                 <optgroup label="Voorbeelden">
@@ -57,6 +57,7 @@
                 </optgroup>
               </select>
             </a>
+            <a onclick="screenshot(this)">Maak screenshot</a>
           </div>
         </div>
         <div class="dropdown">
@@ -134,9 +135,9 @@
           &copy; 2020 Jeroen van Tilburg, MIT licentie <br/>
           Feedback naar <feedback></feedback> <br/> 
           Broncode: <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> <br/>
-          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.1)<br/> 
-                   <a href="index.html">Standaardversie</a> (2.2) <br/>
-                   <a href="index_dev.html">Ontwikkelversie</a> (2.3)<br/>
+          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.2)<br/> 
+                   <a href="index.html">Standaardversie</a> (2.3) <br/>
+                   <a href="index_dev.html">Ontwikkelversie</a> (2.4)<br/>
         </center>
       </div>
     </div>
@@ -176,9 +177,6 @@
           <li><b>Voltmeter:</b><br/>
             Met de voltmeter kan de spanning op een uitgang worden gemeten.
             De andere ingang van de voltmeter is al verbonden met de aarde.</li>
-          <li><b>Compatibiliteit:</b><br/>
-            Online Syteembord werkt niet met Internet Explorer. Stap over op een moderne browser als
-            Chrome, Edge, Firefox of Safari.</li>
           <li><b>Meer informatie:</b><br/>
             Zie de handleiding van het 
             <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li> 
@@ -195,7 +193,7 @@
         gebruikt in de lessen natuurkunde in het voortgezet onderwijs. Met dit programma kunnen 
         leerlingen thuis en op school oefenen met de werking van het systeembord.
         Op die manier kan het een aanvulling zijn op de practica op school met het echte systeembord. 
-        Het Online Systeembord is ontstaan tijdens de Corona-crisis om leerlingen toch een
+        Het Online Systeembord is ontstaan in 2020 tijdens de Corona-crisis om leerlingen toch een
         practicum te kunnen bieden ondanks het feit dat ze niet naar school konden komen.       
         De meeste opgaven en werkbladen zoals die worden aangeboden door de verschillende 
         natuurkundemethodes kunnen direct worden toegepast op het Online Systeembord.
@@ -233,21 +231,39 @@
             ingeladen door het toevoegen van een hashtag met de naam van het xml-bestand aan het 
             webadres. Zo wordt de flipflop-opstelling direct getoond via deze link:<br/>
             <pre>   https://jeroenvantilburg.github.io/systeembord/#voorbeelden/SRNORLatch.xml</pre><br/>
+            of korter via deze link:<br/>
+            <pre>   https://jeroenvantilburg.nl/systeembord/#voorbeelden/SRNORLatch.xml</pre><br/>
             Stuur je favoriete of veel gebruikte xml-bestanden naar mij op zodat ik die aan de
             database kan toevoegen.
           </li>
           <li>Met je eigen xml-bestanden die ergens op een webserver staan. De directe link wordt dan 
             bijvoorbeeld: <br/>
-            <pre>   https://jeroenvantilburg.github.io/systeembord/#https://www.example.com/test.xml</pre><br/>
+            <pre>   https://jeroenvantilburg.nl/systeembord/#https://www.example.com/test.xml</pre><br/>
             Hiervoor heb je een eigen website/webserver nodig waarbij 
             <pre>Access-Control-Allow-Origin</pre> is toegestaan vanwege de CORS-policy van de meeste browsers.
             Je kan ook jouw xml-bestanden hosten op je eigen Github Pages.
             Je kan eenvoudig een eigen <a href="https://github.com">Github account</a> maken en daarna
-            Github Pages aanzetten. Met je eigen Github Pages omzeil je in ieder
-            geval mogelijke CORS restricties.
+            Github Pages aanzetten. Met je eigen Github Pages omzeil je hiermee in ieder
+            geval mogelijke CORS restricties. De directe link wordt dan bijvoorbeeld:
+            <pre>   https://jeroenvantilburg.nl/systeembord/#https://mijnnaam.github.io/mijnproject/test.xml</pre><br/>            
           </li>
         </ul>
         <br/>
+        
+        <b>Compatibiliteit</b><br/>
+        Online Syteembord werkt niet in Internet Explorer. Internet Explorer is te verouderd voor
+        deze software. Het is aan te raden om over te stappen op een moderne browser als
+        Chrome, Edge, Firefox of Safari.
+        <br/><br/>
+
+        <b>Insluitcode en ELO</b><br/>
+        Docenten kunnen het Online Syteembord insluiten (embedden) in hun eigen elektronische
+        leeromgeving (ELO). De insluitcode is bijvoorbeeld:<br/>
+        <pre>   &lt;iframe src=&quot;https://jeroenvantilburg.nl/systeembord/&quot; width=&quot;100%&quot; height=&quot;800&quot;&gt;&lt;/iframe&gt;</pre><br/>
+        De breedte en hoogte kan je eventueel aanpassen aan jouw systeem of omgeving. Het is uiteraard
+        ook mogelijk om je eigen xml-bestand te gebruiken door de hashtag toe te voegen aan het webadres
+        (zie hierboven).
+        <br/><br/>
         
         <b>Broncode</b><br>
         De broncode van deze website is vrij beschikbaar op 
@@ -264,10 +280,10 @@
         Suggesties voor verbeteringen van de code zijn welkom.
         <br/><br/>
 
-        <b>Feedback</b><br/>
+        <b>Feedback en vragen</b><br/>
         Om de website en het Online Systeembord zo gebruiksvriendelijk te maken ben ik afhankelijk van
         jullie feedback.        
-        Verbeteringen, bug reports, suggesties, commentaar en complimenten kunnen worden
+        Vragen, verbeteringen, bug reports, suggesties, commentaar en complimenten kunnen worden
         gestuurd naar <feedback></feedback>. 
         <br/><br> 
         
@@ -277,8 +293,7 @@
         en waarin logische schakelingen kunnen worden gebouwd. Kies de software die voldoet aan jouw eisen.
         <ul>
           <li><a href="https://metenenregelen.nl">metenenregelen.nl</a></li>
-          <li><a href="https://www.lkruise.nl/natuurkunde/Animaties/Systeembord2/Systeembord8.html">
-            Systeembord L. Kruise</a></li>
+          <li><a href="https://www.lkruise.nl/natuurkunde/Animaties/Systeembord2/Systeembord8.html">Systeembord L. Kruise</a></li>
           <li><a href="https://rutgerkok.nl/tools/systeembord/">Systeembord Rutger Kok</a></li>
           <li><a href="https://logic.ly/demo">Logic.ly</a></li>
           <li><a href="https://tomsoft.nl/0030">Systeembord Tomsoft</a> (alleen Windows)</li>
@@ -309,8 +324,8 @@
     <script src="scripts/jquery-3.5.0.min.js"></script>
     <script src="scripts/warningIE.js"></script>
     <script src="scripts/systemboard_engine_prev.js"></script>
-    <script data-goatcounter="https://onlinesysteembord.goatcounter.com/count"
-            async src="//gc.zgo.at/count.js"></script>
+    <!--script data-goatcounter="https://onlinesysteembord.goatcounter.com/count"
+            async src="//gc.zgo.at/count.js"></script-->
     <noscript>Your browser does not support JavaScript!</noscript>
 
 </body>

@@ -31,7 +31,7 @@ SOFTWARE.
    =========================================== */
 
 // Set the version
-var version     = "2.2";
+var version     = "2.3";
 var versionType = "standaard"; // prev, standaard, dev
 
 // Mixed analog / digital
@@ -822,7 +822,14 @@ class LED extends Element {
     this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 5, 
                                   fill: '#600000', stroke: 'black', strokeWidth: 2   });
     this.led.setGradient('stroke', gradientButtonDw );
-    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led]
+    
+    this.ledShine = new fabric.Circle({left: boxWidth-25, top: 20, radius: 19, opacity: 0.0 });
+    this.ledShine.setGradient('fill', { type: 'radial', r1: this.ledShine.radius, r2: this.led.radius,
+                                        x1: this.ledShine.radius, y1: this.ledShine.radius, 
+                                        x2: this.ledShine.radius, y2: this.ledShine.radius,
+                                        colorStops: { 1: 'rgba(255,0,0,0.3)', 0: 'rgba(0, 0, 0, 0)'} });
+    
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led, this.ledShine]
                     .concat(drawCircles(x1,y1,this.nodes, "white"));
     
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
@@ -833,9 +840,11 @@ class LED extends Element {
     var result = this.nodes[0].eval();
     if( isHigh(result) && !isHigh(this.lastResult) ) {
       this.led.set({fill : 'red'});
+      this.ledShine.set({opacity: 1.0 });
       renderNeeded = true;
     } else if( !isHigh(result) && isHigh(this.lastResult) ) {
       this.led.set({fill : '#600000'});            
+      this.ledShine.set({opacity: 0.0 });
       renderNeeded = true;
     }
     this.lastResult = result;
@@ -1322,9 +1331,11 @@ function makeLDR(left, top, node){
 
 // Create a light sensor
 class LightSensor extends Element {
-  constructor(x1,y1) {
+  constructor(x1,y1,params) {
     super(x1,y1);
-    this.nodes = [ new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1+25, y1+25 ) ] ; 
+    var xLDR = params.hasOwnProperty("xLDR") ? parseFloat(params.xLDR) : x1+25;
+    var yLDR = params.hasOwnProperty("yLDR") ? parseFloat(params.yLDR) : y1+25;
+    this.nodes = [ new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, xLDR, yLDR ) ] ; 
   
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'lichtsensor')]
                     .concat(drawCircles(x1,y1,this.nodes, "yellow"));
@@ -1334,8 +1345,12 @@ class LightSensor extends Element {
     this.ldr = makeLDR(this.nodes[0].xLDR, this.nodes[0].yLDR, this.nodes[0]);
     canvas.add(this.ldr);
   }
- 
+  
   remove() { canvas.remove( this.ldr ); };
+
+  // Store additional XML attributes: the reference voltage
+  getXMLAttributes() { return { xLDR : this.nodes[0].xLDR.toString(),
+                                yLDR : this.nodes[0].yLDR.toString()}; } 
 }    
 
 
