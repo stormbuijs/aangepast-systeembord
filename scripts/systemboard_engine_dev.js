@@ -819,10 +819,17 @@ class LED extends Element {
     this.lastResult = 0.0;
     
     // Draw LED
-    this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 6, 
+    this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 5, 
                                   fill: '#600000', stroke: 'black', strokeWidth: 2   });
     this.led.setGradient('stroke', gradientButtonDw );
-    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led]
+    
+    this.ledShine = new fabric.Circle({left: boxWidth-25, top: 20, radius: 19, opacity: 0.0 });
+    this.ledShine.setGradient('fill', { type: 'radial', r1: this.ledShine.radius, r2: this.led.radius,
+                                        x1: this.ledShine.radius, y1: this.ledShine.radius, 
+                                        x2: this.ledShine.radius, y2: this.ledShine.radius,
+                                        colorStops: { 1: 'rgba(255,0,0,0.3)', 0: 'rgba(0, 0, 0, 0)'} });
+    
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led, this.ledShine]
                     .concat(drawCircles(x1,y1,this.nodes, "white"));
     
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
@@ -833,9 +840,11 @@ class LED extends Element {
     var result = this.nodes[0].eval();
     if( isHigh(result) && !isHigh(this.lastResult) ) {
       this.led.set({fill : 'red'});
+      this.ledShine.set({opacity: 1.0 });
       renderNeeded = true;
     } else if( !isHigh(result) && isHigh(this.lastResult) ) {
       this.led.set({fill : '#600000'});            
+      this.ledShine.set({opacity: 0.0 });
       renderNeeded = true;
     }
     this.lastResult = result;
