@@ -1367,7 +1367,7 @@ class Heater extends Element {
 
     // Temperature display
     this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
-          left: 25, top: -55, width: 50, fontSize: 12, textAlign: 'right',
+          left: 25, top: -55, width: 50, fontWeight: 'bold', fontSize: 12, textAlign: 'right',
           fill: 'red', backgroundColor: '#330000' });
 
     // Radiator
@@ -1508,7 +1508,7 @@ class DigitalVoltmeter extends Element {
 
     // Draw the display and the rest
     this.display = new fabric.Textbox(this.lastState.toFixed(2)+" V", {
-          left: 22, top: 12, width: 37, fontSize: 12, textAlign: 'right',
+          left: 22, top: 12, width: 37, fontWeight: 'bold', fontSize: 12, textAlign: 'right',
           fill: 'red', backgroundColor: '#330000' });
     var groupList = [ drawBoxAndText(0,0,44,60,'meter'), 
                       drawText(1,45,"volt-",12),
