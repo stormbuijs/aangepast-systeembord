@@ -71,6 +71,7 @@ var elements = [];
 
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, backgroundColor: 'white',
+                                                      allowTouchScrolling: true,
                                                       preserveObjectStacking: true });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 fabric.Object.prototype.hasControls = false;
