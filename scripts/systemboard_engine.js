@@ -248,7 +248,7 @@ var gradientButtonDw = { x1: -10, y1: -10, x2: 22, y2: 22,
 
 // Draw a push button
 function drawButton(left, top, node){
-  var c = new fabric.Circle({left: left, top: top, strokeWidth: 3, stroke: 'grey', radius: 10,
+  let c = new fabric.Circle({left: left, top: top, strokeWidth: 3, stroke: 'grey', radius: 10,
                              fill: '#222222', selectable: false });
   c.setGradient('stroke', gradientButtonUp );
   c.name = "button";
@@ -256,9 +256,8 @@ function drawButton(left, top, node){
   
   // Event listener: Change button color and state of OutputNode when pushed
   c.on('mousedown', function() {
-    c.node.state = invert(c.node.state);
     c.node.state = high;
-    c.set({ fill: '#333333', strokeWidth: 3, radius: 10});
+    c.set({ fill: '#333333'});
     c.setGradient('stroke', gradientButtonDw );
   });
   
@@ -266,12 +265,40 @@ function drawButton(left, top, node){
   c.on('mouseup', function() {
     // a mouse-click can be too short for the engine to evaluate itself
     setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
-    c.set({ fill: '#222222', strokeWidth: 3, radius: 10});
+    c.set({ fill: '#222222'});
     c.setGradient('stroke', gradientButtonUp );
   });
   
   return c;
 }    
+
+// Draw a toggle button
+function drawToggle(left, top, node){
+  let c = new fabric.Circle({left: -10, top: 0, strokeWidth: 1, stroke: 'darkgrey', radius: 8 });
+  c.setGradient('fill', gradientButtonDw );
+  let r = new fabric.Rect( {left: 0, top: 0, strokeWidth: 2, rx: 10, ry: 10,
+                            width: 40, height: 20, fill: '#aa0000' } );
+  r.setGradient('stroke', gradientButtonUp );
+  let g = new fabric.Group([ r, c ], { left: left, top: top, selectable: false });
+  g.name = "toggle";
+  g.node = node;
+  
+  // Event listener: Change position/color of switch and state of OutputNode when pushed
+  g.on('mousedown', function() {
+    g.node.state = invert(g.node.state);
+    console.log( g.node.state );
+    if( isHigh( g.node.state ) ) {
+      g.item(0).set({ fill: 'green'});
+      g.item(1).set({left: 10} );
+    } else {
+      g.item(0).set({ fill: '#aa0000'});
+      g.item(1).set({ left: -10});
+    }
+    renderNeeded = true;
+  });
+    
+  return g;
+}
 
 function drawText(x1,y1,text,fontsize=10){
   // Draw text
@@ -904,6 +931,21 @@ class Switch extends Element {
 
     // Draw the push button
     this.button = drawButton(x1+25, y1+0.5*boxHeightSmall, this.nodes[0]);
+    canvas.add(this.button);
+  }
+}
+
+// Create toggle-switch
+class ToggleSwitch extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ;
+    var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'tuimelschakelaar') ]
+                     .concat(drawCircles(x1,y1,this.nodes, "yellow"));
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
+
+    // Draw the push button
+    this.button = drawToggle(x1+30, y1+0.5*boxHeightSmall-3, this.nodes[0]);
     canvas.add(this.button);
   }
 }
