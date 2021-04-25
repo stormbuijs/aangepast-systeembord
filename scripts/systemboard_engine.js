@@ -2217,9 +2217,7 @@ function formatXml(xml) {
    - Showing modal boxes
    ============================================= */
 
-
 // Event listener for resizing the window
-//window.addEventListener('resize', resizeCanvas, false);
 $(window).resize( resizeCanvas );
 function resizeCanvas() {    
   var divCanvas = document.getElementById("canvas1");
@@ -2232,35 +2230,16 @@ function resizeCanvas() {
 }
 
 /* Define functions for the modal box */
-var currentModal = "";
-
 // Showing modal box
-function showModal(name) {
-  // Set the feedback tag
-  setFeedback();
-
-  var text = document.getElementById(name);
-  text.style.display = "block";
-  currentModal = name;
-  
-}
+function showModal(name) { $("#"+name).show(); }
 
 // When the user clicks on <span> (x), close the current modal
-var closeButtons = document.getElementsByClassName("close");
-for( var i=0; i < closeButtons.length; ++i) {
-  closeButtons[i].onclick = function() {
-    document.getElementById(currentModal).style.display = "none"; 
-    currentModal = "";
-  }
-}
-
+$(".close").on("click", function() { $(this).parent().parent().toggle(); });
+  
 // When the user clicks anywhere outside of the modal, close it
-window.onclick = function(event) {
-  if (event.target == document.getElementById(currentModal) ) {
-    document.getElementById(currentModal).style.display = "none";
-  }
-}
-
+$(window).on("click", function(event) {
+  if( event.target.className === "modal" ) event.target.style.display = "none";
+});
 
 /* ============= MAIN ENGINE ==================
    Evaluate the board (all elements) using
@@ -2347,6 +2326,10 @@ $("document").ready(function(){
   
   // Make sure that the engine is run every clockPeriod  
   setInterval(evaluateBoard, clockPeriod);
+  
+  // Set the feedback tag
+  setFeedback();
+
 });
 
 
