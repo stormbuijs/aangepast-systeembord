@@ -5,6 +5,8 @@ var urlsToCache = [
   'index.html',
   'style.css',
   'favicon.ico',
+  'site.webmanifest',
+  'sw.js',
   'scripts/systemboard_engine.js',
   'scripts/registerSW.js',
   'scripts/fabric-patch-touch.js',
