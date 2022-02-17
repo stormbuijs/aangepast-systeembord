@@ -1279,13 +1279,15 @@ class Relais extends Element {
                                             fontSize: 20, textAlign: 'center' });
     var circ = new fabric.Circle({left: boxWidth-50, top: 25, strokeWidth: 1, stroke: 'black' ,
                                   radius: 10, fill: 'lightgrey'});
+    this.switchLine1 = drawLine([25, 0.5*boxHeight, boxWidth-70, 0.5*boxHeight]);
+    this.switchLine2 = drawLine([boxWidth-65, 40, boxWidth-75, 60]);
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'Relais'),
                      drawLine([25, 25, 25, boxHeight-25]),
                      drawLine([20, boxHeight-25, 30, boxHeight-25]),
-                     drawLine([25, 0.5*boxHeight, boxWidth-70, 0.5*boxHeight]),
+                     this.switchLine1,
                      drawLine([boxWidth-25, 25, boxWidth-25, boxHeight-25]),
                      drawLine([boxWidth-75, 25, boxWidth-75, 40]),
-                     drawLine([boxWidth-65, 40, boxWidth-75, 60]),
+                     this.switchLine2,
                      drawLine([boxWidth-75, 60, boxWidth-75, boxHeight-25]),
                      drawLine([boxWidth-75, 25, boxWidth-25, 25]),
                      circ, textbox, rect,
@@ -1293,7 +1295,24 @@ class Relais extends Element {
                      .concat(drawCircles(x1,y1,[this.nodes[0]], "white"),
                              drawCircles(x1,y1,this.nodes.slice(1,3), "black"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
+    this.switchLine1.set({'x1': -50, 'y1': 0, 'x2': 5, 'y2': 0 });
+    this.switchLine2.set({'x1': 10, 'y1': -10, 'x2': 0, 'y2': 10 });
   }
+  
+  // Control Relais behaviour
+  output() {
+    var result = this.nodes[0].eval();
+    if( isHigh(result) && !isHigh(this.lastResult) ) {
+      this.switchLine1.set({'x2': 0 });
+      this.switchLine2.set({'x1': 0 });
+      renderNeeded = true;
+    } else if( !isHigh(result) && isHigh(this.lastResult) ) {
+      this.switchLine1.set({'x2': 5 });
+      this.switchLine2.set({'x1': 10 });
+      renderNeeded = true;
+    }
+    this.lastResult = result;
+  };
 }
 
 
