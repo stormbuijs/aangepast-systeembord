@@ -254,7 +254,7 @@ function drawButton(left, top, node){
   c.name = "button";
   c.node = node;
   
-  let dblClickTimer = 0, longPressTimer = 0;
+  let longPressTimer = 0;
   
   // Event listener: Change button color and state of OutputNode when pushed
   c.on('mousedown', function() {
@@ -267,18 +267,13 @@ function drawButton(left, top, node){
   
   // Event listener: Change button color and state of OutputNode to low when mouse is up
   c.on('mouseup', function() {
-    // if it was a double click or longpress: do nothing
+    // Only update the button if it was a short press
     const d = new Date();
-    if( d.getTime()-dblClickTimer < 500 ||
-        d.getTime()-longPressTimer > 500 ) {
-      dblClickTimer = 0;
-    } else {
+    if( d.getTime()-longPressTimer < 500 ) {
       // a mouse-click can be too short for the engine to evaluate itself
       setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
       c.set({ fill: '#222222'});
       c.setGradient('stroke', gradientButtonUp );
-      const d = new Date();
-      dblClickTimer = d.getTime();
     }
   });
   
