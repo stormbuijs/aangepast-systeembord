@@ -1357,6 +1357,9 @@ class Lightbulb extends Element {
       this.group.addWithUpdate( circles[i] ); 
     }
     this.imgBulbOn.set({left: this.imgBulbOff.left, top: this.imgBulbOff.top });  // update to same pos
+
+    // Event listener: Moving light bulb
+    this.group.on('moving', updateLDRs );
   }  
   
   output() {
@@ -1376,12 +1379,7 @@ class Lightbulb extends Element {
         this.imgBulbOff.moveTo(0);
       }
       // also update all light sensors
-      for (var i = 0; i < elements.length; i++) { 
-        if( elements[i].constructor.name == "LightSensor" ) {
-          var lightsensor = elements[i];
-          updateLDR( lightsensor.nodes[0] );
-        }
-      }
+      updateLDRs();
     }
   }
 }
@@ -1809,6 +1807,16 @@ function updateLDR(node){
     }
   }
   node.state = Math.min(node.state, 5); // Set maximum to 5 volt
+}
+
+// Update all LDRs (voltage to light sensor) 
+function updateLDRs() {
+  for (var i = 0; i < elements.length; i++) { 
+    if( elements[i].constructor.name == "LightSensor" ) {
+      var lightsensor = elements[i];
+      updateLDR( lightsensor.nodes[0] );
+    }
+  }
 }
 
 // Update the wire when moving
