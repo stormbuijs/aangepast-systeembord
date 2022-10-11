@@ -1380,6 +1380,62 @@ class Lightbulb extends Element {
 }
 
 
+// Create flash light
+class Flashlight extends Element {
+  constructor(x1,y1){
+    super(x1,y1);
+    this.allowSnap = false;
+    this.state = false;
+    
+    // Get the image of the flashlight from the document
+    var imgElement = document.getElementById('flashlight');
+    this.imgFlashLight = new fabric.Image(imgElement, {left: 0, top: 0 });
+    this.imgFlashLight.scale(0.25);
+    
+    this.shine = new fabric.Circle({left: -10, top: 10, radius: 30, opacity: 0.0 });
+    this.shine.setGradient('fill', { type: 'radial', r1: this.shine.radius, r2: 10,
+                                        x1: this.shine.radius, y1: this.shine.radius, 
+                                        x2: this.shine.radius, y2: this.shine.radius,
+                                        colorStops: { 1: 'rgba(255,200,0,0.7)', 0: 'rgba(0, 0, 0, 0)'} });
+    
+    // Draw the group and set the correct positions afterwards
+    var groupList = [ this.imgFlashLight, this.shine ];
+
+    this.group = new fabric.Group( groupList,
+                                 {left: x1, top: y1 });
+    this.group.name = "element";
+    this.group.element = this;
+    canvas.add(this.group);
+    this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });
+    this.group.setCoords();
+    
+    // Event listener: Change light shining and state when clicking on flash light
+    let that = this;
+    let wasMoved = false;
+    this.group.on('mousedown', function() { wasMoved = false; });
+    this.group.on('mouseup', function() {
+      if( !wasMoved ) {
+        that.state = !that.state;
+        if( that.state ) {
+          that.shine.set({opacity: 1.0 });
+          renderNeeded = true;        
+        } else {
+          that.shine.set({opacity: 0.0 });
+          renderNeeded = true; 
+        }
+      }
+      updateLDRs();
+    });
+    
+    // Event listener: Moving flash light
+    this.group.on('moving', function() {
+      wasMoved = true;
+      updateLDRs();
+    });
+  }   
+}
+
+
 // Make movable image for LDR
 function makeLDR(left, top, node){
   var domLDR = document.getElementById('ldr');
@@ -1787,13 +1843,14 @@ canvas.on('object:moving', function(e) {
 function updateLDR(node){
   // Find all lightbulbs and calculate distance
   node.state = low;    
-  var lightbulb = null;
+  var light = null;
   for (var i = 0; i < elements.length; i++) { 
-    if( elements[i].constructor.name == "Lightbulb" ) {
-	    lightbulb = elements[i];
-      if( lightbulb && lightbulb.state ) {
-        var xPosLight = lightbulb.x + 0.5*lightbulb.group.width;
-        var yPosLight = lightbulb.y + 0.5*lightbulb.group.height;
+    if( elements[i].constructor.name == "Lightbulb" ||
+        elements[i].constructor.name == "Flashlight") {
+	  light = elements[i];
+      if( light && light.state ) {
+        var xPosLight = light.x + 0.5*light.group.width;
+        var yPosLight = light.y + 0.5*light.group.height;
         var dist = Math.pow(node.xLDR-xPosLight,2)+Math.pow(node.yLDR-yPosLight,2);
         var voltage = 5.0/(1.0+dist/20000.0);
         // Normalize distance (maximum is around 1000) to 5 V
