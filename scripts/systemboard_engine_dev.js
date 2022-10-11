@@ -1331,19 +1331,22 @@ class Lightbulb extends Element {
     this.allowSnap = false;
     this.state = false;
     var isHV = true;
-    this.nodes = [ new InputNode(x1+18, y1+96, "input1", isHV ), 
-                   new InputNode(x1+35, y1+129, "input2", isHV ) ] ;
+    this.nodes = [ new InputNode(x1+44, y1+110, "input1", isHV ), 
+                   new InputNode(x1+60, y1+135, "input2", isHV ) ] ;
     
-    // Get the images of the lightbulb from the document
-    var imgElementOn = document.getElementById('lighton');
-    this.imgBulbOn = new fabric.Image(imgElementOn, {left: 0, top: 0 });
-    this.imgBulbOn.scale(0.7);
-    var imgElementOff = document.getElementById('lightoff');
+    // Get the image of the lightbulb from the document
+    var imgElementOff = document.getElementById('lightbulb');
     this.imgBulbOff = new fabric.Image(imgElementOff, {left: 0, top: 0 });
-    this.imgBulbOff.scale(0.7);
+    this.imgBulbOff.scale(0.6);
+
+    this.shine = new fabric.Circle({left: 0, top: -15, radius: 60, opacity: 0.0 });
+    this.shine.setGradient('fill', { type: 'radial', r1: this.shine.radius, r2: 20,
+                                        x1: this.shine.radius, y1: this.shine.radius, 
+                                        x2: this.shine.radius, y2: this.shine.radius,
+                                        colorStops: { 1: 'rgba(255,200,0,0.7)', 0: 'rgba(0, 0, 0, 0)'} });
     
     // Draw the group and set the correct positions afterwards
-    var groupList = [ this.imgBulbOff ];
+    var groupList = [ this.imgBulbOff, this.shine ];
     this.drawGroup(0, 0, groupList);
     this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });
     this.group.setCoords();
@@ -1351,7 +1354,6 @@ class Lightbulb extends Element {
     for( var i=0; i<circles.length; ++i ) {
       this.group.addWithUpdate( circles[i] ); 
     }
-    this.imgBulbOn.set({left: this.imgBulbOff.left, top: this.imgBulbOff.top });  // update to same pos
 
     // Event listener: Moving light bulb
     this.group.on('moving', updateLDRs );
@@ -1365,13 +1367,9 @@ class Lightbulb extends Element {
       this.state = newState;
       renderNeeded = true;
       if( this.state ) { 
-        this.group.remove(this.imgBulbOff);
-	      this.group.add(this.imgBulbOn);
-        this.imgBulbOn.moveTo(0);
+        this.shine.set({opacity: 1.0 });
       } else {
-        this.group.remove(this.imgBulbOn);
-        this.group.add(this.imgBulbOff);
-        this.imgBulbOff.moveTo(0);
+        this.shine.set({opacity: 0.0 });
       }
       // also update all light sensors
       updateLDRs();
