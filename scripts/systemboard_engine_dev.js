@@ -50,7 +50,7 @@ var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
 // Globals for the temperature and heater
 var heatTransfer = 100;        // Means that Tmax=40
 var heatCapacity = 5000;       // Determines speed of heating
-var temperatureInside = 15.0;  // Celcius
+var temperatureInside = [15.0, 15.0, 15.0, 15.0, 15.0];  // Celcius
 var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500;        // Watt
 
@@ -1481,14 +1481,14 @@ class Heater extends Element {
   constructor(x1,y1) {
     super(x1,y1);
     this.allowSnap = false;
-    this.oldTemperature = temperatureInside;
+    this.oldTemperature = temperatureInside[0];
 
     var isHV = true;
     this.nodes = [ new InputNode(x1+10, y1+85, "input1", isHV ), 
                    new InputNode(x1+10, y1+110, "input2", isHV ) ] ;
 
     // Temperature display
-    this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
+    this.textbox = new fabric.Textbox(temperatureInside[0].toFixed(1)+" \u2103", {
           left: 25, top: -55, width: 50, fontWeight: 'bold', fontSize: 12, textAlign: 'right',
           fill: 'red', backgroundColor: '#330000' });
 
@@ -1509,18 +1509,19 @@ class Heater extends Element {
   }
   
   output() {
-    var heatLoss = heatTransfer * (temperatureInside - temperatureOutside);
-    temperatureInside += -heatLoss * clockPeriod*0.001 / heatCapacity;
+    var heatLoss = heatTransfer * (temperatureInside[0] - temperatureOutside);
+    temperatureInside.unshift( temperatureInside[0] + -heatLoss * clockPeriod*0.001 / heatCapacity);
+    temperatureInside.pop();
 
     if( this.nodes[0].child && this.nodes[1].child && // nodes should be connected
         this.nodes[0].child.child == this.nodes[1].child.child && // from the same relais
         isHigh( this.nodes[1].eval() ) ) { // check node2
-      temperatureInside += powerHeater * clockPeriod*0.001 / heatCapacity;
+      temperatureInside[0] += powerHeater * clockPeriod*0.001 / heatCapacity;
     }
     
-    var newTemperature = temperatureInside.toFixed(1);
+    var newTemperature = temperatureInside[0].toFixed(1);
     if( Math.abs(this.oldTemperature-newTemperature) > 0.05 ) {
-      this.textbox.set({ text : temperatureInside.toFixed(1)+" \u2103"});
+      this.textbox.set({ text : temperatureInside[0].toFixed(1)+" \u2103"});
       this.oldTemperature = newTemperature;
       renderNeeded = true;
     }
@@ -1542,7 +1543,8 @@ class TemperatureSensor extends Element {
   
   // Set voltage from temperature inside
   output() { 
-    var voltage = (temperatureInside - 15.0) * 0.2;
+    // Use last value of array to add small delay to temperature sensor
+    var voltage = (temperatureInside.at(-1) - 15.0) * 0.2;
     voltage = Math.min(Math.max(0.0,voltage),5.0); // Range between 0.0 and 5.0 V
     this.nodes[0].state = voltage;
   }
