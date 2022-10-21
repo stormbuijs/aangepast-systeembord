@@ -31,7 +31,7 @@ SOFTWARE.
    =========================================== */
 
 // Set the version
-var version     = "2.3";
+var version     = "2.2";
 var versionType = "prev"; // prev, standaard, dev
 
 // Mixed analog / digital
@@ -71,7 +71,6 @@ var elements = [];
 
 // Create canvas
 var canvas = this.__canvas = new fabric.Canvas('c', { selection: false, backgroundColor: 'white',
-                                                      allowTouchScrolling: true,
                                                       preserveObjectStacking: true });
 fabric.Object.prototype.originX = fabric.Object.prototype.originY = 'center';
 fabric.Object.prototype.hasControls = false;
@@ -248,7 +247,7 @@ var gradientButtonDw = { x1: -10, y1: -10, x2: 22, y2: 22,
 
 // Draw a push button
 function drawButton(left, top, node){
-  let c = new fabric.Circle({left: left, top: top, strokeWidth: 3, stroke: 'grey', radius: 10,
+  var c = new fabric.Circle({left: left, top: top, strokeWidth: 3, stroke: 'grey', radius: 10,
                              fill: '#222222', selectable: false });
   c.setGradient('stroke', gradientButtonUp );
   c.name = "button";
@@ -256,8 +255,9 @@ function drawButton(left, top, node){
   
   // Event listener: Change button color and state of OutputNode when pushed
   c.on('mousedown', function() {
+    c.node.state = invert(c.node.state);
     c.node.state = high;
-    c.set({ fill: '#333333'});
+    c.set({ fill: '#333333', strokeWidth: 3, radius: 10});
     c.setGradient('stroke', gradientButtonDw );
   });
   
@@ -265,40 +265,12 @@ function drawButton(left, top, node){
   c.on('mouseup', function() {
     // a mouse-click can be too short for the engine to evaluate itself
     setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
-    c.set({ fill: '#222222'});
+    c.set({ fill: '#222222', strokeWidth: 3, radius: 10});
     c.setGradient('stroke', gradientButtonUp );
   });
   
   return c;
 }    
-
-// Draw a toggle button
-function drawToggle(left, top, node){
-  let c = new fabric.Circle({left: -10, top: 0, strokeWidth: 1, stroke: 'darkgrey', radius: 8 });
-  c.setGradient('fill', gradientButtonDw );
-  let r = new fabric.Rect( {left: 0, top: 0, strokeWidth: 2, rx: 10, ry: 10,
-                            width: 40, height: 20, fill: '#aa0000' } );
-  r.setGradient('stroke', gradientButtonUp );
-  let g = new fabric.Group([ r, c ], { left: left, top: top, selectable: false });
-  g.name = "toggle";
-  g.node = node;
-  
-  // Event listener: Change position/color of switch and state of OutputNode when pushed
-  g.on('mousedown', function() {
-    g.node.state = invert(g.node.state);
-    console.log( g.node.state );
-    if( isHigh( g.node.state ) ) {
-      g.item(0).set({ fill: 'green'});
-      g.item(1).set({left: 10} );
-    } else {
-      g.item(0).set({ fill: '#aa0000'});
-      g.item(1).set({ left: -10});
-    }
-    renderNeeded = true;
-  });
-    
-  return g;
-}
 
 function drawText(x1,y1,text,fontsize=10){
   // Draw text
@@ -850,14 +822,7 @@ class LED extends Element {
     this.led = new fabric.Circle({left: boxWidth-25, top: 20, radius: 5, 
                                   fill: '#600000', stroke: 'black', strokeWidth: 2   });
     this.led.setGradient('stroke', gradientButtonDw );
-    
-    this.ledShine = new fabric.Circle({left: boxWidth-25, top: 20, radius: 19, opacity: 0.0 });
-    this.ledShine.setGradient('fill', { type: 'radial', r1: this.ledShine.radius, r2: this.led.radius,
-                                        x1: this.ledShine.radius, y1: this.ledShine.radius, 
-                                        x2: this.ledShine.radius, y2: this.ledShine.radius,
-                                        colorStops: { 1: 'rgba(255,0,0,0.3)', 0: 'rgba(0, 0, 0, 0)'} });
-    
-    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led, this.ledShine]
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'LED'), this.led]
                     .concat(drawCircles(x1,y1,this.nodes, "white"));
     
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
@@ -868,11 +833,9 @@ class LED extends Element {
     var result = this.nodes[0].eval();
     if( isHigh(result) && !isHigh(this.lastResult) ) {
       this.led.set({fill : 'red'});
-      this.ledShine.set({opacity: 1.0 });
       renderNeeded = true;
     } else if( !isHigh(result) && isHigh(this.lastResult) ) {
       this.led.set({fill : '#600000'});            
-      this.ledShine.set({opacity: 0.0 });
       renderNeeded = true;
     }
     this.lastResult = result;
@@ -931,21 +894,6 @@ class Switch extends Element {
 
     // Draw the push button
     this.button = drawButton(x1+25, y1+0.5*boxHeightSmall, this.nodes[0]);
-    canvas.add(this.button);
-  }
-}
-
-// Create toggle-switch
-class ToggleSwitch extends Element {
-  constructor(x1,y1) {
-    super(x1,y1);
-    this.nodes = [ new OutputNode(x1+boxWidth-25, y1+0.5*boxHeightSmall ) ] ;
-    var groupList = [ drawBoxAndText(0,0,boxWidth,boxHeightSmall,'tuimelschakelaar') ]
-                     .concat(drawCircles(x1,y1,this.nodes, "yellow"));
-    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
-
-    // Draw the push button
-    this.button = drawToggle(x1+30, y1+0.5*boxHeightSmall-3, this.nodes[0]);
     canvas.add(this.button);
   }
 }
@@ -1279,15 +1227,13 @@ class Relais extends Element {
                                             fontSize: 20, textAlign: 'center' });
     var circ = new fabric.Circle({left: boxWidth-50, top: 25, strokeWidth: 1, stroke: 'black' ,
                                   radius: 10, fill: 'lightgrey'});
-    this.switchLine1 = drawLine([25, 0.5*boxHeight, boxWidth-70, 0.5*boxHeight]);
-    this.switchLine2 = drawLine([boxWidth-65, 40, boxWidth-75, 60]);
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'Relais'),
                      drawLine([25, 25, 25, boxHeight-25]),
                      drawLine([20, boxHeight-25, 30, boxHeight-25]),
-                     this.switchLine1,
+                     drawLine([25, 0.5*boxHeight, boxWidth-70, 0.5*boxHeight]),
                      drawLine([boxWidth-25, 25, boxWidth-25, boxHeight-25]),
                      drawLine([boxWidth-75, 25, boxWidth-75, 40]),
-                     this.switchLine2,
+                     drawLine([boxWidth-65, 40, boxWidth-75, 60]),
                      drawLine([boxWidth-75, 60, boxWidth-75, boxHeight-25]),
                      drawLine([boxWidth-75, 25, boxWidth-25, 25]),
                      circ, textbox, rect,
@@ -1295,24 +1241,7 @@ class Relais extends Element {
                      .concat(drawCircles(x1,y1,[this.nodes[0]], "white"),
                              drawCircles(x1,y1,this.nodes.slice(1,3), "black"));
     this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeight, groupList);
-    this.switchLine1.set({'x1': -50, 'y1': 0, 'x2': 5, 'y2': 0 });
-    this.switchLine2.set({'x1': 10, 'y1': -10, 'x2': 0, 'y2': 10 });
   }
-    
-  // Control Relais behaviour
-  output() {
-    var result = this.nodes[0].eval();
-    if( isHigh(result) && !isHigh(this.lastResult) ) {
-      this.switchLine1.set({'x2': 0 });
-      this.switchLine2.set({'x1': 0 });
-      renderNeeded = true;
-    } else if( !isHigh(result) && isHigh(this.lastResult) ) {
-      this.switchLine1.set({'x2': 5 });
-      this.switchLine2.set({'x1': 10 });
-      renderNeeded = true;
-    }
-    this.lastResult = result;
-  };
 }
 
 
@@ -1393,11 +1322,9 @@ function makeLDR(left, top, node){
 
 // Create a light sensor
 class LightSensor extends Element {
-  constructor(x1,y1,params) {
+  constructor(x1,y1) {
     super(x1,y1);
-    var xLDR = params.hasOwnProperty("xLDR") ? parseFloat(params.xLDR) : x1+25;
-    var yLDR = params.hasOwnProperty("yLDR") ? parseFloat(params.yLDR) : y1+25;
-    this.nodes = [ new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, xLDR, yLDR ) ] ; 
+    this.nodes = [ new LightSensorNode(x1+boxWidth-25, y1+0.5*boxHeightSmall, x1+25, y1+25 ) ] ; 
   
     var groupList = [drawBoxAndText(0,0,boxWidth,boxHeightSmall,'lichtsensor')]
                     .concat(drawCircles(x1,y1,this.nodes, "yellow"));
@@ -1407,12 +1334,8 @@ class LightSensor extends Element {
     this.ldr = makeLDR(this.nodes[0].xLDR, this.nodes[0].yLDR, this.nodes[0]);
     canvas.add(this.ldr);
   }
-  
+ 
   remove() { canvas.remove( this.ldr ); };
-
-  // Store additional XML attributes: the reference voltage
-  getXMLAttributes() { return { xLDR : this.nodes[0].xLDR.toString(),
-                                yLDR : this.nodes[0].yLDR.toString()}; } 
 }    
 
 
@@ -1429,7 +1352,7 @@ class Heater extends Element {
 
     // Temperature display
     this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
-          left: 25, top: -55, width: 50, fontWeight: 'bold', fontSize: 12, textAlign: 'right',
+          left: 25, top: -55, width: 50, fontSize: 12, textAlign: 'right',
           fill: 'red', backgroundColor: '#330000' });
 
     // Radiator
@@ -1570,7 +1493,7 @@ class DigitalVoltmeter extends Element {
 
     // Draw the display and the rest
     this.display = new fabric.Textbox(this.lastState.toFixed(2)+" V", {
-          left: 22, top: 12, width: 37, fontWeight: 'bold', fontSize: 12, textAlign: 'right',
+          left: 22, top: 12, width: 37, fontSize: 12, textAlign: 'right',
           fill: 'red', backgroundColor: '#330000' });
     var groupList = [ drawBoxAndText(0,0,44,60,'meter'), 
                       drawText(1,45,"volt-",12),
@@ -2236,7 +2159,9 @@ function formatXml(xml) {
    - Showing modal boxes
    ============================================= */
 
+
 // Event listener for resizing the window
+//window.addEventListener('resize', resizeCanvas, false);
 $(window).resize( resizeCanvas );
 function resizeCanvas() {    
   var divCanvas = document.getElementById("canvas1");
@@ -2249,16 +2174,35 @@ function resizeCanvas() {
 }
 
 /* Define functions for the modal box */
+var currentModal = "";
+
 // Showing modal box
-function showModal(name) { $("#"+name).show(); }
+function showModal(name) {
+  // Set the feedback tag
+  setFeedback();
+
+  var text = document.getElementById(name);
+  text.style.display = "block";
+  currentModal = name;
+  
+}
 
 // When the user clicks on <span> (x), close the current modal
-$(".close").on("click", function() { $(this).parent().parent().toggle(); });
-  
+var closeButtons = document.getElementsByClassName("close");
+for( var i=0; i < closeButtons.length; ++i) {
+  closeButtons[i].onclick = function() {
+    document.getElementById(currentModal).style.display = "none"; 
+    currentModal = "";
+  }
+}
+
 // When the user clicks anywhere outside of the modal, close it
-$(window).on("click", function(event) {
-  if( event.target.className === "modal" ) event.target.style.display = "none";
-});
+window.onclick = function(event) {
+  if (event.target == document.getElementById(currentModal) ) {
+    document.getElementById(currentModal).style.display = "none";
+  }
+}
+
 
 /* ============= MAIN ENGINE ==================
    Evaluate the board (all elements) using
@@ -2345,10 +2289,6 @@ $("document").ready(function(){
   
   // Make sure that the engine is run every clockPeriod  
   setInterval(evaluateBoard, clockPeriod);
-  
-  // Set the feedback tag
-  setFeedback();
-
 });
 
 

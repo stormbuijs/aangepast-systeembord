@@ -31,7 +31,7 @@ SOFTWARE.
    =========================================== */
 
 // Set the version
-var version     = "2.4";
+var version     = "2.5";
 var versionType = "dev"; // prev, standaard, dev
 
 // Mixed analog / digital

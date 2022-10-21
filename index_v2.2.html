@@ -7,20 +7,18 @@
   <meta name="keywords" content="natuurkunde, technische automatisering, systeembord">
   <meta name="author" content="Jeroen van Tilburg">
   <meta name="viewport" content="width=930">
-  <meta property="og:image" content="https://jeroenvantilburg.nl/systeembord/screenshot.png" />
+  <meta property="og:image" content="https://jeroenvantilburg.github.io/systeembord/screenshot.png" />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://jeroenvantilburg.nl/systeembord/" />
+  <meta property="og:url" content="https://jeroenvantilburg.github.io/systeembord/" />
   <meta property="og:title" content="Online systeembord" />
   <meta property="og:description" content="Bouw je eigen automatisch systeem en leer hoe logische schakelingen werken" />
-  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="mask-icon" href="safari-pinned-tab.svg" color="#6c6c6c">
-  <link rel="shortcut icon" href="favicon.ico">
-  <meta name="msapplication-TileColor" content="#2d89ef">
-  <meta name="msapplication-config" content="browserconfig.xml">
-  <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon-precomposed" sizes="57x57" href="favicon-apple-touch-114.png">
+  <link rel="apple-touch-icon-precomposed" sizes="114x114" href="favicon-apple-touch-114.png">
+  <link rel="apple-touch-icon-precomposed" sizes="72x72" href="favicon-apple-touch-144.png">
+  <link rel="apple-touch-icon-precomposed" sizes="144x144" href="favicon-apple-touch-144.png">
+  <link rel="icon" type="image/vnd.microsoft.icon" sizes="32x32 48x48" href="favicon.ico">
+  <link rel="icon" sizes="128x128" href="favicon.icns">
+  <link rel="icon" href="favicon.png" type="image/x-icon">
   <link rel="stylesheet" type="text/css" href="style.css" media="screen,projection" />
   <base target="_blank">
 </head>
@@ -70,7 +68,6 @@
                 <option selected disabled value="0">Voeg toe...</option>
                 <optgroup label="INVOER">
                   <option value="Switch">Drukschakelaar</option>
-                  <option value="ToggleSwitch">Tuimelschakelaar</option>
                   <option value="VarVoltage">Variabele spanning</option>
                   <option value="Pulse">Pulsgenerator</option>
                   <option value="ADC">AD omzetter</option>
@@ -133,14 +130,14 @@
       <div class="modal-content modal-small"> <span class="close">&times;</span>
         <center>
           <h3>Online Systeembord</h3>
-          <img src="mstile-70x70.png"/><br clear="all"/><br/>
+          <img src="favicon-apple-touch-114.png"/><br clear="all"/><br/>
           Versie <version></version><br/>
           &copy; 2020 Jeroen van Tilburg, MIT licentie <br/>
           Feedback naar <feedback></feedback> <br/> 
           Broncode: <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> <br/>
-          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.3)<br/> 
-                   <a href="index.html">Standaardversie</a> (2.4) <br/>
-                   <a href="index_dev.html">Ontwikkelversie</a> (2.5)<br/>
+          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.2)<br/> 
+                   <a href="index.html">Standaardversie</a> (2.3) <br/>
+                   <a href="index_dev.html">Ontwikkelversie</a> (2.4)<br/>
         </center>
       </div>
     </div>
@@ -182,7 +179,7 @@
             De andere ingang van de voltmeter is al verbonden met de aarde.</li>
           <li><b>Meer informatie:</b><br/>
             Zie de handleiding van het 
-            <a href="https://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li> 
+            <a href="http://www.cma-science.nl/resources/nl/practicum/b0020.pdf">systeembord</a>.</li> 
         </ul>
       </div>
     </div>
@@ -233,6 +230,8 @@
               database van Online Systeembord</a>. De betreffende opstelling wordt direct
             ingeladen door het toevoegen van een hashtag met de naam van het xml-bestand aan het 
             webadres. Zo wordt de flipflop-opstelling direct getoond via deze link:<br/>
+            <pre>   https://jeroenvantilburg.github.io/systeembord/#voorbeelden/SRNORLatch.xml</pre><br/>
+            of korter via deze link:<br/>
             <pre>   https://jeroenvantilburg.nl/systeembord/#voorbeelden/SRNORLatch.xml</pre><br/>
             Stuur je favoriete of veel gebruikte xml-bestanden naar mij op zodat ik die aan de
             database kan toevoegen.
@@ -321,9 +320,7 @@
     <video autoplay playsinline muted style="display:none" width="0.1"></video>
 
     <!-- Load js -->
-    <script src="scripts/registerSW.js"></script>
     <script src="scripts/fabric.min.js"></script>
-    <script src="scripts/fabric-patch-touch.js"></script>
     <script src="scripts/jquery-3.5.0.min.js"></script>
     <script src="scripts/warningIE.js"></script>
     <script src="scripts/systemboard_engine_prev.js"></script>

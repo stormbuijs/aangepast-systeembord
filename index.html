@@ -97,6 +97,7 @@
                   <option value="Buzzer">Zoemer</option>
                   <option value="Relais">Relais</option>
                   <option value="Lightbulb">Lamp</option>
+                  <option value="Flashlight">Zaklamp</option>
                   <option value="Heater">Verwarming</option>
                   <option value="Voltmeter">Voltmeter (analoog)</option>
                   <option value="DigitalVoltmeter">Voltmeter (digitaal)</option>
@@ -138,9 +139,9 @@
           &copy; 2020 Jeroen van Tilburg, MIT licentie <br/>
           Feedback naar <feedback></feedback> <br/> 
           Broncode: <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> <br/>
-          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.2)<br/> 
-                   <a href="index.html">Standaardversie</a> (2.3) <br/>
-                   <a href="index_dev.html">Ontwikkelversie</a> (2.4)<br/>
+          Beschikbare versies: <br/><a href="index_prev.html">Vorige versie</a> (2.3)<br/> 
+                   <a href="index.html">Standaardversie</a> (2.4) <br/>
+                   <a href="index_dev.html">Ontwikkelversie</a> (2.5)<br/>
         </center>
       </div>
     </div>
@@ -157,7 +158,7 @@
           <li><b>Verbindingssnoeren verwijderen:</b><br/>
             Sleep het snoer weg van de ingang.</li>
           <li><b>Drukschakelaar:</b><br/>
-            Met een klik-sleep kan de schakelaar worden vastgezet.</li>
+            Met een long-press of een klik-sleep kan de schakelaar worden vastgezet.</li>
           <li><b>Relais:</b><br/>
             De relais is al aangesloten op een wisselspanningbron.
             De zwarte uitgangen kunnen worden verbonden met de lamp of 
@@ -266,20 +267,41 @@
         (zie hierboven).
         <br/><br/>
         
-        <b>Broncode</b><br>
+        <b>Broncode, versies en licenties</b><br>
         De broncode van deze website is vrij beschikbaar op 
         <a href="https://github.com/jeroenvantilburg/systeembord">Github</a> onder de 
         <a href="https://nl.wikipedia.org/wiki/MIT-licentie">MIT licentie</a>. De broncode
         mag vrij worden gekopieerd en gehost op iedere webserver. Zorg er dan wel
-        voor dat de code up-to-date blijft omdat er regelmatig updates en bugfixes zijn. De
-        huidige versie is <version></version>. Om nieuwe ontwikkelingen te kunnen testen
+        voor dat de code up-to-date blijft omdat er regelmatig updates en bugfixes zijn. Om 
+        nieuwe ontwikkelingen te kunnen testen
         en om bugs te traceren worden drie versies van de software beschikbaar gesteld op
         deze website: een       
         <a href="index_prev.html">vorige versie</a>, de
         <a href="index.html">standaardversie</a> en een 
         <a href="index_dev.html">ontwikkelversie</a>.
-        Suggesties voor verbeteringen van de code zijn welkom.
+        <br/>
+        De hosting voor deze website wordt vrij beschikbaar gesteld door
+        <a href="https://github.com">GitHub</a> en 
+        <a href="https://pages.github.com">GitHub Pages</a>. De volgende libraries zijn gebruikt
+        met hun eigen licenties:
+        <ul>
+          <li><a href="https://jquery.com">jQuery</a>: DOM manipulation</li>
+          <li><a href="https://freepngimg.com/">Free PNG img</a>: PNG library</li>
+          <li><a href="http://fabricjs.com">Fabric</a>: HTML5 canvas library</li>
+        </ul>
         <br/><br/>
+
+        <b>Nieuw in versie 2.4</b><br/>
+        Er zijn enkele verbeteringen toegevoegd in versie 2.4:
+        <ul>
+          <li>Nieuw plaatje voor de lamp (het peertje).</li>
+          <li>Nieuw: een zaklamp om de LDR te testen. Deze hoef je niet eerst aan te sluiten.</li>
+          <li>Drukschakelaaar: deze kan nu ook worden vastgezet met een longpress (> 500 ms).</li>
+          <li>Bugfix: de output van de LDR wordt nu ook aangepast wanneer een lamp wordt verplaatst.</li>
+          <li>De temperatuursensor heeft nu een kleine vertraging. Hierdoor wordt het aan/uit knipperen 
+            in een terugkoppelingsschakeling rustiger.</li>
+        </ul>
+        <br/><br> 
 
         <b>Feedback en vragen</b><br/>
         Om de website en het Online Systeembord zo gebruiksvriendelijk te maken ben ik afhankelijk van
@@ -287,7 +309,7 @@
         Vragen, verbeteringen, bug reports, suggesties, commentaar en complimenten kunnen worden
         gestuurd naar <feedback></feedback>. 
         <br/><br> 
-        
+                
         <b>Overige webapplicaties</b><br/>
         Er zijn verschillende programma's en webapplicaties gemaakt door derden 
         waarin het systeembord wordt gesimuleerd 
@@ -314,8 +336,8 @@
     </div>
     
     <!-- Load images and video. Required by systemboard_engine.js -->
-    <img width=0 src="img/pic_bulboff.gif" id="lightoff">
-    <img width=0 src="img/pic_bulbon.gif" id="lighton">
+    <img width=0 src="img/lightbulb.png" id="lightbulb"> <!-- from https://freepngimg.com/png/7388-bulb-png-image/download -->
+    <img width=0 src="img/flashlight.png" id="flashlight"> <!-- from https://freepngimg.com/png/22362-flashlight-transparent -->
     <img width=0 src="img/ldr.png" id="ldr">
     <img width=0 src="img/radiator.jpg" id="radiator">
     <video autoplay playsinline muted style="display:none" width="0.1"></video>

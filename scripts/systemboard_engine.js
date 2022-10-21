@@ -31,7 +31,7 @@ SOFTWARE.
    =========================================== */
 
 // Set the version
-var version     = "2.3";
+var version     = "2.4";
 var versionType = "standaard"; // prev, standaard, dev
 
 // Mixed analog / digital
@@ -50,7 +50,7 @@ var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
 // Globals for the temperature and heater
 var heatTransfer = 100;        // Means that Tmax=40
 var heatCapacity = 5000;       // Determines speed of heating
-var temperatureInside = 15.0;  // Celcius
+var temperatureInside = [15.0, 15.0, 15.0, 15.0, 15.0];  // Celcius
 var temperatureOutside = 15.0; // Celcius
 var powerHeater = 2500;        // Watt
 
@@ -254,19 +254,27 @@ function drawButton(left, top, node){
   c.name = "button";
   c.node = node;
   
+  let longPressTimer = 0;
+  
   // Event listener: Change button color and state of OutputNode when pushed
   c.on('mousedown', function() {
     c.node.state = high;
     c.set({ fill: '#333333'});
     c.setGradient('stroke', gradientButtonDw );
+    const d = new Date();
+    longPressTimer = d.getTime();
   });
   
   // Event listener: Change button color and state of OutputNode to low when mouse is up
   c.on('mouseup', function() {
-    // a mouse-click can be too short for the engine to evaluate itself
-    setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
-    c.set({ fill: '#222222'});
-    c.setGradient('stroke', gradientButtonUp );
+    // Only update the button if it was a short press
+    const d = new Date();
+    if( d.getTime()-longPressTimer < 500 ) {
+      // a mouse-click can be too short for the engine to evaluate itself
+      setTimeout(function(){ c.node.state = low; renderNeeded = true}, clockPeriod+5); // add small delay
+      c.set({ fill: '#222222'});
+      c.setGradient('stroke', gradientButtonUp );
+    }
   });
   
   return c;
@@ -1298,7 +1306,7 @@ class Relais extends Element {
     this.switchLine1.set({'x1': -50, 'y1': 0, 'x2': 5, 'y2': 0 });
     this.switchLine2.set({'x1': 10, 'y1': -10, 'x2': 0, 'y2': 10 });
   }
-    
+  
   // Control Relais behaviour
   output() {
     var result = this.nodes[0].eval();
@@ -1323,19 +1331,22 @@ class Lightbulb extends Element {
     this.allowSnap = false;
     this.state = false;
     var isHV = true;
-    this.nodes = [ new InputNode(x1+18, y1+96, "input1", isHV ), 
-                   new InputNode(x1+35, y1+129, "input2", isHV ) ] ;
+    this.nodes = [ new InputNode(x1+44, y1+110, "input1", isHV ), 
+                   new InputNode(x1+60, y1+135, "input2", isHV ) ] ;
     
-    // Get the images of the lightbulb from the document
-    var imgElementOn = document.getElementById('lighton');
-    this.imgBulbOn = new fabric.Image(imgElementOn, {left: 0, top: 0 });
-    this.imgBulbOn.scale(0.7);
-    var imgElementOff = document.getElementById('lightoff');
+    // Get the image of the lightbulb from the document
+    var imgElementOff = document.getElementById('lightbulb');
     this.imgBulbOff = new fabric.Image(imgElementOff, {left: 0, top: 0 });
-    this.imgBulbOff.scale(0.7);
+    this.imgBulbOff.scale(0.6);
+
+    this.shine = new fabric.Circle({left: 0, top: -15, radius: 60, opacity: 0.0 });
+    this.shine.setGradient('fill', { type: 'radial', r1: this.shine.radius, r2: 20,
+                                        x1: this.shine.radius, y1: this.shine.radius, 
+                                        x2: this.shine.radius, y2: this.shine.radius,
+                                        colorStops: { 1: 'rgba(255,200,0,0.7)', 0: 'rgba(0, 0, 0, 0)'} });
     
     // Draw the group and set the correct positions afterwards
-    var groupList = [ this.imgBulbOff ];
+    var groupList = [ this.imgBulbOff, this.shine ];
     this.drawGroup(0, 0, groupList);
     this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });
     this.group.setCoords();
@@ -1343,7 +1354,9 @@ class Lightbulb extends Element {
     for( var i=0; i<circles.length; ++i ) {
       this.group.addWithUpdate( circles[i] ); 
     }
-    this.imgBulbOn.set({left: this.imgBulbOff.left, top: this.imgBulbOff.top });  // update to same pos
+
+    // Event listener: Moving light bulb
+    this.group.on('moving', updateLDRs );
   }  
   
   output() {
@@ -1354,23 +1367,70 @@ class Lightbulb extends Element {
       this.state = newState;
       renderNeeded = true;
       if( this.state ) { 
-        this.group.remove(this.imgBulbOff);
-	      this.group.add(this.imgBulbOn);
-        this.imgBulbOn.moveTo(0);
+        this.shine.set({opacity: 1.0 });
       } else {
-        this.group.remove(this.imgBulbOn);
-        this.group.add(this.imgBulbOff);
-        this.imgBulbOff.moveTo(0);
+        this.shine.set({opacity: 0.0 });
       }
       // also update all light sensors
-      for (var i = 0; i < elements.length; i++) { 
-        if( elements[i].constructor.name == "LightSensor" ) {
-          var lightsensor = elements[i];
-          updateLDR( lightsensor.nodes[0] );
-        }
-      }
+      updateLDRs();
     }
   }
+}
+
+
+// Create flash light
+class Flashlight extends Element {
+  constructor(x1,y1){
+    super(x1,y1);
+    this.allowSnap = false;
+    this.state = false;
+    
+    // Get the image of the flashlight from the document
+    var imgElement = document.getElementById('flashlight');
+    this.imgFlashLight = new fabric.Image(imgElement, {left: 0, top: 0 });
+    this.imgFlashLight.scale(0.25);
+    
+    this.shine = new fabric.Circle({left: -10, top: 10, radius: 30, opacity: 0.0 });
+    this.shine.setGradient('fill', { type: 'radial', r1: this.shine.radius, r2: 10,
+                                        x1: this.shine.radius, y1: this.shine.radius, 
+                                        x2: this.shine.radius, y2: this.shine.radius,
+                                        colorStops: { 1: 'rgba(255,200,0,0.7)', 0: 'rgba(0, 0, 0, 0)'} });
+    
+    // Draw the group and set the correct positions afterwards
+    var groupList = [ this.imgFlashLight, this.shine ];
+
+    this.group = new fabric.Group( groupList,
+                                 {left: x1, top: y1 });
+    this.group.name = "element";
+    this.group.element = this;
+    canvas.add(this.group);
+    this.group.set({left: x1+0.5*this.group.width-0.5, top: y1+0.5*this.group.height-0.5 });
+    this.group.setCoords();
+    
+    // Event listener: Change light shining and state when clicking on flash light
+    let that = this;
+    let wasMoved = false;
+    this.group.on('mousedown', function() { wasMoved = false; });
+    this.group.on('mouseup', function() {
+      if( !wasMoved ) {
+        that.state = !that.state;
+        if( that.state ) {
+          that.shine.set({opacity: 1.0 });
+          renderNeeded = true;        
+        } else {
+          that.shine.set({opacity: 0.0 });
+          renderNeeded = true; 
+        }
+      }
+      updateLDRs();
+    });
+    
+    // Event listener: Moving flash light
+    this.group.on('moving', function() {
+      wasMoved = true;
+      updateLDRs();
+    });
+  }   
 }
 
 
@@ -1421,14 +1481,14 @@ class Heater extends Element {
   constructor(x1,y1) {
     super(x1,y1);
     this.allowSnap = false;
-    this.oldTemperature = temperatureInside;
+    this.oldTemperature = temperatureInside[0];
 
     var isHV = true;
     this.nodes = [ new InputNode(x1+10, y1+85, "input1", isHV ), 
                    new InputNode(x1+10, y1+110, "input2", isHV ) ] ;
 
     // Temperature display
-    this.textbox = new fabric.Textbox(temperatureInside.toFixed(1)+" \u2103", {
+    this.textbox = new fabric.Textbox(temperatureInside[0].toFixed(1)+" \u2103", {
           left: 25, top: -55, width: 50, fontWeight: 'bold', fontSize: 12, textAlign: 'right',
           fill: 'red', backgroundColor: '#330000' });
 
@@ -1449,18 +1509,19 @@ class Heater extends Element {
   }
   
   output() {
-    var heatLoss = heatTransfer * (temperatureInside - temperatureOutside);
-    temperatureInside += -heatLoss * clockPeriod*0.001 / heatCapacity;
+    var heatLoss = heatTransfer * (temperatureInside[0] - temperatureOutside);
+    temperatureInside.unshift( temperatureInside[0] + -heatLoss * clockPeriod*0.001 / heatCapacity);
+    temperatureInside.pop();
 
     if( this.nodes[0].child && this.nodes[1].child && // nodes should be connected
         this.nodes[0].child.child == this.nodes[1].child.child && // from the same relais
         isHigh( this.nodes[1].eval() ) ) { // check node2
-      temperatureInside += powerHeater * clockPeriod*0.001 / heatCapacity;
+      temperatureInside[0] += powerHeater * clockPeriod*0.001 / heatCapacity;
     }
     
-    var newTemperature = temperatureInside.toFixed(1);
+    var newTemperature = temperatureInside[0].toFixed(1);
     if( Math.abs(this.oldTemperature-newTemperature) > 0.05 ) {
-      this.textbox.set({ text : temperatureInside.toFixed(1)+" \u2103"});
+      this.textbox.set({ text : temperatureInside[0].toFixed(1)+" \u2103"});
       this.oldTemperature = newTemperature;
       renderNeeded = true;
     }
@@ -1482,7 +1543,8 @@ class TemperatureSensor extends Element {
   
   // Set voltage from temperature inside
   output() { 
-    var voltage = (temperatureInside - 15.0) * 0.2;
+    // Use last value of array to add small delay to temperature sensor
+    var voltage = (temperatureInside.at(-1) - 15.0) * 0.2;
     voltage = Math.min(Math.max(0.0,voltage),5.0); // Range between 0.0 and 5.0 V
     this.nodes[0].state = voltage;
   }
@@ -1781,13 +1843,14 @@ canvas.on('object:moving', function(e) {
 function updateLDR(node){
   // Find all lightbulbs and calculate distance
   node.state = low;    
-  var lightbulb = null;
+  var light = null;
   for (var i = 0; i < elements.length; i++) { 
-    if( elements[i].constructor.name == "Lightbulb" ) {
-	    lightbulb = elements[i];
-      if( lightbulb && lightbulb.state ) {
-        var xPosLight = lightbulb.x + 0.5*lightbulb.group.width;
-        var yPosLight = lightbulb.y + 0.5*lightbulb.group.height;
+    if( elements[i].constructor.name == "Lightbulb" ||
+        elements[i].constructor.name == "Flashlight") {
+	  light = elements[i];
+      if( light && light.state ) {
+        var xPosLight = light.x + 0.5*light.group.width;
+        var yPosLight = light.y + 0.5*light.group.height;
         var dist = Math.pow(node.xLDR-xPosLight,2)+Math.pow(node.yLDR-yPosLight,2);
         var voltage = 5.0/(1.0+dist/20000.0);
         // Normalize distance (maximum is around 1000) to 5 V
@@ -1796,6 +1859,16 @@ function updateLDR(node){
     }
   }
   node.state = Math.min(node.state, 5); // Set maximum to 5 volt
+}
+
+// Update all LDRs (voltage to light sensor) 
+function updateLDRs() {
+  for (var i = 0; i < elements.length; i++) { 
+    if( elements[i].constructor.name == "LightSensor" ) {
+      var lightsensor = elements[i];
+      updateLDR( lightsensor.nodes[0] );
+    }
+  }
 }
 
 // Update the wire when moving
