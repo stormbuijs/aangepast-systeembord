@@ -2305,7 +2305,7 @@ function formatXml(xml) {
 
 /* ============= DISPLAY FUNCTIONS =============
    Functions to:
-   - dynamically resize the canvas width
+   - dynamically resize the canvas width and height
    - Showing modal boxes
    ============================================= */
 
@@ -2319,7 +2319,13 @@ function resizeCanvas() {
     canvas.setWidth(newWidth);
     canvas.renderAll();
   }
-}
+  var newHeight = window.innerHeight-90;
+  if( newHeight > 500 ) { // minimum size needs to stay at 500px
+    divCanvas.style.height = newHeight;
+    canvas.setHeight(newHeight);
+    canvas.renderAll();
+  }
+}  
 
 /* Define functions for the modal box */
 // Showing modal box
