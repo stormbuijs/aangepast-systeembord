@@ -2008,6 +2008,7 @@ function moveElement(p){
 // Event listener: After moving wire destroy and create new links
 canvas.on('object:moved', function(e) {
     var p = e.target;
+    if( p.name == "element") resizeCanvas();
     if( p.name != "wire" ) return;
     var snapped = false;
     // reset connection wire
@@ -2158,7 +2159,8 @@ function parseFile(xml) {
       node.child = toNode;
     }
   }
-  
+  // Resize canvas in case elements are out of bounds
+  resizeCanvas();
 }
 
 function addElement(className,x1=0,y1=0,params={}){
@@ -2305,20 +2307,43 @@ function formatXml(xml) {
 
 /* ============= DISPLAY FUNCTIONS =============
    Functions to:
-   - dynamically resize the canvas width
+   - dynamically resize the canvas width and height
    - Showing modal boxes
    ============================================= */
 
 // Event listener for resizing the window
 $(window).resize( resizeCanvas );
 function resizeCanvas() {    
+  var minimumSize = getMinimumCanvasSize();
   var divCanvas = document.getElementById("canvas1");
-  var newWidth = window.innerWidth-20;
-  if( newWidth > 900 ) { // minimum size needs to stay at 900px
-    divCanvas.style.width = newWidth;
-    canvas.setWidth(newWidth);
-    canvas.renderAll();
-  }
+  let newWidth = Math.max( minimumSize.x, window.innerWidth-20 );
+  let newHeight = Math.max( minimumSize.y, window.innerHeight-90 );
+  divCanvas.style.width = newWidth;
+  divCanvas.style.height = newHeight;
+  canvas.setWidth(newWidth);
+  canvas.setHeight(newHeight);
+  canvas.renderAll();
+}
+
+function getMinimumCanvasSize( ) {
+  var minWidth = 0, minHeight = 0;
+  elements.forEach(function(element) {
+    minWidth  = Math.max( getMinimumCanvasWidth(  element ), minWidth );
+    minHeight = Math.max( getMinimumCanvasHeight( element ), minHeight );    
+  });
+  return {x: minWidth, y: minHeight};
+}
+
+function getMinimumCanvasWidth( element ) {
+  let minWidth = 900;   // minimum size needs to stay at 900px
+  if( element.group ) minWidth = Math.max( element.x + element.group.width+10, minWidth );
+  return minWidth;
+}
+
+function getMinimumCanvasHeight( element ) {
+  let minHeight = 500;   // minimum size needs to stay at 500px
+  if( element.group ) minHeight = Math.max( element.y + element.group.height+10, minHeight );
+  return minHeight;
 }
 
 /* Define functions for the modal box */
