@@ -32,7 +32,8 @@ var urlsToCache = [
   'img/ldr.png',
   'img/radiator.jpg',
   'apple-touch-icon.png',
-  'mstile-70x70.png'
+  'mstile-70x70.png',
+  'android-chrome-192x192.png'
 ];
 
 self.addEventListener('install', function(event) {
