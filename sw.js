@@ -27,6 +27,8 @@ var urlsToCache = [
   'xml/Newton/Fig34_schakelklok.xml',
   'img/pic_bulboff.gif',
   'img/pic_bulbon.gif',
+  'img/flashlight.png',
+  'img/lightbulb.png',
   'img/ldr.png',
   'img/radiator.jpg',
   'apple-touch-icon.png',
