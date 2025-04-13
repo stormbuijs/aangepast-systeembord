@@ -875,6 +875,41 @@ class Memory extends Element {
   }
 }
 
+// Create flip flop with its nodes
+class FlipFlop extends Element {
+  constructor (x1, y1) {
+    super(x1, y1);
+    let node1 = new InputNode(x1 + 25, y1 + 0.5 * boxHeight);
+    let node2 = new OutputNode(x1 + boxWidth - 25, y1 + 0.5 * boxHeight, node1);
+    this.nodes = [node1, node2];
+    this.previousFlip = false;
+
+    var groupList = [
+      drawBoxAndText(0, 0, boxWidth, boxHeight, 'flip flop'),
+      drawLine([0.5 * boxWidth, 0.5 * boxHeight, boxWidth - 25, 0.5 * boxHeight]),
+      drawLine([0.5 * boxWidth, 0.5 * boxHeight, 25, 0.5 * boxHeight]),
+      drawText(18, 44, 'flip'),
+      drawBoxWithSymbol(0.5 * boxWidth, 0.5 * boxHeight, 'FF')
+    ].concat(drawCircles(x1, y1, this.nodes, 'blue'));
+
+    this.drawGroup(x1 + 0.5 * boxWidth, y1 + 0.5 * boxHeight, groupList);
+  }
+
+  output() {
+    let flip = isHigh(this.nodes[0].eval());
+    let previousFlip = this.previousFlip;
+    let output = this.nodes[1].state;
+
+    this.previousFlip = flip;
+
+    // Only when going from low to high
+    if (flip === previousFlip || flip === false && previousFlip === true) return;
+
+    // Flip the output node
+    this.nodes[1].state = output === 0 ? high : low;
+  }
+}
+
 // Create LED with node
 class LED extends Element {
   constructor(x1,y1) {
@@ -1317,7 +1352,7 @@ class Relais extends Element {
                                   radius: 10, fill: 'lightgrey'});
     this.switchLine1 = drawLine([25, 0.5*boxHeight, boxWidth-70, 0.5*boxHeight]);
     this.switchLine2 = drawLine([boxWidth-65, 40, boxWidth-75, 60]);
-    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'Relais'),
+    var groupList = [drawBoxAndText(0,0,boxWidth,boxHeight,'relais'),
                      drawLine([25, 25, 25, boxHeight-25]),
                      drawLine([20, boxHeight-25, 30, boxHeight-25]),
                      this.switchLine1,
