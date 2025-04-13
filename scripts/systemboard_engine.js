@@ -48,9 +48,10 @@ var edgedetection = 10; // snap components
 var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
 
 // Colors of the wires
-var HVColor = '#444444';
 var wireColor = '#dd0000';
 var activeWireColor = '#ffff00';
+
+var HVColor = '#444444';
 
 // Globals for the temperature and heater
 var heatTransfer = 100;        // Means that Tmax=40
@@ -64,6 +65,9 @@ var eventCounter = 0;
 
 // Global flag for rendering
 var renderNeeded = true;
+
+// Global flag to color wires when high
+var wireColors = false;
 
 // Global flag to fix position of components
 var moveComponents = false;
@@ -255,14 +259,15 @@ function makeWire(x1,y1,node,isHV=false) {
 }
 
 // Helperfunction to change the wrire color
-function updateWirecolor(wire) {
+function updateWireColor(wire) {
   var line = wire.line1;
-  var isActive = isHigh(wire.node.eval());
+  var isActive = isHigh(wire.node.eval()) && wireColors; // Update only when wireColors is enabled
+  var isHV = wire.node.isHV;
 
   // Only if the color needs to change
   if ((isActive && line.stroke !== activeWireColor) || (!isActive && line.stroke === activeWireColor)) {
     line.set({
-      stroke: isActive ? activeWireColor : (wire.node.isHV ? HVColor : wireColor)
+      stroke: isHV ? HVColor : (isActive ? activeWireColor : wireColor)
     });
     renderNeeded = true;
   }
@@ -1769,6 +1774,15 @@ function removeCheckMark(button) {
   button.innerHTML = buttonText.substr(0,buttonText.length-7).concat("&nbsp;&nbsp;&nbsp;&nbsp;");
 }
 
+// Make the wires change color when high
+function toggleWireColors () {
+  wireColors = !wireColors
+
+  var checkbox = document.getElementById('toggleWireColors');
+  if (wireColors) addCheckMark(checkbox);
+  else removeCheckMark(checkbox);
+}
+
 // Make the group of each element moveable
 function toggleMoving() {
   // Toggle 
@@ -2478,7 +2492,7 @@ function evaluateBoard() {
   // Then, update lines
   canvas.forEachObject(function (obj) {
     if (obj.name === 'wire') {
-      updateWirecolor(obj)
+      updateWireColor(obj)
     }
   });
 
