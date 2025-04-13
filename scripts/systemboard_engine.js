@@ -47,6 +47,11 @@ var edgedetection = 10; // snap components
 // Sizes of the elements
 var boxWidth = 150, boxHeight=100, boxHeightSmall = 50;
 
+// Colors of the wires
+var HVColor = '#444444';
+var wireColor = '#dd0000';
+var activeWireColor = '#ffff00';
+
 // Globals for the temperature and heater
 var heatTransfer = 100;        // Means that Tmax=40
 var heatCapacity = 5000;       // Determines speed of heating
@@ -226,18 +231,41 @@ function makeCircle(left, top, line1, node, color){
 }
 
 // Make line for wire
-function makeLine(coords, color) {
-  return new fabric.Line(coords, {stroke: color, strokeWidth: 3});
+function makeLine(coords, color, node) {
+  var line = new fabric.Line(coords, {
+    stroke: color,
+    strokeWidth: 3,
+    node: node // Store the node for later use
+  });
+
+  return line
 }
 
 // Make wire (= movable circle + line + fixed circle)
 function makeWire(x1,y1,node,isHV=false) { 
-  var color = isHV ? '#444444' : '#dd0000';
-  var line = makeLine([ x1, y1, x1, y1 ],color);
-  canvas.add( line );
+  var color = isHV ? HVColor : wireColor;
+
+  var line = makeLine([x1, y1, x1, y1], color, node); // Pass the node
+  canvas.add(line);
+
   let endCircle = makeCircle(x1, y1, line, node, color);
-  canvas.add( endCircle );
+  canvas.add(endCircle);
+
   return endCircle;
+}
+
+// Helperfunction to change the wrire color
+function updateWirecolor(wire) {
+  var line = wire.line1;
+  var isActive = isHigh(wire.node.eval());
+
+  // Only if the color needs to change
+  if ((isActive && line.stroke !== activeWireColor) || (!isActive && line.stroke === activeWireColor)) {
+    line.set({
+      stroke: isActive ? activeWireColor : (wire.node.isHV ? HVColor : wireColor)
+    });
+    renderNeeded = true;
+  }
 }
 
 // Set nice-looking gradients for buttons
@@ -2406,10 +2434,21 @@ function loadHash( hash ) {
 // Evaluate all elements (elements evaluate the nodes)
 function evaluateBoard() {
   eventCounter++;
+
+  // First, evaluate all nodes
   for (var i = 0; i < elements.length; i++) { 
      elements[i].output();
-  } 
-  if( renderNeeded) {
+  }
+
+  // Then, update lines
+  canvas.forEachObject(function (obj) {
+    if (obj.name === 'wire') {
+      updateWirecolor(obj)
+    }
+  });
+
+
+  if (renderNeeded) {
     canvas.requestRenderAll();
     renderNeeded = false;
   }
