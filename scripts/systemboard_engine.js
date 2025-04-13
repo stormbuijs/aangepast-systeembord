@@ -908,10 +908,41 @@ class FlipFlop extends Element {
     this.previousFlip = flip;
 
     // Only when going from low to high
-    if (flip === previousFlip || flip === false && previousFlip === true) return;
+    if (flip === previousFlip || (flip === false && previousFlip === true)) return;
 
     // Flip the output node
-    this.nodes[1].state = output === 0 ? high : low;
+    this.nodes[1].state = output === low ? high : low;
+  }
+}
+
+class Random extends Element {
+  constructor(x1,y1) {
+    super(x1,y1);
+    let node1 = new InputNode(x1 + 25, y1 + 0.5 * boxHeightSmall);
+    let node2 = new OutputNode(x1 + boxWidth - 25, y1 + 0.5 * boxHeightSmall, node1);
+    this.nodes = [node1, node2];
+    this.previousInput = false;
+
+    var groupList = [
+      drawBoxAndText(0, 0, boxWidth, boxHeightSmall, 'willekeurig'),
+      drawLine([25, 0.5 * boxHeightSmall, boxWidth - 25, 0.5 * boxHeightSmall]),
+      drawBoxWithSymbol(0.5 * boxWidth, -7 + 0.5 * boxHeightSmall, "W")
+    ].concat(drawCircles(x1, y1, this.nodes,"blue"));
+
+    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
+  }
+
+  output() {
+    let input = isHigh(this.nodes[0].eval());
+    let previousInput = this.previousInput;
+
+    this.previousInput = input;
+
+    // Only when going from low to high
+    if (input === previousInput || (input === false && previousInput === true)) return;
+
+    // Set the output node to a random state
+    this.nodes[1].state = Math.random() < 0.50 ? high : low;
   }
 }
 
