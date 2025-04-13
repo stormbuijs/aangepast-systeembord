@@ -915,6 +915,58 @@ class FlipFlop extends Element {
   }
 }
 
+// Create JK flip flop 
+class JKFlipFlop extends Element {
+  constructor(x1, y1) {
+    super(x1, y1);
+    let node1 = new InputNode(x1 + 25, y1 + 25);
+    let node2 = new InputNode(x1 + 25, y1 + boxHeight - 25);
+    let node3 = new OutputNode(x1 + boxWidth - 25, y1 + 0.5 * boxHeight);
+    this.nodes = [node1, node2, node3];
+
+    this.previousSet = false;
+    this.previousReset = false;
+
+    var groupList = [
+      drawBoxAndText(0, 0, boxWidth, boxHeight, 'JK-flip flop'),
+      drawLine([0.5 * boxWidth, 0.5 * boxHeight, boxWidth - 25, 0.5 * boxHeight]),
+      drawLine([25, 25, 25, 40]),
+      drawLine([25, 40, 0.5 * boxWidth, 40]),
+      drawLine([25, boxHeight - 25, 25, boxHeight - 40]),
+      drawLine([25, boxHeight - 40, 0.5 * boxWidth, boxHeight - 40]),
+      drawText(35, 31, 'set'),
+      drawText(35, boxHeight - 19, 'reset'),
+      drawBoxWithSymbol(0.5 * boxWidth, 0.5 * boxHeight, 'JK')
+    ].concat(drawCircles(x1, y1, this.nodes, 'blue'));
+
+    this.drawGroup(x1 + 0.5 * boxWidth, y1 + 0.5 * boxHeight, groupList);
+  }
+
+  output() {
+    const set = isHigh(this.nodes[0].eval());
+    const reset = isHigh(this.nodes[1].eval());
+    const currentOutput = this.nodes[2].state;
+
+    // Only if set or reset has changed
+    if (set === this.previousSet && reset === this.previousReset) return;
+
+    let nextOutput = currentOutput;
+
+    if (set && reset) {
+      nextOutput = currentOutput === low ? high : low;
+    } else if (set && !reset) {
+      nextOutput = high;
+    } else if (!set && reset) {
+      nextOutput = low;
+    }
+
+    if (nextOutput !== currentOutput) this.nodes[2].state = nextOutput;
+
+    this.previousSet = set;
+    this.previousReset = reset;
+  }
+}
+
 // Create random element
 class Random extends Element {
   constructor(x1,y1) {
