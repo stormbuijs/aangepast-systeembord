@@ -1,12 +1,8 @@
-# Online systeembord
- Deze javascript-applicatie simuleert de werking het het systeembord zoals dat wordt gebruikt in de lessen natuurkunde in het voortgezet onderwijs. Met dit programma kunnen leerlingen thuis en op school oefenen met de werking van het systeembord.
+# Aangepast Online systeembord
+Een aangepaste versie door Storm Buijs, oorspronkelijk van [Jeroen van Tilburg](https://github.com/jeroenvantilburg/systeembord), simuleert deze javascript-applicatie de werking het het systeembord zoals dat wordt gebruikt in de lessen natuurkunde in het voortgezet onderwijs. Met dit programma kunnen leerlingen thuis en op school oefenen met de werking van het systeembord.
 
 
 ## Webapp
-
-[![Webapp screenshot](/screenshot.png)](https://jeroenvantilburg.github.io/systeembord)
-
-[Probeer de webapp!](https://jeroenvantilburg.github.io/systeembord)
 
 De webapp is geschreven in HTML5 en javascript en draait in principe in Windows/MacOS/Android/iOS in iedere moderne browser. De code is nog in ontwikkeling. Als er iets niet werkt of voor verbeteringen: geef feedback.
 
