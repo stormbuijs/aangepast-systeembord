@@ -322,7 +322,7 @@ function drawToggle(left, top, node){
   // Event listener: Change position/color of switch and state of OutputNode when pushed
   g.on('mousedown', function() {
     g.node.state = invert(g.node.state);
-    console.log( g.node.state );
+    // console.log( g.node.state );
     if( isHigh( g.node.state ) ) {
       g.item(0).set({ fill: 'green'});
       g.item(1).set({left: 10} );
