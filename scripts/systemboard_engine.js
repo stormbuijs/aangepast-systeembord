@@ -915,6 +915,7 @@ class FlipFlop extends Element {
   }
 }
 
+// Create random element
 class Random extends Element {
   constructor(x1,y1) {
     super(x1,y1);
