@@ -980,9 +980,9 @@ class Random extends Element {
       drawBoxAndText(0, 0, boxWidth, boxHeightSmall, 'willekeurig'),
       drawLine([25, 0.5 * boxHeightSmall, boxWidth - 25, 0.5 * boxHeightSmall]),
       drawBoxWithSymbol(0.5 * boxWidth, -7 + 0.5 * boxHeightSmall, "W")
-    ].concat(drawCircles(x1, y1, this.nodes,"blue"));
+    ].concat(drawCircles(x1, y1, this.nodes, 'blue'));
 
-    this.drawGroup(x1+0.5*boxWidth, y1+0.5*boxHeightSmall, groupList);
+    this.drawGroup(x1 + 0.5 * boxWidth, y1 + 0.5 * boxHeightSmall, groupList);
   }
 
   output() {
@@ -991,11 +991,12 @@ class Random extends Element {
 
     this.previousInput = input;
 
-    // Only when going from low to high
-    if (input === previousInput || (input === false && previousInput === true)) return;
+    // Only if there is a change in input
+    if (input === previousInput) return;
 
     // Set the output node to a random state
-    this.nodes[1].state = Math.random() < 0.50 ? high : low;
+    // Only when there is also an input signal
+    this.nodes[1].state = input ? (Math.random() < 0.50 ? high : low) : low;
   }
 }
 
