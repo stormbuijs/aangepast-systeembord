@@ -919,8 +919,8 @@ class FlipFlop extends Element {
 class JKFlipFlop extends Element {
   constructor(x1, y1) {
     super(x1, y1);
-    let node1 = new InputNode(x1 + 25, y1 + 25);
-    let node2 = new InputNode(x1 + 25, y1 + boxHeight - 25);
+    let node1 = new InputNode(x1 + 25, y1 + 25, 'set');
+    let node2 = new InputNode(x1 + 25, y1 + boxHeight - 25, 'reset');
     let node3 = new OutputNode(x1 + boxWidth - 25, y1 + 0.5 * boxHeight);
     this.nodes = [node1, node2, node3];
 
